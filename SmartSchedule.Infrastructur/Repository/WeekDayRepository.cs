@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using SmartSchedule.Core.Entities;
+using SmartSchedule.Core.Repositories;
+using SmartSchedule.Core.Service.Interfaces;
+using SmartSchedule.Infrastructure.Data;
+
+namespace SmartSchedule.Infrastructure.Repositories
+{
+    /// <summary>
+    /// Репозиторий для работы с Днями недели.
+    /// </summary>
+    public class WeekDayRepository : BaseRepository<WeekDay, int, AppDbContext>, IWeekDayRepository
+    {
+        private readonly ICachingService _cache;
+        private const string CacheKey = "weekdays:all";
+
+        /// <summary>
+        /// Конструктор репозитория WeekDay.
+        /// </summary>
+        /// <param name="context">Контекст базы данных.</param>
+        /// <param name="cache">Сервис кэширования.</param>
+        public WeekDayRepository(AppDbContext context, ICachingService cache) : base(context)
+        {
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        }
+
+        /// <inheritdoc />
+        public override async Task<List<WeekDay>> GetAllAsync(CancellationToken ct = default)
+        {
+            return await _cache.GetOrSetAsync(
+                CacheKey,
+                () => base.GetAllAsync(ct),
+                TimeSpan.FromHours(24),
+                ct).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public override async Task<WeekDay> CreateAsync(WeekDay entity, CancellationToken ct = default)
+        {
+            var result = await base.CreateAsync(entity, ct).ConfigureAwait(false);
+            await _cache.RemoveAsync(CacheKey, ct).ConfigureAwait(false);
+            return result;
+        }
+
+        /// <inheritdoc />
+        public override async Task UpdateAsync(WeekDay entity, CancellationToken ct = default)
+        {
+            await base.UpdateAsync(entity, ct).ConfigureAwait(false);
+            await _cache.RemoveAsync(CacheKey, ct).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public override async Task DeleteByIdAsync(int id, CancellationToken ct = default)
+        {
+            await base.DeleteByIdAsync(id, ct).ConfigureAwait(false);
+            await _cache.RemoveAsync(CacheKey, ct).ConfigureAwait(false);
+        }
+    }
+}

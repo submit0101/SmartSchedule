@@ -1,0 +1,3071 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SmartSchedule.Core</name>
+    </assembly>
+    <members>
+        <member name="T:SmartSchedule.Core.Constants.WeekTypeConstants">
+            <summary>
+            Содержит константы для известных ID типов недели в базе данных WeekType.
+            </summary>
+        </member>
+        <member name="F:SmartSchedule.Core.Constants.WeekTypeConstants.Odd">
+            <summary>
+            Идентификатор для нечётной недели (обычно 1).
+            </summary>
+        </member>
+        <member name="F:SmartSchedule.Core.Constants.WeekTypeConstants.Even">
+            <summary>
+            Идентификатор для чётной недели (обычно 2).
+            </summary>
+        </member>
+        <member name="F:SmartSchedule.Core.Constants.WeekTypeConstants.Both">
+            <summary>
+            Идентификатор для обозначения обеих недель (обычно 3). Используется для общих занятий
+            или для поиска конфликтов расписания.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Abstractions.BaseEntity`1">
+            <summary>
+             Базовый класс сущности
+            </summary>
+            <typeparam name="TId"></typeparam>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Abstractions.BaseEntity`1.Id">
+            <summary>
+             индетификатор сущности 
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Abstractions.IEntity`1">
+            <summary>
+            Базовый интерфейс для сущности с типизированным идентификатором.
+            </summary>
+            <typeparam name="TId"></typeparam>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Abstractions.IEntity`1.Id">
+            <summary>
+            Типизированный идентификатор
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Abstractions.IEntity">
+            <summary>
+             Базовый интерфейс для сущности без указания типа данных
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Building">
+            <summary>
+            Представляет здание, содержащее кабинеты и основную информацию, такую как название и адрес.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Building.Name">
+            <summary>
+            Название здания.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Building.Address">
+            <summary>
+            Адрес здания.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Building.Cabinets">
+            <summary>
+            Список кабинетов, находящихся в здании.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Cabinet">
+            <summary>
+            Представляет кабинет в учебном заведении.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Cabinet.Number">
+            <summary>
+            Номер кабинета.
+            </summary>
+            <example>105</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Cabinet.BuildingId">
+            <summary>
+            Название или номер здания, в котором находится кабинет.
+            </summary>
+            <example>Главный корпус</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Cabinet.Capacity">
+            <summary>
+            Вместимость кабинета (максимальное количество человек, которое может вместить кабинет).
+            Может быть null, если вместимость не указана.
+            </summary>
+            <example>30</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Cabinet.Equipment">
+            <summary>
+            Перечень оборудования, доступного в кабинете.
+            </summary>
+            <example>Проектор, интерактивная доска, компьютеры</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Cabinet.Lessons">
+            <summary>
+            Список занятий, которые проводятся в этом кабинете.
+            Инициализируется пустым списком по умолчанию.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Cabinet.Building">
+            <summary>
+             список строений 
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Group">
+            <summary>
+            Представляет учебную группу в системе.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Group.Name">
+            <summary>
+            Название группы.
+            </summary>
+            <example>22-ПРО-2</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Group.Lessons">
+            <summary>
+            Коллекция занятий, связанных с этой группой.
+            Содержит список объектов типа <see cref="T:SmartSchedule.Core.Entities.Lesson"/>.
+            Инициализируется пустым списком по умолчанию.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Lesson">
+            <summary>
+            Представляет занятие (урок) в расписании.
+            Содержит информацию о предмете, преподавателе, группе, аудитории, времени и дне недели.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.CabinetId">
+            <summary>
+            Идентификатор аудитории, в которой проводится занятие.
+            Может быть null, если аудитория не указана.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.TeacherId">
+            <summary>
+            Идентификатор преподавателя, который проводит занятие.
+            Может быть null, если преподаватель не указан.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.GroupId">
+            <summary>
+            Идентификатор группы, для которой проводится занятие.
+            Может быть null, если группа не указана.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.SubjectId">
+            <summary>
+            Идентификатор учебной дисциплины (предмета), которая изучается на занятии.
+            Может быть null, если предмет не указан.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.TimeSlotId">
+            <summary>
+            Идентификатор временного слота, в рамках которого проходит занятие.
+            Может быть null, если временной слот не указан.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.WeekTypeId">
+            <summary>
+            Идентификатор типа недели, к которому относится занятие.
+            Может быть null, если тип недели не указан.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.DayOfWeekId">
+            <summary>
+            День недели, в который проводится занятие (например: 1 - Понедельник, 5 - Пятница).
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.Cabinet">
+            <summary>
+            Навигационное свойство: аудитория, в которой проводится занятие.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.Group">
+            <summary>
+            Навигационное свойство: группа, для которой проводится занятие.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.Subject">
+            <summary>
+            Навигационное свойство: учебная дисциплина (предмет), которая изучается на занятии.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.Teacher">
+            <summary>
+            Навигационное свойство: преподаватель, проводящий занятие.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.TimeSlot">
+            <summary>
+            Навигационное свойство: временной слот, в котором проводится занятие.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.WeekType">
+            <summary>
+            Навигационное свойство: тип недели, к которому относится занятие.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.WeekDay">
+            <summary>
+            Навигационное свойство: День недели, к которому относится занятие.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Position">
+            <summary>
+            Представляет должность преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Position.Name">
+            <summary>
+            Название должности.
+            </summary>
+            <example>Профессор</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Position.Description">
+            <summary>
+            Описание должности (необязательное поле).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Position.Teachers">
+            <summary>
+            Список преподавателей, занимающих эту должность.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Subject">
+            <summary>
+            Представляет учебную дисциплину (предмет) в системе.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Subject.Title">
+            <summary>
+            Название дисциплины.
+            </summary>
+            <example>Математический анализ</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Subject.Lessons">
+            <summary>
+            Список занятий, связанных с данной дисциплиной.
+            Инициализируется пустым списком по умолчанию.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.Teacher">
+            <summary>
+            Представляет преподавателя в учебной системе.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Teacher.FirstName">
+            <summary>
+            Имя преподавателя.
+            </summary>
+            <example>Иван</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Teacher.MiddleName">
+            <summary>
+            Отчество преподавателя.
+            </summary>
+            <example>Иванович</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Teacher.LastName">
+            <summary>
+            Фамилия преподавателя.
+            </summary>
+            <example>Иванов</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Teacher.PositionId">
+            <summary>
+            Должность преподавателя.
+            </summary>
+            <example>Старший преподаватель</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Teacher.Position">
+            <summary>
+            Должность преподавателя (навигационное свойство).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.Teacher.Lessons">
+            <summary>
+            Список занятий, проводимых данным преподавателем.
+            Инициализируется пустым списком по умолчанию.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.TimeSlot">
+            <summary>
+            Представляет временной слот — конкретный временной интервал, в который могут проводиться занятия.
+            Например: 1 пара — с 08:30 до 10:00, 2 пара — с 10:10 до 11:40 и т.д.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.TimeSlot.SlotNumber">
+            <summary>
+            Номер временного слота (например, порядковый номер пары в расписании).
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.TimeSlot.StartTime">
+            <summary>
+            Время начала занятия в рамках этого слота.
+            </summary>
+            <example>08:30</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.TimeSlot.EndTime">
+            <summary>
+            Время окончания занятия в рамках этого слота.
+            </summary>
+            <example>10:00</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.TimeSlot.Lessons">
+            <summary>
+            Список занятий, запланированных в этом временном слоте.
+            Используется ICollection для поддержки Entity Framework и возможной ленивой загрузки.
+            Инициализируется пустым списком по умолчанию.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.WeekDay">
+            <summary>
+            Представляет день недели.
+            Используется для определения, в какой день проводится занятие.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.WeekDay.Name">
+            <summary>
+            Название дня недели.
+            Например: "Понедельник", "Вторник", и т.д.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.WeekDay.Lessons">
+            <summary>
+             Навигационная свойство
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Entities.WeekType">
+            <summary>
+            Представляет тип недели в расписании.
+            Используется для разделения занятий на чётные/нечётные недели или другие пользовательские типы недель.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.WeekType.Name">
+            <summary>
+            Название типа недели.
+            Например: "Четная", "Нечетная", "Основная", "Дополнительная" и т.д.
+            </summary>
+            <example>Четная</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Entities.WeekType.Lessons">
+            <summary>
+            Список занятий, связанных с этим типом недели.
+            Позволяет определить, какие уроки проводятся в рамках данного типа недели.
+            Инициализируется пустым списком по умолчанию.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Exceptions.CabinetConflictException">
+            <summary>
+            Исключение, возникающее при попытке создать или обновить кабинет с дублирующимися атрибутами.
+            Соответствует HTTP-статусу 409 Conflict.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Exceptions.CabinetConflictException.Number">
+            <summary>
+            Номер кабинета, вызвавший конфликт.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Exceptions.CabinetConflictException.BuildingId">
+            <summary>
+            ID здания, в котором возник конфликт.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.CabinetConflictException.#ctor">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.CabinetConflictException"/>.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.CabinetConflictException.#ctor(System.String)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.CabinetConflictException"/> с указанным сообщением об ошибке.
+            </summary>
+            <param name="message">Сообщение, описывающее ошибку.</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.CabinetConflictException.#ctor(System.String,System.Exception)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.CabinetConflictException"/> с указанным сообщением об ошибке
+            и ссылкой на внутреннее исключение, вызвавшее данное исключение.
+            </summary>
+            <param name="message">Сообщение об ошибке.</param>
+            <param name="innerException">Исключение, которое является причиной текущего исключения.</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.CabinetConflictException.#ctor(System.String,System.Int32)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.CabinetConflictException"/> для конфликта дублирования кабинета.
+            </summary>
+            <param name="number">Номер кабинета.</param>
+            <param name="buildingId">ID здания.</param>
+        </member>
+        <member name="T:SmartSchedule.Core.Exceptions.ScheduleConflictException">
+            <summary>
+            Исключение, возникающее при обнаружении конфликта в расписании занятий
+            </summary>
+            <remarks>
+            Это исключение выбрасывается, когда при создании или изменении занятия 
+            обнаруживается пересечение с существующим занятием для той же группы 
+            в тот же временной слот и день недели.
+            </remarks>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.ScheduleConflictException.#ctor">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.ScheduleConflictException"/> 
+            с сообщением об ошибке по умолчанию
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.ScheduleConflictException.#ctor(System.String)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.ScheduleConflictException"/> 
+            с указанным сообщением об ошибке
+            </summary>
+            <param name="message">Сообщение, описывающее ошибку</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.ScheduleConflictException.#ctor(System.String,System.Exception)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.ScheduleConflictException"/> 
+            с указанным сообщением об ошибке и ссылкой на внутреннее исключение
+            </summary>
+            <param name="message">Сообщение об ошибке</param>
+            <param name="innerException">
+            Исключение, которое является причиной текущего исключения
+            </param>
+        </member>
+        <member name="T:SmartSchedule.Core.Exceptions.UniqueNameConflictException">
+            <summary>
+            Исключение, возникающее при нарушении уникальности имени
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Exceptions.UniqueNameConflictException.Name">
+            <summary>
+            Конфликтующее имя
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.UniqueNameConflictException.#ctor">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.UniqueNameConflictException"/>
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.UniqueNameConflictException.#ctor(System.String)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.UniqueNameConflictException"/> с указанным именем
+            </summary>
+            <param name="name">Конфликтующее имя</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Exceptions.UniqueNameConflictException.#ctor(System.String,System.Exception)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Core.Exceptions.UniqueNameConflictException"/> с указанным сообщением об ошибке и внутренним исключением
+            </summary>
+            <param name="message">Сообщение об ошибке</param>
+            <param name="innerException">Внутреннее исключение</param>
+        </member>
+        <member name="T:SmartSchedule.Core.Extensions.EnumExtensions">
+            <summary>
+            Расширения для работы с перечислениями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Extensions.EnumExtensions.GetDescriptionAttribute``1(``0)">
+            <summary>
+            Возвращает значение атрибута Description для перечисления.
+            </summary>
+            <typeparam name="T">Тип перечисления.</typeparam>
+            <param name="enumType">Перечисление с атрибутами Description.</param>
+            <returns>Значение атрибута Description.</returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Extensions.StringExtensions">
+            <summary>
+            Расширения для работы со строками.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Extensions.StringExtensions.ToSnakeCase(System.String)">
+            <summary>Преобразует строку к snake_case.</summary>
+            <param name="str">Строка для преобразования.</param>
+            <returns>Строка в snake_case.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Extensions.StringExtensions.ToTitleCase(System.String)">
+            <summary>Преобразует строку к TitleCase.</summary>
+            <param name="s">Строка в snake_case или camelCase для преобразования.</param>
+            <returns>Строка в TitleCase.</returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.BuildingProfile">
+            <summary>
+            Профиль маппера Корпуса
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.BuildingProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.CabinetProfile">
+            <summary>
+            Профиль маппера Кабинетов
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.CabinetProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.GroupProfile">
+            <summary>
+            Профиль маппера Групп
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.GroupProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.LessonProfile">
+            <summary>
+            Профиль маппера Занятий
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.LessonProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.PositionProfile">
+            <summary>
+            Профиль маппера Должностей
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.PositionProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.SubjectProfile">
+            <summary>
+            Профиль маппера Предметов
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.SubjectProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.TeacherProfile">
+            <summary>
+            Профиль маппера Преподавателей
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.TeacherProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.TimeSlotProfile">
+            <summary>
+            Профиль маппера Временных слотов
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.TimeSlotProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.WeekdayProfile">
+            <summary>
+            Профиль маппера Кабинетов
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.WeekdayProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Mapper.WeekTypeProfile">
+            <summary>
+            Профиль маппера Типов недели
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Mapper.WeekTypeProfile.#ctor">
+            <summary>
+            Создание нового экземпляра класса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto">
+            <summary>
+            DTO для создания нового здания.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto.Name">
+            <summary>
+            Название здания (например, "Старый корпус").
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto.Address">
+            <summary>
+            Адрес здания.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.BuildingDTO.ShortBuildingDto">
+            <summary>
+            Модель краткого ответа
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.BuildingDTO.ShortBuildingDto.Id">
+            <summary>
+            Уникальный идентификатор
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.BuildingDTO.ShortBuildingDto.Name">
+            <summary>
+            Имя корпуса
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetScheduleReportDto">
+            <summary>
+            DTO (Data Transfer Object) для представления расписания кабинета по дням недели и временным слотам.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetScheduleReportDto.DayOfWeekId">
+            <summary>
+            Идентификатор дня недели (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetScheduleReportDto.DayName">
+            <summary>
+            Название дня недели, полученное на основе DayOfWeekId.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetScheduleReportDto.TimeSlotId">
+            <summary>
+            Идентификатор временного слота.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetScheduleReportDto.TimeSlotDisplay">
+            <summary>
+            Текстовое представление временного слота (например, "08:00 - 09:00").
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetScheduleReportDto.IsBusy">
+            <summary>
+            Флаг, указывающий, занят ли кабинет в указанный день и временной слот.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageFilterDto">
+            <summary>
+            пробую фильт панель через dto
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageFilterDto.BuildingId">
+            <summary>
+            id здания
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageFilterDto.WeekTypeId">
+            <summary>
+            Уникальный Идентификатор типа недели
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageFilterDto.DayOfWeekId">
+            <summary>
+            Уникальный идетификатор
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageReportDto">
+            <summary>
+            DTO для отчёта о загруженности аудитории.
+            Содержит данные о количестве занятий и проценте использования аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageReportDto.CabinetNumber">
+            <summary>
+            Номер аудитории.
+            </summary>
+            <example>214</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageReportDto.BuildingName">
+            <summary>
+            Название здания, в котором находится аудитория.
+            </summary>
+            <example>Главный корпус</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageReportDto.TotalLessons">
+            <summary>
+            Общее количество занятий, проведённых в этой аудитории за неделю.
+            </summary>
+            <example>24</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageReportDto.UsagePercentage">
+            <summary>
+            Процент использования аудитории относительно максимально возможного числа занятий.
+            Рассчитывается как отношение фактических занятий к максимальному числу пар в неделю.
+            </summary>
+            <example>66.67</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto">
+            <summary>
+            DTO для создания новой аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto.Number">
+            <summary>
+            Номер аудитории.
+            </summary>
+            <example>105</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto.BuildingId">
+            <summary>
+            Здание или корпус, в котором находится аудитория.
+            </summary>
+            <example>Главный корпус</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto.Capacity">
+            <summary>
+            Вместимость аудитории (может быть null).
+            </summary>
+            <example>30</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto.Equipment">
+            <summary>
+            Перечень оборудования, доступного в аудитории.
+            </summary>
+            <example>Проектор, доска, компьютеры</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.CabinetDTO.ResponseCabinetDto">
+            <summary>
+            Ответ с информацией о аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ResponseCabinetDto.Id">
+            <summary>
+            Уникальный идентификатор аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ResponseCabinetDto.Number">
+            <summary>
+            Номер аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ResponseCabinetDto.BuldingName">
+            <summary>
+            Здание или корпус, в котором находится аудитория.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ResponseCabinetDto.Capacity">
+            <summary>
+            Вместимость аудитории (может быть null).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ResponseCabinetDto.Equipment">
+            <summary>
+            Перечень оборудования, доступного в аудитории.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.CabinetDTO.ShortCabinetDto">
+            <summary>
+            краткая модель ответа 
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ShortCabinetDto.Id">
+            <summary>
+            Уникальный Идентифатор поля нужен для серверного ответа и отправки
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ShortCabinetDto.number">
+            <summary>
+            Номер кабинета ну или cпз
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.ShortCabinetDto.BuildingName">
+            <summary>
+            Название  корпуса 
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto">
+            <summary>
+            DTO для обновления аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto.Id">
+            <summary>
+            Идентификатор аудитории, которую нужно обновить.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto.Number">
+            <summary>
+            Новый номер аудитории (если требуется изменить).
+            </summary>
+            <example>106</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto.BuildingId">
+            <summary>
+            Новое здание или корпус (если требуется изменить).
+            </summary>
+            <example>Новый корпус</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto.Capacity">
+            <summary>
+            Новая вместимость аудитории (может быть null).
+            </summary>
+            <example>25</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto.Equipment">
+            <summary>
+            Новое оборудование аудитории.
+            </summary>
+            <example>Проектор, ноутбук</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.GroupDTO.CreateGroupDto">
+            <summary>
+            DTO для создания новой группы.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.CreateGroupDto.Name">
+            <summary>
+            Название группы.
+            </summary>
+            <example>22-ПРО-2</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto">
+            <summary>
+            принимающие данные 
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto.DayOfWeekId">
+            <summary> Идентификатор дня недели (1-7), по которому нужно посчитать загрузку. Null - для всей недели. </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto.WeekTypeId">
+            <summary> Тип недели (1 - Нечетная, 2 - Четная, 3 - Целая, 0/Null - для всех недель). </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageReportDto">
+            <summary>
+            dto для получение структурированного отчёта
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageReportDto.GroupName">
+            <summary> Название группы (например, "22-ПРО-2") </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageReportDto.TotalScheduledLessons">
+            <summary> Фактически запланировано занятий за период </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageReportDto.MaxPossibleLessons">
+            <summary> Максимально возможное количество пар (6 дней * MaxTimeSlots) </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageReportDto.UsagePercentage">
+            <summary> Процент занятости (TotalScheduled / MaxPossible * 100) </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.GroupDTO.ResponseGroupDto">
+            <summary>
+            Ответ с информацией о группе.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.ResponseGroupDto.Id">
+            <summary>
+            Уникальный идентификатор группы.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.ResponseGroupDto.Name">
+            <summary>
+            Название группы.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.GroupDTO.UpdateGroupDto">
+            <summary>
+            DTO для обновления группы.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.UpdateGroupDto.Id">
+            <summary>
+            Идентификатор группы, которую нужно обновить.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.GroupDTO.UpdateGroupDto.Name">
+            <summary>
+            Новое название группы (если требуется изменить).
+            </summary>
+            <example>22-ПРО-2</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.LessonDTO.ConflictCheckResultDto">
+            <summary>
+            Результат проверки конфликта для клиента (для предварительной подсветки DnD).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ConflictCheckResultDto.IsWeekConflict">
+            <summary>
+            Конфликт с другими занятиями ТОЙ ЖЕ группы в целевом слоте, 
+            основанный на Типе Недели (Числитель/Знаменатель).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ConflictCheckResultDto.IsTeacherBusy">
+            <summary>
+            Конфликт по Преподавателю (занят в целевом слоте у ЛЮБОЙ группы).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ConflictCheckResultDto.IsCabinetBusy">
+            <summary>
+            Конфликт по Кабинету (занят в целевом слоте у ЛЮБОЙ группы).
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto">
+            <summary>
+            DTO для создания нового занятия.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.CabinetId">
+            <summary>
+            Идентификатор аудитории, в которой проводится занятие (может быть null).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.TeacherId">
+            <summary>
+            Идентификатор преподавателя, который проводит занятие (может быть null).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.GroupId">
+            <summary>
+            Идентификатор группы, для которой проводится занятие (может быть null).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.SubjectId">
+            <summary>
+            Идентификатор предмета, который изучается на занятии (может быть null).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.TimeSlotId">
+            <summary>
+            Идентификатор временного слота, в котором проходит занятие (может быть null).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.WeekTypeId">
+            <summary>
+            Идентификатор типа недели, к которому относится занятие (может быть null).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.DayOfWeekId">
+            <summary>
+            День недели, в который проводится занятие (например: 1 - Понедельник, 5 - Пятница).
+            </summary>
+            <example>2</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto">
+            <summary>
+            Ответ с информацией о занятии.
+            Содержит связанные данные для отображения.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.Id">
+            <summary>
+            Уникальный идентификатор занятия.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.CabinetId">
+            <summary>
+            Идентификатор аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.CabinetNumber">
+            <summary>
+            Номер аудитории.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.TeacherId">
+            <summary>
+            Идентификатор преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.TeacherFullName">
+            <summary>
+            ФИО преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.GroupId">
+            <summary>
+            Идентификатор группы.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.GroupName">
+            <summary>
+            Название группы.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.SubjectId">
+            <summary>
+            Идентификатор предмета.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.SubjectTitle">
+            <summary>
+            Название предмета.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.TimeSlotId">
+            <summary>
+            Идентификатор временного слота.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.TimeSlotNumber">
+            <summary>
+            Порядковый номер временного слота.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.BuildingName">
+            <summary>
+            Название корпуса, в котором находится аудитория.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.TimeSlotDisplay">
+            <summary>
+            Время начала и окончания занятия (формат: "08:30 - 10:00").
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.WeekTypeId">
+            <summary>
+            Идентификатор типа недели.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.WeekTypeName">
+            <summary>
+            Название типа недели.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.DayOfWeekId">
+            <summary>
+            День недели (например: 1 - Понедельник).
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.LessonDTO.StructuredLessonDto">
+            <summary>
+            модель ответа стуртурированного расписания
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.StructuredLessonDto.Lessons">
+            <summary>
+            модель ответа 
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.StructuredLessonDto.TimeSlotDisplay">
+            <summary>
+            показать время
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto">
+            <summary>
+            DTO для обновления существующего занятия.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.Id">
+            <summary>
+            Идентификатор занятия, которое нужно обновить.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.CabinetId">
+            <summary>
+            Новый идентификатор аудитории (если требуется изменить).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.TeacherId">
+            <summary>
+            Новый идентификатор преподавателя (если требуется изменить).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.GroupId">
+            <summary>
+            Новый идентификатор группы (если требуется изменить).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.SubjectId">
+            <summary>
+            Новый идентификатор предмета (если требуется изменить).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.TimeSlotId">
+            <summary>
+            Новый идентификатор временного слота (если требуется изменить).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.WeekTypeId">
+            <summary>
+            Новый идентификатор типа недели (если требуется изменить).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.DayOfWeekId">
+            <summary>
+            Новое значение дня недели (если требуется изменить).
+            Например: 3 - Среда.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto">
+            <summary>
+            DTO для создания новой должности преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto.Name">
+            <summary>
+            Название должности.
+            </summary>
+            <example>Профессор</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto.Description">
+            <summary>
+            Описание должности (необязательное поле).
+            </summary>
+            <example>Научный руководитель кафедры</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.PosittonDTO.ResponsePositionDto">
+            <summary>
+            Ответ с информацией о должности преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.ResponsePositionDto.Id">
+            <summary>
+            Уникальный идентификатор должности.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.ResponsePositionDto.Name">
+            <summary>
+            Название должности.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.ResponsePositionDto.Description">
+            <summary>
+            Описание должности (необязательное поле).
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.PosittonDTO.ShortPositionDto">
+            <summary>
+            Краткая информация о преподавателях
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.ShortPositionDto.Id">
+            <summary>
+            Уникальный идентификатор преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.ShortPositionDto.Name">
+            <summary>
+            Название должности.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto">
+            <summary>
+            DTO для обновления должности преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto.Id">
+            <summary>
+            Идентификатор должности, которую нужно обновить.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto.Name">
+            <summary>
+            Новое название должности (если требуется изменить).
+            </summary>
+            <example>Доцент</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto.Description">
+            <summary>
+            Новое описание должности (если требуется изменить).
+            </summary>
+            <example>Ведущий преподаватель</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.SubjectDTO.CreateSubjectDto">
+            <summary>
+            DTO для создания нового предмета.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.SubjectDTO.CreateSubjectDto.Title">
+            <summary>
+            Название предмета.
+            </summary>
+            <example>Математический анализ</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.SubjectDTO.ResponseSubjectDto">
+            <summary>
+            Ответ с информацией о предмете.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.SubjectDTO.ResponseSubjectDto.Id">
+            <summary>
+            Уникальный идентификатор предмета.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.SubjectDTO.ResponseSubjectDto.Title">
+            <summary>
+            Название предмета.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.SubjectDTO.UpdateSubjectDto">
+            <summary>
+            обновление с информацией о предмете.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.SubjectDTO.UpdateSubjectDto.Id">
+            <summary>
+            Уникальный идентификатор предмета.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.SubjectDTO.UpdateSubjectDto.Title">
+            <summary>
+            Название предмета.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto">
+            <summary>
+            DTO для создания преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto.FirstName">
+            <summary>
+            Имя преподавателя.
+            </summary>
+            <example>Иван</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto.MiddleName">
+            <summary>
+            Отчество преподавателя.
+            </summary>
+            <example>Иванович</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto.LastName">
+            <summary>
+            Фамилия преподавателя.
+            </summary>
+            <example>Иванов</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto.PositionId">
+            <summary>
+            Идентификатор должности преподавателя.
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto">
+            <summary>
+            Ответ с информацией о преподавателе.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto.Id">
+            <summary>
+            Уникальный идентификатор преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto.FirstName">
+            <summary>
+            Имя преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto.MiddleName">
+            <summary>
+            Отчество преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto.LastName">
+            <summary>
+            Фамилия преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto.FullName">
+            <summary>
+            Полное имя преподавателя (Фамилия Имя Отчество).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto.PositionName">
+            <summary>
+            Название должности преподавателя.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.ShortTeacherDto">
+            <summary>
+            Краткая информация о преподавателе.
+            Используется для минимизации объема передаваемых данных в ответах API.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ShortTeacherDto.Id">
+            <summary>
+            Уникальный идентификатор преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ShortTeacherDto.FullName">
+            <summary>
+            Полное имя преподавателя в формате "Фамилия Имя Отчество".
+            Это поле вычисляется на основе отдельных полей из базы данных: 
+            Фамилия (Surname), Имя (Name), Отчество (Patronymic).
+            Не хранится напрямую в БД.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherScheduleReportDto">
+            <summary>
+            DTO для представления отдельного временного слота в "тепловой карте" расписания преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherScheduleReportDto.DayOfWeekId">
+            <summary>
+            Идентификатор дня недели (1 = Понедельник).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherScheduleReportDto.DayName">
+            <summary>
+            Название дня недели (например, "Понедельник").
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherScheduleReportDto.TimeSlotId">
+            <summary>
+            Идентификатор временного слота (пары).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherScheduleReportDto.TimeSlotDisplay">
+            <summary>
+            Отображаемый интервал времени для слота (например, "8:30 - 10:00").
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherScheduleReportDto.IsBusy">
+            <summary>
+            Флаг, указывающий, занят ли преподаватель в данном слоте (<see langword="true"/>) или свободен (<see langword="false"/>).
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageFilterDto">
+            <summary>
+            Фильтр для отчета о загруженности преподавателей.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageFilterDto.DayOfWeekId">
+            <summary>
+            Идентификатор дня недели (1-6). Если <see langword="null"/>, учитываются все дни.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageFilterDto.WeekTypeId">
+            <summary>
+            Идентификатор типа недели (1 - нечетная, 2 - четная, 3 - обе). Если <see langword="null"/>, учитываются все типы недель.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageReportDto">
+            <summary>
+            DTO для вывода статистики по загруженности преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageReportDto.TeacherFullName">
+            <summary>
+            Полное имя преподавателя (ФИО).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageReportDto.TotalLessons">
+            <summary>
+            Общее количество назначенных занятий (количество записей в расписании), найденных по заданным фильтрам.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageReportDto.MaxPossibleLessons">
+            <summary>
+            Максимально возможное количество слотов (знаменатель) в отчетном периоде.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageReportDto.UsagePercentage">
+            <summary>
+            Процент использования временных слотов (загруженности) относительно максимального количества слотов в отчетном периоде.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto">
+            <summary>
+            DTO для обновления преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto.Id">
+            <summary>
+            Идентификатор преподавателя, которого нужно обновить.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto.FirstName">
+            <summary>
+            Новое имя преподавателя (если требуется изменить).
+            </summary>
+            <example>Петр</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto.MiddleName">
+            <summary>
+            Новое отчество преподавателя (если требуется изменить).
+            </summary>
+            <example>Петрович</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto.LastName">
+            <summary>
+            Новая фамилия преподавателя (если требуется изменить).
+            </summary>
+            <example>Петров</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto.PositionId">
+            <summary>
+            Новый идентификатор должности преподавателя (если требуется изменить).
+            </summary>
+            <example>2</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TimeSlotDTO.CreateTimeSlotDto">
+            <summary>
+            DTO для создания временного слота.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.CreateTimeSlotDto.SlotNumber">
+            <summary>
+            Порядковый номер временного слота.
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.CreateTimeSlotDto.StartTime">
+            <summary>
+            Время начала занятия.
+            </summary>
+            <example>08:30</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.CreateTimeSlotDto.EndTime">
+            <summary>
+            Время окончания занятия.
+            </summary>
+            <example>10:00</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TimeSlotDTO.ResponseTimeSlotDto">
+            <summary>
+            Ответ с информацией о временном слоте.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.ResponseTimeSlotDto.Id">
+            <summary>
+            Уникальный идентификатор временного слота.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.ResponseTimeSlotDto.SlotNumber">
+            <summary>
+            Порядковый номер временного слота.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.ResponseTimeSlotDto.StartTime">
+            <summary>
+            Время начала занятия.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.ResponseTimeSlotDto.EndTime">
+            <summary>
+            Время окончания занятия.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto">
+            <summary>
+            DTO для обновления временного слота.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto.Id">
+            <summary>
+            Идентификатор временного слота, который нужно обновить.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto.SlotNumber">
+            <summary>
+            Новый порядковый номер временного слота (если требуется изменить).
+            </summary>
+            <example>2</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto.StartTime">
+            <summary>
+            Новое время начала занятия (если требуется изменить).
+            </summary>
+            <example>10:10</example>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto.EndTime">
+            <summary>
+            Новое время окончания занятия (если требуется изменить).
+            </summary>
+            <example>11:40</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.WeekTypeDTO.CreateWeekTypeDto">
+            <summary>
+            DTO для создания типа недели.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.WeekTypeDTO.CreateWeekTypeDto.Name">
+            <summary>
+            Название типа недели.
+            </summary>
+            <example>Четная</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.WeekTypeDTO.ResponseWeekTypeDto">
+            <summary>
+            Ответ с информацией о типе недели.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.WeekTypeDTO.ResponseWeekTypeDto.Id">
+            <summary>
+            Уникальный идентификатор типа недели.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.WeekTypeDTO.ResponseWeekTypeDto.Name">
+            <summary>
+            Название типа недели.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.WeekTypeDTO.UpdateWeekTypeDto">
+            <summary>
+            DTO для обновления типа недели..
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.WeekTypeDTO.UpdateWeekTypeDto.Id">
+            <summary>
+            Идентификатор типа недели, который нужно обновить.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.WeekTypeDTO.UpdateWeekTypeDto.Name">
+            <summary>
+            Новое название типа недели (если требуется изменить).
+            </summary>
+            <example>Нечетная</example>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.IBaseRepository`2">
+            <summary>
+            Интерфейс Ьазового репозитория
+            </summary>
+            <typeparam name="TEntity"></typeparam>
+            <typeparam name="TId"></typeparam>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.GetAllShorts(System.Threading.CancellationToken)">
+            <summary>
+            Возращает каротки список всех сущностей
+            </summary>
+            <param name="ct">Токен отмены операции</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.GetAllAsync(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Threading.CancellationToken)">
+            <summary>
+            получить все значения
+            </summary>
+            <param name="filter">фильтер</param>
+            <param name="ct">Токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Возвращает список всех сущностей.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список сущностей.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.GetByIdAsync(`1,System.Threading.CancellationToken)">
+            <summary>
+            Возвращает сущность по идентификатору.
+            </summary>
+            <param name="id">Идентификатор сущности.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Сущность.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.CreateAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Добавляет новую сущность.
+            </summary>
+            <param name="entity">Данные для создания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Созданная сущность.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.UpdateAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Обновляет сущность.
+            </summary>
+            <param name="entity">Данные для обновления.</param>
+            <param name="ct">Токен отмены операции.</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.DeleteByIdAsync(`1,System.Threading.CancellationToken)">
+            <summary>
+            Удаляет сущность по её идентификатору.
+            </summary>
+            <param name="id">Идентификатор сущности.</param>
+            <param name="ct">Токен отмены операции.</param>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.IBuildingRepository">
+            <summary>
+            Интерфейс репозитория строения
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBuildingRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверка уникальности кабинета
+            </summary>
+            <param name="name">номер кабинета</param>
+            <param name="excludeId">уникальный иднтификатор записи</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.ICabinetRepository">
+            <summary>
+            Интерфейс репозитория Кабинета
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ICabinetRepository.GetAllWithBuldingAsync(System.Threading.CancellationToken)">
+            <summary>
+            Асинхронно получает все кабинеты,включая связанные строения
+            </summary>
+            <param name="ct"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ICabinetRepository.SearchAsync(System.String,System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            Поиск кабинетов по номеру и/или зданию с сортировкой.
+            </summary>
+            <param name="searchTerm">Числовой номер кабинета (например "310")</param>
+            <param name="buildingNumber">Номер здания (1 или 2)</param>
+            <param name="sortBy">Поле для сортировки ("number", "building")</param>
+            <param name="descending">Направление сортировки (true - по убыванию)</param>
+            <returns>Список подходящих кабинетов</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ICabinetRepository.GetAllFilteredAsync(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Фильтер кабинетов
+            </summary>
+            <param name="buildingId">Уникальный идентификатор здания</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ICabinetRepository.GetWithLessonsByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            получить все
+            </summary>
+            <param name="cabinetId">получить кабинет по id</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ICabinetRepository.ExistsAsync(System.String,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверка уникальности кабинета
+            </summary>
+            <param name="number">номер кабинета</param>
+            <param name="buildingId">номер корпуса</param>
+            <param name="excludeId">уникальный иднтификатор записи</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.IGroupRepository">
+            <summary>
+            Интерфейс репозитория Группы
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IGroupRepository.ExistsByAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверка уникальности кабинета
+            </summary>
+            <param name="name">номер кабинета</param>
+            <param name="excludeId">уникальный иднтификатор записи</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.ILessonRepository">
+            <summary>
+            Интерфейс репозитория Занятия
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.GetByGroupIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            получить рассписание для определенной группы
+            </summary>
+            <param name="groupId">группа</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.GetFilteredLessonsAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Фильтер уроков
+            </summary>
+            <param name="weekTypeId">тип недели</param>
+            <param name="dayOfWeekId">день недели</param>
+            <param name="cabinetId">кабинет </param>
+            <param name="ct"> токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.GetBusyCabinetIdsAsync(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает ID кабинетов, занятых в указанное время/день/неделю.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.GetByTeacherIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает расписание для отдельного преподавателя по его идентификатору.
+            </summary>
+            <param name="teacherId">Идентификатор преподавателя.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список занятий, относящихся к указанному преподавателю.</returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.IPositionRepository">
+            <summary>
+            Интерфейс репозитория Должности
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.IPositionRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверка уникальности кабинета
+            </summary>
+            <param name="name">номер кабинета</param>
+            <param name="excludeId">уникальный иднтификатор записи</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.ISubjectRepository">
+            <summary>
+            Интерфейс репозитория Предмета
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ISubjectRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверка unique
+            </summary>
+            <param name="name">номер кабинета</param>
+            <param name="excludeId">уникальный иднтификатор записи</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.ITeacherRepository">
+            <summary>
+            Интерфейс репозитория Преподавателя
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ITeacherRepository.GetAllWithPositonAsync(System.Threading.CancellationToken)">
+            <summary>
+            Ансихрнонно получает всех учителй включая связанные позиции
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ITeacherRepository.SearchAsync(System.String,System.Nullable{System.Int32})">
+            <summary>
+            Получить список преподавателей по заданному поисковому запросу.
+            </summary>
+            <param name="search">Поисковая строка (ФИО или часть ФИО).</param>
+            <param name="positionValue">Должность для фильтрации.</param>
+            <returns>Список преподавателей.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ITeacherRepository.GetWithLessonsByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить преподавателя по ID с присоединенными (Include) занятиями.
+            Необходимо для построения тепловой карты.
+            </summary>
+            <param name="id">ID преподавателя</param>
+            <param name="ct">Токе отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.ITimeSlotRepository">
+            <summary>
+            Интерфейс репозитория Временного слота
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.IWeekDayRepository">
+            <summary>
+            Интерфейс репозитория Дня недели
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Repositories.IWeekTypeRepository">
+            <summary>
+            Интерфейс репозитория Типа недели
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Service.BuildingService">
+            <summary>
+            Сервис для работы со зданиями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.BuildingService.#ctor(SmartSchedule.Core.Repositories.IBuildingRepository,AutoMapper.IMapper)">
+            <summary>
+            Конструктор сервиса зданий.
+            </summary>
+            <param name="repository">Репозиторий зданий.</param>
+            <param name="mapper">Объект маппинга.</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметры равны null.</exception>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.BuildingService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех зданий.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список зданий в виде DTO.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.BuildingService.GetAllShorts(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех зданий в кратком варианте
+            </summary>
+            <param name="ct">токен отмены </param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.BuildingService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить здание по идентификатору.
+            </summary>
+            <param name="id">Идентификатор здания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>DTO здания.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.BuildingService.CreateAsync(SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новое здание.
+            </summary>
+            <param name="dto">Данные для создания здания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>DTO созданного здания.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.BuildingService.UpdateAsync(System.Int32,SmartSchedule.Application.DTOs.Building.UpdateBuildingDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию о здании.
+            </summary>
+            <param name="id">Идентификатор здания.</param>
+            <param name="dto">Данные для обновления.</param>
+            <param name="ct">Токен отмены операции.</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.BuildingService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить здание по идентификатору.
+            </summary>
+            <param name="id">Идентификатор здания.</param>
+            <param name="ct">Токен отмены операции.</param>
+        </member>
+        <member name="T:SmartSchedule.Core.Service.GroupService">
+            <summary>
+            Сервис для работы с группами
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.GroupService.#ctor(SmartSchedule.Core.Repositories.IGroupRepository,AutoMapper.IMapper)">
+            <summary>
+            Конструктор сервиса групп
+            </summary>
+            <param name="repository">Репозиторий групп</param>
+            <param name="mapper">Объект маппинга</param>
+            <exception cref="T:System.ArgumentNullException">Если repository или mapper равны null</exception>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.GroupService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить все группы
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO групп</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.GroupService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить группу по идентификатору
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO группы</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.GroupService.CreateAsync(SmartSchedule.Core.Models.DTO.GroupDTO.CreateGroupDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новую группу
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO созданной группы</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.GroupService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.GroupDTO.UpdateGroupDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные группы
+            </summary>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <param name="id">Уникальный идентификатор</param>
+            <returns>DTO обновленной группы</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.GroupService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить группу
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Core.Service.Interfaces.ICachingService">
+            <summary>
+            Предоставляет методы для работы с кэшем.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.ICachingService.GetOrSetAsync``1(System.String,System.Func{System.Threading.Tasks.Task{``0}},System.Nullable{System.TimeSpan},System.Threading.CancellationToken)">
+            <summary>
+            Получает значение из кэша по указанному ключу или устанавливает его с помощью фабрики, если кэш пуст.
+            </summary>
+            <typeparam name="T">Тип кэшируемых данных.</typeparam>
+            <param name="key">Ключ кэша.</param>
+            <param name="factory">Фабрика для создания данных при отсутствии в кэше.</param>
+            <param name="expiration">Время жизни кэшированных данных. Если не указано — используется значение по умолчанию.</param>
+            <param name="cancellationToken">Токен отмены операции.</param>
+            <returns>Кэшированные или созданные данные.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.ICachingService.RemoveAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Удаляет данные из кэша по указанному ключу.
+            </summary>
+            <param name="key">Ключ кэша.</param>
+            <param name="cancellationToken">Токен отмены операции.</param>
+            <returns>Задача, представляющая асинхронную операцию удаления.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.ICachingService.RemoveByPatternAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Удаляет все данные из кэша, соответствующие заданному шаблону.
+            </summary>
+            <param name="pattern">Шаблон ключей (например, "subject:*").</param>
+            <param name="cancellationToken">Токен отмены операции.</param>
+            <returns>Задача, представляющая асинхронную операцию удаления.</returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Service.Interfaces.IWeekDayService">
+            <summary>
+            Интрфейс сервиса для реализации пока дня недели 
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IWeekDayService.GetAllShortsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех дней в кратком формате
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список чеков</returns>
+        </member>
+        <member name="T:SmartSchedule.Core.Service.WeekDayService">
+            <summary>
+            Сервис для работы с днями недели
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.WeekDayService.#ctor(SmartSchedule.Core.Repositories.IWeekDayRepository,AutoMapper.IMapper)">
+            <summary>
+            Конструктор сервиса дней недели
+            </summary>
+            <param name="repository">Репозиторий дней недели</param>
+            <param name="mapper">Сервис маппинга</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.WeekDayService.GetAllShortsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех дней недели в кратком формате
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список дней недели</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.DTOs.Building.ResponseBuildingDto">
+            <summary>
+            модель ответа
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.Building.ResponseBuildingDto.Id">
+            <summary>
+            уникальный индентификатор
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.Building.ResponseBuildingDto.Name">
+            <summary>
+            Новое название здания.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.Building.ResponseBuildingDto.Address">
+            <summary>
+            Новый адрес здания.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Application.DTOs.Building.UpdateBuildingDto">
+            <summary>
+            DTO для обновления информации о здании.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.Building.UpdateBuildingDto.Id">
+            <summary>
+            уникальный индентификатор
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.Building.UpdateBuildingDto.Name">
+            <summary>
+            Новое название здания.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.Building.UpdateBuildingDto.Address">
+            <summary>
+            Новый адрес здания.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Application.DTOs.WeekDayShortDto">
+            <summary>
+             краткая модель ответа для выпадашки
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.WeekDayShortDto.Id">
+            <summary>
+            Уникальный индетификатор
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Application.DTOs.WeekDayShortDto.Name">
+            <summary>
+            имя для дня недели
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.CabinetService">
+            <summary>
+            Сервис для работы с кабинетами.
+            Управляет кэшированием DTO и инвалидацией при изменениях.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.#ctor(SmartSchedule.Core.Repositories.ICabinetRepository,AutoMapper.IMapper,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Конструктор сервиса кабинетов.
+            </summary>
+            <param name="repository">Репозиторий кабинетов.</param>
+            <param name="mapper">Объект маппинга.</param>
+            <param name="cache">Сервис кэширования.</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если любой из параметров равен <see langword="null"/>.</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить все кабинеты с информацией о зданиях.
+            </summary>
+            <param name="ct">Токен отмены.</param>
+            <returns>Список DTO кабинетов.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.GetAllShortWithBuilding(System.Threading.CancellationToken)">
+            <summary>
+            Получить список кабинетов в коротком формате со связью к зданию.
+            </summary>
+            <param name="ct">Токен отмены.</param>
+            <returns>Список коротких DTO кабинетов.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить кабинет по идентификатору.
+            </summary>
+            <param name="id">Идентификатор кабинета.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>DTO кабинета.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.CreateAsync(SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый кабинет.
+            </summary>
+            <param name="dto">Данные для создания.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>DTO созданного кабинета.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные кабинета.
+            </summary>
+            <param name="id">Уникальный идентификатор кабинета.</param>
+            <param name="dto">Данные для обновления.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>DTO обновленного кабинета.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить кабинет.
+            </summary>
+            <param name="id">Идентификатор кабинета.</param>
+            <param name="ct">Токен отмены.</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.CabinetService.SearchCabinetsAsync(System.String,System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            Выполняет поиск и фильтрацию кабинетов.
+            </summary>
+            <param name="searchTerm">Поисковый запрос по номеру кабинета.</param>
+            <param name="buildingNumber">Фильтр по зданию.</param>
+            <param name="sortBy">Поле сортировки ("number" или "building").</param>
+            <param name="descending">Направление сортировки.</param>
+            <returns>Список найденных кабинетов.</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.IBuildingService">
+            <summary>
+            Сервис для работы с зданиями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IBuildingService.GetAllShorts(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех зданий в короткой форме
+            </summary>
+            <param name="ct">Токен отмены операции</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IBuildingService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех зданий.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список зданий</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IBuildingService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить здание по идентификатору.
+            </summary>
+            <param name="id">Идентификатор здания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные о здании</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IBuildingService.CreateAsync(SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новое здание.
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданное здание</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IBuildingService.UpdateAsync(System.Int32,SmartSchedule.Application.DTOs.Building.UpdateBuildingDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию о здании.
+            </summary>
+            <param name="id">Идентификатор здания</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IBuildingService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить здание по идентификатору.
+            </summary>
+            <param name="id">Идентификатор здания</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.ICabinetService">
+            <summary>
+            Сервис для работы с аудиториями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ICabinetService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех аудиторий в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список аудиторий</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ICabinetService.GetAllShortWithBuilding(System.Threading.CancellationToken)">
+            <summary>
+            получить список кабинетов в коротком формате с всязкой
+            </summary>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ICabinetService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить аудиторию по идентификатору.
+            </summary>
+            <param name="id">Идентификатор аудитории</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о аудитории</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ICabinetService.CreateAsync(SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новую аудиторию.
+            </summary>
+            <param name="dto">Данные для создания аудитории</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданная аудитория</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ICabinetService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию об аудитории.
+            </summary>
+            <param name="id">Идентификатор аудитории</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ICabinetService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить аудиторию по идентификатору.
+            </summary>
+            <param name="id">Идентификатор аудитории</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ICabinetService.SearchCabinetsAsync(System.String,System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            Поиск кабинетов по номеру и/или зданию с сортировкой.
+            </summary>
+            <param name="searchTerm">Числовой номер кабинета (например "310")</param>
+            <param name="buildingNumber">Номер здания (1 или 2)</param>
+            <param name="sortBy">Поле для сортировки ("number", "building")</param>
+            <param name="descending">Направление сортировки (true - по убыванию)</param>
+            <returns>Список подходящих кабинетов</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.IGroupService">
+            <summary>
+            Сервис для работы с учебными группами.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IGroupService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех групп в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список групп</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IGroupService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить группу по идентификатору.
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о группе</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IGroupService.CreateAsync(SmartSchedule.Core.Models.DTO.GroupDTO.CreateGroupDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новую группу.
+            </summary>
+            <param name="dto">Данные для создания группы</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданная группа</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IGroupService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.GroupDTO.UpdateGroupDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию о группе.
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IGroupService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить группу по идентификатору.
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.ILessonService">
+            <summary>
+            Сервис для работы с занятиями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех занятий в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список занятий</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить занятие по идентификатору.
+            </summary>
+            <param name="id">Идентификатор занятия</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о занятии</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.CreateAsync(SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новое занятие.
+            </summary>
+            <param name="dto">Данные для создания занятия</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданное занятие</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию о занятии.
+            </summary>
+            <param name="id">Идентификатор занятия</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить занятие по идентификатору.
+            </summary>
+            <param name="id">Идентификатор занятия</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetByGroupIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить данный уроков для группы 
+            </summary>
+            <param name="groupId">групппа id</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetStructuredScheduleByGroupIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            получаем структурированное расписание для группы
+            </summary>
+            <param name="groupId">индентификатор группы</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetAvailableCabinetsAsync(System.Int32,System.Int32,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            ищет свободные кабинеты
+            </summary>
+            <param name="dayOfWeekId">день недели</param>
+            <param name="timeSlotId">слот</param>
+            <param name="weekTypeId">какая неделя</param>
+            <param name="buildingId">Тип коруса</param>
+            <param name="ct">токен отмны</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetCabinetUsageReportAsync(SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Формирует отчёт о загруженности аудиторий с учётом заданных фильтров.
+            </summary>
+            <param name="filter">Фильтр с параметрами отчёта (здание, день недели, тип недели)</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO со статистикой по аудиториям</returns>
+            <exception cref="T:System.ArgumentNullException">Если filter равен null</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetCabinetScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            тепловое представление кабинета
+            </summary>
+            <param name="cabinetId">Кабинет</param>
+            <param name="weekTypeId">тип недели</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.CheckConflictAsync(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Проверяет наличие конфликтов (Группа, Преподаватель, Кабинет) для занятия в целевом слоте.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetByTeacherIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить данные уроков для преподавателя
+            </summary>
+            <param name="teacherId">преподаватель</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetStructuredScheduleByTeacherIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            получить структурированное расписание для преподавателя
+            </summary>
+            <param name="teacherId">ID преподавателя</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetTeacherUsageReportAsync(SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Формирует отчёт о загруженности преподавателей с учётом заданных фильтров.
+            </summary>
+            <param name="filter">Фильтр с параметрами отчёта (день недели, тип недели)</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO со статистикой по преподавателям</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetTeacherScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Формирует отчёт в виде тепловой карты расписания для конкретного преподавателя.
+            </summary>
+            <param name="teacherId">Уникальный идентификатор преподавателя</param>
+            <param name="weekTypeId">Тип недели (1, 2, или 0 для всех недель)</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO со статусом занятости по каждому слоту</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GetGroupUsageReportAsync(SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <param name="filter">Фильтр для групп</param>
+            <returns>возращает отчет по нагрузки на аудиторию</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.IPositionService">
+            <summary>
+            Сервис для работы с должностями преподавателей.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IPositionService.GetShortAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить всех должностей в  коротком виде
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO преподавателей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IPositionService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех должностей в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список должностей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IPositionService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить должность по идентификатору.
+            </summary>
+            <param name="id">Идентификатор должности</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о должности</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IPositionService.CreateAsync(SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новую должность.
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданная должность</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IPositionService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию о должности.
+            </summary>
+            <param name="id">Идентификатор должности</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IPositionService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить должность по идентификатору.
+            </summary>
+            <param name="id">Идентификатор должности</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.ISubjectService">
+            <summary>
+            Сервис для работы с учебными дисциплинами (предметами).
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ISubjectService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех предметов в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список предметов</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ISubjectService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить предмет по идентификатору.
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о предмете</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ISubjectService.CreateAsync(SmartSchedule.Core.Models.DTO.SubjectDTO.CreateSubjectDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый предмет.
+            </summary>
+            <param name="dto">Данные для создания предмета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный предмет</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ISubjectService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.SubjectDTO.UpdateSubjectDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию о предмете.
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ISubjectService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить предмет по идентификатору.
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.ITeacherService">
+            <summary>
+            Сервис для работы с преподавателями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.GetShortAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить всех преподавателей в обычном коротком виде
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO преподавателей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех преподавателей в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список преподавателей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить преподавателя по идентификатору.
+            </summary>
+            <param name="id">Идентификатор преподавателя</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о преподавателе</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.CreateAsync(SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать нового преподавателя.
+            </summary>
+            <param name="dto">Данные для создания преподавателя</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный преподаватель</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить информацию о преподавателе.
+            </summary>
+            <param name="id">Идентификатор преподавателя</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить преподавателя по идентификатору.
+            </summary>
+            <param name="id">Идентификатор преподавателя</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.SearchTeachersAsync(System.String,System.Nullable{System.Int32})">
+            <summary>
+            Выполняет поиск преподавателей по ФИО и фильтрацию по должности.
+            </summary>
+            <param name="search">Поисковая строка (ФИО).</param>
+            <param name="positionId">Идентификатор должности.</param>
+            <returns>Список найденных преподавателей.</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.ITimeSlotService">
+            <summary>
+            Сервис для работы с временными слотами.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITimeSlotService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список временных слотов в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список временных слотов</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITimeSlotService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить временной слот по идентификатору.
+            </summary>
+            <param name="id">Идентификатор слота</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о временном слоте</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITimeSlotService.CreateAsync(SmartSchedule.Core.Models.DTO.TimeSlotDTO.CreateTimeSlotDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый временной слот.
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный временной слот</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITimeSlotService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные временного слота.
+            </summary>
+            <param name="id">Идентификатор слота</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITimeSlotService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить временной слот по идентификатору.
+            </summary>
+            <param name="id">Идентификатор слота</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.Interfaces.IWeekTypeService">
+            <summary>
+            Сервис для работы с типами недель.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IWeekTypeService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех типов недель в полном формате.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список типов недель</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IWeekTypeService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить тип недели по идентификатору.
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Подробная информация о типе недели</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IWeekTypeService.CreateAsync(SmartSchedule.Core.Models.DTO.WeekTypeDTO.CreateWeekTypeDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый тип недели.
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный тип недели</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IWeekTypeService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.WeekTypeDTO.UpdateWeekTypeDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить тип недели.
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.IWeekTypeService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить тип недели по идентификатору.
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.LessonService">
+            <summary>
+            Сервис для управления занятиями, проверки конфликтов расписания и формирования аналитических отчетов.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.#ctor(SmartSchedule.Core.Repositories.ILessonRepository,AutoMapper.IMapper,SmartSchedule.Core.Repositories.ITimeSlotRepository,SmartSchedule.Core.Repositories.ICabinetRepository,SmartSchedule.Core.Repositories.IWeekDayRepository,SmartSchedule.Core.Repositories.ITeacherRepository,SmartSchedule.Core.Repositories.IGroupRepository)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Application.Services.LessonService"/>.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.CheckConflictAsync(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Проверяет наличие конфликтов (пересечений по времени, аудитории, преподавателю или группе) для занятия.
+            </summary>
+            <param name="lessonId">Идентификатор проверяемого занятия (0, если создается новое).</param>
+            <param name="targetDayId">Идентификатор дня недели.</param>
+            <param name="targetTimeId">Идентификатор временного слота.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>DTO с флагами обнаруженных конфликтов.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetTeacherUsageReportAsync(SmartSchedule.Core.Models.DTO.TeacherDTO.TeacherUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Формирует отчет по загруженности преподавателей на основе заданных фильтров.
+            </summary>
+            <param name="filter">Параметры фильтрации (день недели, тип недели).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список с данными о загрузке каждого преподавателя.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetTeacherScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает расписание занятий конкретного преподавателя для визуализации в виде сетки.
+            </summary>
+            <param name="teacherId">Идентификатор преподавателя.</param>
+            <param name="weekTypeId">Тип недели (Числитель/Знаменатель).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список слотов с отметками о занятости.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получает список всех занятий в системе.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список DTO занятий.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает информацию о занятии по его идентификатору.
+            </summary>
+            <param name="id">Идентификатор занятия.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>DTO занятия.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetAvailableCabinetsAsync(System.Int32,System.Int32,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Возвращает список свободных кабинетов для указанного временного слота.
+            </summary>
+            <param name="dayOfWeekId">День недели.</param>
+            <param name="timeSlotId">Временной слот.</param>
+            <param name="weekTypeId">Тип недели.</param>
+            <param name="buildingId">Фильтр по корпусу (необязательно).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список свободных аудиторий.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.CreateAsync(SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto,System.Threading.CancellationToken)">
+            <summary>
+            Создает новое занятие после проверки на конфликты.
+            </summary>
+            <param name="dto">DTO с данными для создания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>DTO созданного занятия.</returns>
+            <exception cref="T:SmartSchedule.Core.Exceptions.ScheduleConflictException">Если обнаружено пересечение в расписании.</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновляет существующее занятие после проверки на конфликты.
+            </summary>
+            <param name="id">Идентификатор занятия.</param>
+            <param name="dto">DTO с обновленными данными.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <exception cref="T:System.ArgumentException">Если занятие не найдено.</exception>
+            <exception cref="T:SmartSchedule.Core.Exceptions.ScheduleConflictException">Если обнаружено пересечение в расписании.</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удаляет занятие по идентификатору.
+            </summary>
+            <param name="id">Идентификатор занятия.</param>
+            <param name="ct">Токен отмены операции.</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetByGroupIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает все занятия для указанной группы.
+            </summary>
+            <param name="groupId">Идентификатор группы.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список занятий группы.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetByTeacherIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает все занятия для указанного преподавателя.
+            </summary>
+            <param name="teacherId">Идентификатор преподавателя.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список занятий преподавателя.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetStructuredScheduleByGroupIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает структурированное расписание (группированное по дням и слотам) для группы.
+            </summary>
+            <param name="groupId">Идентификатор группы.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Словарь, где ключ - день недели, значение - список занятий.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetStructuredScheduleByTeacherIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает структурированное расписание (группированное по дням и слотам) для преподавателя.
+            </summary>
+            <param name="teacherId">Идентификатор преподавателя.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Словарь, где ключ - день недели, значение - список занятий.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetGroupUsageReportAsync(SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Формирует отчет по загруженности учебных групп на основе фильтров.
+            </summary>
+            <param name="filter">Параметры фильтрации.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список с данными о загрузке каждой группы.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetCabinetUsageReportAsync(SmartSchedule.Core.Models.DTO.CabinetDTO.CabinetUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Формирует отчет по загруженности аудиторий (кабинетов) на основе фильтров.
+            </summary>
+            <param name="filter">Параметры фильтрации (день, тип недели, корпус).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список с данными о загрузке каждого кабинета.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GetCabinetScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает расписание занятий конкретного кабинета для визуализации в виде сетки.
+            </summary>
+            <param name="cabinetId">Идентификатор кабинета.</param>
+            <param name="weekTypeId">Тип недели.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список слотов с отметками о занятости.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.CheckForScheduleConflict(SmartSchedule.Core.Entities.Lesson,System.Threading.CancellationToken)">
+            <summary>
+            Внутренний метод для проверки конфликтов в расписании перед сохранением.
+            Бросает исключение при обнаружении конфликта.
+            </summary>
+            <param name="lesson">Проверяемое занятие.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <exception cref="T:SmartSchedule.Core.Exceptions.ScheduleConflictException">Если конфликт найден.</exception>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.PositionService">
+            <summary>
+            Сервис для работы с должностями преподавателей
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.PositionService.#ctor(SmartSchedule.Core.Repositories.IPositionRepository,AutoMapper.IMapper)">
+            <summary>
+            Конструктор сервиса должностей
+            </summary>
+            <param name="repository">Репозиторий должностей</param>
+            <param name="mapper">Объект маппинга</param>
+            <exception cref="T:System.ArgumentNullException">Если repository или mapper равны null</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.PositionService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить все должности
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO должностей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.PositionService.GetShortAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить всех должносте  в  коротком виде
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO должностей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.PositionService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить должность по идентификатору
+            </summary>
+            <param name="id">Идентификатор должности</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO должности</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.PositionService.CreateAsync(SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новую должность
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO созданной должности</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.PositionService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные должности
+            </summary>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <param name="id">Уникальный идентификатор</param>
+            <returns>DTO обновленной должности</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.PositionService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить должность
+            </summary>
+            <param name="id">Идентификатор должности</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.SubjectService">
+            <summary>
+            Сервис для работы с предметами
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.SubjectService.#ctor(SmartSchedule.Core.Repositories.ISubjectRepository,AutoMapper.IMapper)">
+            <summary>
+            Конструктор сервиса предметов
+            </summary>
+            <param name="repository">Репозиторий предметов</param>
+            <param name="mapper">Объект маппинга</param>
+            <exception cref="T:System.ArgumentNullException">Если repository или mapper равны null</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.SubjectService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить все предметы
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO предметов</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.SubjectService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить предмет по идентификатору
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO предмета</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.SubjectService.CreateAsync(SmartSchedule.Core.Models.DTO.SubjectDTO.CreateSubjectDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый предмет
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO созданного предмета</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.SubjectService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.SubjectDTO.UpdateSubjectDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные предмета
+            </summary>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <param name="id">уникальный идентификатор</param>
+            <returns>DTO обновленного предмета</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.SubjectService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить предмет
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.TeacherService">
+            <summary>
+            Сервис для работы с преподавателями.
+            Управляет кэшированием DTO и инвалидацией при изменениях.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.#ctor(SmartSchedule.Core.Repositories.ITeacherRepository,AutoMapper.IMapper,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Конструктор сервиса преподавателей.
+            </summary>
+            <param name="repository">Репозиторий преподавателей.</param>
+            <param name="mapper">Объект маппинга.</param>
+            <param name="cache">Сервис кэширования.</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если любой из параметров равен <see langword="null"/>.</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.GetShortAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить всех преподавателей в коротком виде.
+            </summary>
+            <param name="ct">Токен отмены.</param>
+            <returns>Список DTO преподавателей.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить всех преподавателей с информацией о должностях.
+            </summary>
+            <param name="ct">Токен отмены.</param>
+            <returns>Список DTO преподавателей.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить преподавателя по идентификатору.
+            </summary>
+            <param name="id">Идентификатор преподавателя.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>DTO преподавателя.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.CreateAsync(SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать нового преподавателя.
+            </summary>
+            <param name="dto">Данные для создания.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>DTO созданного преподавателя.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные преподавателя.
+            </summary>
+            <param name="id">Идентификатор преподавателя.</param>
+            <param name="dto">Данные для обновления.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>DTO обновленного преподавателя.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить преподавателя.
+            </summary>
+            <param name="id">Идентификатор преподавателя.</param>
+            <param name="ct">Токен отмены.</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.SearchTeachersAsync(System.String,System.Nullable{System.Int32})">
+            <summary>
+            Выполняет поиск преподавателей по ФИО и фильтрацию по должности.
+            </summary>
+            <param name="search">Поисковая строка (ФИО).</param>
+            <param name="positionId">Идентификатор должности.</param>
+            <returns>Список найденных преподавателей.</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.TimeSlotService">
+            <summary>
+            Сервис для работы с временными слотами
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TimeSlotService.#ctor(SmartSchedule.Core.Repositories.ITimeSlotRepository,AutoMapper.IMapper)">
+            <summary>
+            Конструктор сервиса временных слотов
+            </summary>
+            <param name="repository">Репозиторий временных слотов</param>
+            <param name="mapper">Объект маппинга</param>
+            <exception cref="T:System.ArgumentNullException">Если repository или mapper равны null</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TimeSlotService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить все временные слоты
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO временных слотов</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TimeSlotService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить временной слот по идентификатору
+            </summary>
+            <param name="id">Идентификатор временного слота</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO временного слота</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TimeSlotService.CreateAsync(SmartSchedule.Core.Models.DTO.TimeSlotDTO.CreateTimeSlotDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый временной слот
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO созданного временного слота</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TimeSlotService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные временного слота
+            </summary>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <param name="id">Уникальный идентификатор</param>
+            <returns>DTO обновленного временного слота</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TimeSlotService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить временной слот
+            </summary>
+            <param name="id">Идентификатор временного слота</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Application.Services.WeekTypeService">
+            <summary>
+            Сервис для работы с типами недель
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.WeekTypeService.#ctor(SmartSchedule.Core.Repositories.IWeekTypeRepository,AutoMapper.IMapper)">
+            <summary>
+            Конструктор сервиса типов недель
+            </summary>
+            <param name="repository">Репозиторий типов недель</param>
+            <param name="mapper">Объект маппинга</param>
+            <exception cref="T:System.ArgumentNullException">Если repository или mapper равны null</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.WeekTypeService.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить все типы недель
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список DTO типов недель</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.WeekTypeService.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить тип недели по идентификатору
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO типа недели</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.WeekTypeService.CreateAsync(SmartSchedule.Core.Models.DTO.WeekTypeDTO.CreateWeekTypeDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый тип недели
+            </summary>
+            <param name="dto">Данные для создания</param>
+            <param name="ct">Токен отмены</param>
+            <returns>DTO созданного типа недели</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.WeekTypeService.UpdateAsync(System.Int32,SmartSchedule.Core.Models.DTO.WeekTypeDTO.UpdateWeekTypeDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные типа недели
+            </summary>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <param name="id">Уникальный идентификатор</param>
+            <returns>DTO обновленного типа недели</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.WeekTypeService.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить тип недели
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedul.Core.Exceptions.BusinessException">
+            <summary>
+            Ошибка бизнес-логики.
+            </summary>
+        </member>
+        <member name="M:SmartSchedul.Core.Exceptions.BusinessException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedul.Core.Exceptions.BusinessException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedul.Core.Exceptions.BusinessException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedul.Core.Exceptions.ObjectNotFoundException">
+            <summary>
+            Исключение - объект не найден.
+            </summary>
+        </member>
+        <member name="M:SmartSchedul.Core.Exceptions.ObjectNotFoundException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedul.Core.Exceptions.ObjectNotFoundException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedul.Core.Exceptions.ObjectNotFoundException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedul.Core.Extensions.TypeExtensions">
+            <summary>
+            Расширение для работы с типами.
+            </summary>
+        </member>
+        <member name="M:SmartSchedul.Core.Extensions.TypeExtensions.GetDescriptionAttribute(System.Type,System.String)">
+            <summary>
+            Возвращает значение атрибута Description для поля по имени.
+            </summary>
+            <param name="type">Тип с атрибутами Description.</param>
+            <param name="fieldName">Имя поля с атрибутом Description.</param>
+            <returns>Значение атрибута Description.</returns>
+        </member>
+        <member name="M:SmartSchedul.Core.Extensions.TypeExtensions.GetDefaultValueAttribute(System.Type,System.String)">
+            <summary>
+            Возвращает значение атрибута DefaultValue для поля по имени.
+            </summary>
+            <param name="type">Тип с атрибутами DefaultValue.</param>
+            <param name="propertyName">Имя свойства с атрибутом DefaultValue.</param>
+            <returns>Значение атрибута DefaultValue.</returns>
+        </member>
+    </members>
+</doc>

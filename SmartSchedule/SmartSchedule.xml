@@ -1,0 +1,1096 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SmartSchedule</name>
+    </assembly>
+    <members>
+        <member name="T:SmartSchedule.Application.Controllers.BuildingController">
+            <summary>
+            Контроллер для работы со зданиями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.BuildingController.#ctor(SmartSchedule.Application.Services.Interfaces.IBuildingService)">
+            <summary>
+            Конструктор контроллера зданий.
+            </summary>
+            <param name="buildingService">Сервис для работы со зданиями.</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.BuildingController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех зданий.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список зданий.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.BuildingController.GetAllShorts(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех зданий в кратком варианте нужен для выподашек.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список зданий.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.BuildingController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить здание по идентификатору.
+            </summary>
+            <param name="id">Идентификатор здания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Здание с указанным идентификатором.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.BuildingController.Create(SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новое здание.
+            </summary>
+            <param name="dto">Данные для создания здания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Созданное здание.</returns>
+            <response code="201">Здание успешно создано</response>
+            <response code="400">Некорректные данные</response>
+            <response code="409">Здание с таким названием уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.BuildingController.Update(System.Int32,SmartSchedule.Application.DTOs.Building.UpdateBuildingDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные здания.
+            </summary>
+            <param name="id">Идентификатор здания.</param>
+            <param name="dto">Данные для обновления здания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Результат операции.</returns>
+            <response code="204">Здание успешно обновлено</response>
+            <response code="400">Некорректные данные</response>
+            <response code="404">Здание не найдено</response>
+            <response code="409">Здание с таким названием уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.BuildingController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить здание по идентификатору.
+            </summary>
+            <param name="id">Идентификатор здания.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Результат операции.</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.CabinetController">
+            <summary>
+            Контроллер для работы с кабинетами
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.#ctor(SmartSchedule.Application.Services.Interfaces.ICabinetService)">
+            <summary>
+            Конструктор контроллера кабинетов
+            </summary>
+            <param name="cabinetService">Сервис для работы с кабинетами</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех кабинетов
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список кабинетов</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.GetAllShory(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех занятий 
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список занятий</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить кабинет по идентификатору
+            </summary>
+            <param name="id">Идентификатор кабинета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные кабинета</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.Create(SmartSchedule.Core.Models.DTO.CabinetDTO.CreateCabinetDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый кабинет
+            </summary>
+            <param name="dto">Данные для создания кабинета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный кабинет</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.Update(System.Int32,SmartSchedule.Core.Models.DTO.CabinetDTO.UpdateCabinetDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить кабинет
+            </summary>
+            <param name="id">Идентификатор кабинета</param>
+            <param name="ct">Токен отмены</param>
+            <param name="dto">Модель</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить кабинет
+            </summary>
+            <param name="id">Идентификатор кабинета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.CabinetController.SearchAsync(System.String,System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            Поиск кабинетов по номеру и/или зданию с возможностью сортировки.
+            </summary>
+            <param name="searchTerm">Числовой номер кабинета (например "310")</param>
+            <param name="buildingNumber">Номер здания (1 или 2)</param>
+            <param name="sortBy">Поле для сортировки ("number", "building")</param>
+            <param name="descending">Направление сортировки (true - по убыванию)</param>
+            <returns>Список кабинетов в формате DTO</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.GroupController">
+            <summary>
+            Контроллер для работы с группами
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.GroupController.#ctor(SmartSchedule.Application.Services.Interfaces.IGroupService)">
+            <summary>
+            Конструктор контроллера групп
+            </summary>
+            <param name="groupService">Сервис для работы с группами</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.GroupController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех групп
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список групп</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.GroupController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить группу по идентификатору
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные группы</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.GroupController.Create(SmartSchedule.Core.Models.DTO.GroupDTO.CreateGroupDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новую группу
+            </summary>
+            <param name="dto">Данные для создания группы</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданная группа</returns>
+            <response code="201">Группа успешно создана</response>
+            <response code="400">Некорректные данные</response>
+            <response code="409">Группа с таким именем уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.GroupController.Update(System.Int32,SmartSchedule.Core.Models.DTO.GroupDTO.UpdateGroupDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить группу
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+            <response code="204">Группа успешно обновлена</response>
+            <response code="400">Некорректные данные</response>
+            <response code="404">Группа не найдена</response>
+            <response code="409">Группа с таким именем уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.GroupController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить группу
+            </summary>
+            <param name="id">Идентификатор группы</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.LessonController">
+            <summary>
+            Контроллер для работы с занятиями
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.#ctor(SmartSchedule.Application.Services.Interfaces.ILessonService)">
+            <summary>
+            конструктор 
+            </summary>
+            <param name="lessonService">интерфейс сервиса </param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех занятий
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить занятие по идентификатору
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.Create(SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новое занятие
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.Update(System.Int32,SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить занятие
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить занятие
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetByGroup(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить все занятия группы
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetStructuredSchedule(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить структурированное расписание группы
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetAvailableCabinets(System.Int32,System.Int32,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Ищет свободные кабинеты
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetCabinetUsageReport(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Получить отчёт о загруженности аудиторий
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetCabinetScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить расписание кабинета по ID с возможностью фильтрации по типу недели.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.CheckConflict(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Предварительная проверка конфликтов (для DnD).
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetByTeacher(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получение плоского расписания преподавателя
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetStructuredScheduleByTeacher(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить структурированное расписание преподавателя
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetTeacherUsageReport(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Получить отчёт о загруженности преподавателей
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetTeacherScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить тепловую карту расписания преподавателя
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetGroupUsageReport(SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Получает отчет о загруженности учебных групп.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.PositionController">
+            <summary>
+            Контроллер для работы с должностями
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.PositionController.#ctor(SmartSchedule.Application.Services.Interfaces.IPositionService)">
+            <summary>
+            Конструктор контроллера должностей
+            </summary>
+            <param name="positionService">Сервис для работы с должностями</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.PositionController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех должностей
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список должностей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.PositionController.GetAllShort(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех должностей в коротком варианте для выпадашек
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список должностей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.PositionController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить должность по идентификатору
+            </summary>
+            <param name="id">Идентификатор должности</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные должности</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.PositionController.Create(SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новую должность.
+            </summary>
+            <param name="dto">Данные для создания должности.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Созданная должность.</returns>
+            <response code="201">Должность успешно создана</response>
+            <response code="400">Некорректные данные</response>
+            <response code="409">Должность с таким названием уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.PositionController.Update(System.Int32,SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить данные должности.
+            </summary>
+            <param name="id">Идентификатор должности.</param>
+            <param name="dto">Данные для обновления должности.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Результат операции.</returns>
+            <response code="204">Должность успешно обновлена</response>
+            <response code="400">Некорректные данные</response>
+            <response code="404">Должность не найдена</response>
+            <response code="409">Должность с таким названием уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.PositionController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить должность
+            </summary>
+            <param name="id">Идентификатор должности</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.SubjectController">
+            <summary>
+            Контроллер для работы с предметами
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.SubjectController.#ctor(SmartSchedule.Application.Services.Interfaces.ISubjectService)">
+            <summary>
+            Конструктор контроллера предметов
+            </summary>
+            <param name="subjectService">Сервис для работы с предметами</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.SubjectController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех предметов
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список предметов</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.SubjectController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить предмет по идентификатору
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные предмета</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.SubjectController.Create(SmartSchedule.Core.Models.DTO.SubjectDTO.CreateSubjectDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый предмет
+            </summary>
+            <param name="dto">Данные для создания предмета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный предмет</returns>
+            <response code="201">Предмет успешно создан</response>
+            <response code="400">Некорректные данные</response>
+            <response code="409">Предмет с таким названием уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.SubjectController.Update(System.Int32,SmartSchedule.Core.Models.DTO.SubjectDTO.UpdateSubjectDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить предмет
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+            <response code="204">Предмет успешно обновлен</response>
+            <response code="400">Некорректные данные</response>
+            <response code="404">Предмет не найден</response>
+            <response code="409">Предмет с таким названием уже существует</response>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.SubjectController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить предмет
+            </summary>
+            <param name="id">Идентификатор предмета</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.TeacherController">
+            <summary>
+            Контроллер для работы с преподавателями
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.#ctor(SmartSchedule.Application.Services.Interfaces.ITeacherService)">
+            <summary>
+            Конструктор контроллера преподавателей
+            </summary>
+            <param name="teacherService">Сервис для работы с преподавателями</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех преподавателей
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список преподавателей</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.GetAllShorts(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех всех учителей в кратком варианте нужен для выподашек.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список зданий.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить преподавателя по идентификатору
+            </summary>
+            <param name="id">Идентификатор преподавателя</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные преподавателя</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.Create(SmartSchedule.Core.Models.DTO.TeacherDTO.CreateTeacherDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать нового преподавателя
+            </summary>
+            <param name="dto">Данные для создания преподавателя</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный преподаватель</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.Update(System.Int32,SmartSchedule.Core.Models.DTO.TeacherDTO.UpdateTeacherDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить преподавателя
+            </summary>
+            <param name="id">Идентификатор преподавателя</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить преподавателя
+            </summary>
+            <param name="id">Идентификатор преподавателя</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.SearchTeachersAsync(System.String,System.Nullable{System.Int32})">
+            <summary>
+            Выполняет поиск преподавателей по ФИО и фильтрацию по должности.
+            </summary>
+            <param name="search">Поисковая строка для поиска по ФИО.</param>
+            <param name="positionId">Необязательный идентификатор должности для фильтрации.</param>
+            <returns>Список преподавателей, соответствующих критериям поиска.</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.TimeSlotController">
+            <summary>
+            Контроллер для работы с временными слотами
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TimeSlotController.#ctor(SmartSchedule.Application.Services.Interfaces.ITimeSlotService)">
+            <summary>
+            Конструктор контроллера временных слотов
+            </summary>
+            <param name="timeSlotService">Сервис для работы с временными слотами</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TimeSlotController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех временных слотов
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список временных слотов</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TimeSlotController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить временной слот по идентификатору
+            </summary>
+            <param name="id">Идентификатор временного слота</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные временного слота</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TimeSlotController.Create(SmartSchedule.Core.Models.DTO.TimeSlotDTO.CreateTimeSlotDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый временной слот
+            </summary>
+            <param name="dto">Данные для создания временного слота</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный временной слот</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TimeSlotController.Update(System.Int32,SmartSchedule.Core.Models.DTO.TimeSlotDTO.UpdateTimeSlotDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить временной слот
+            </summary>
+            <param name="id">Идентификатор временного слота</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.TimeSlotController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить временной слот
+            </summary>
+            <param name="id">Идентификатор временного слота</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.WeekTypeController">
+            <summary>
+            Контроллер для работы с типами недель
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.WeekTypeController.#ctor(SmartSchedule.Application.Services.Interfaces.IWeekTypeService)">
+            <summary>
+            Конструктор контроллера типов недель
+            </summary>
+            <param name="weekTypeService">Сервис для работы с типами недель</param>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.WeekTypeController.GetAll(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех типов недель
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список типов недель</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.WeekTypeController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить тип недели по идентификатору
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Данные типа недели</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.WeekTypeController.Create(SmartSchedule.Core.Models.DTO.WeekTypeDTO.CreateWeekTypeDto,System.Threading.CancellationToken)">
+            <summary>
+            Создать новый тип недели
+            </summary>
+            <param name="dto">Данные для создания типа недели</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Созданный тип недели</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.WeekTypeController.Update(System.Int32,SmartSchedule.Core.Models.DTO.WeekTypeDTO.UpdateWeekTypeDto,System.Threading.CancellationToken)">
+            <summary>
+            Обновить тип недели
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="dto">Данные для обновления</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.WeekTypeController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Удалить тип недели
+            </summary>
+            <param name="id">Идентификатор типа недели</param>
+            <param name="ct">Токен отмены</param>
+            <returns>Результат операции</returns>
+        </member>
+        <member name="T:SmartSchedule.API.Controllers.WeekDayController">
+            <summary>
+            Контроллер для работы с днями недели
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.API.Controllers.WeekDayController.#ctor(SmartSchedule.Core.Service.Interfaces.IWeekDayService)">
+            <summary>
+            Конструктор контроллера для дней недели
+            </summary>
+            <param name="weekDayService">Сервис для работы с днями недели</param>
+        </member>
+        <member name="M:SmartSchedule.API.Controllers.WeekDayController.GetAllShortsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получить список всех дней недели в кратком формате
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список дней недели</returns>
+        </member>
+        <member name="T:SmartSchedule.API.Extensions.AppSettingsExtensions">
+            <summary>
+            Расширение для настроек приложения.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.AppSettingsExtensions.Validate(SmartSchedule.API.Models.Settings.AppSettings)">
+            <summary>
+            Валидирует заполнение настроек приложения.
+            </summary>
+            <param name="appSettings"></param>
+            <exception cref="T:System.ComponentModel.DataAnnotations.ValidationException"></exception>
+        </member>
+        <member name="T:SmartSchedule.API.Extensions.LoggerExtensions">
+            <summary>
+            Расширения для логирования.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.LogExceptionProblemDetails(Microsoft.Extensions.Logging.ILogger,Microsoft.AspNetCore.Http.HttpContext,Microsoft.AspNetCore.Mvc.ProblemDetails)">
+            <summary>
+            Логирует исключения.
+            </summary>
+            <param name="logger">Логгер.</param>
+            <param name="context">Контекст запроса.</param>
+            <param name="details">Детали исключения.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessError(Microsoft.Extensions.Logging.ILogger,System.String)">
+            <summary>
+            Логирует с уровнем "Error"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessError(Microsoft.Extensions.Logging.ILogger,System.Exception,System.String)">
+            <summary>
+            Логирует с уровнем "Error"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="ex">Исключение.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessWarning(Microsoft.Extensions.Logging.ILogger,System.String)">
+            <summary>
+            Логирует с уровнем "Warning"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessWarning(Microsoft.Extensions.Logging.ILogger,System.Exception,System.String)">
+            <summary>
+            Логирует с уровнем "Warning"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="ex">Исключение.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessInformation(Microsoft.Extensions.Logging.ILogger,System.String)">
+            <summary>
+            Логирует с уровнем "Information"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessInformation(Microsoft.Extensions.Logging.ILogger,System.Exception,System.String)">
+            <summary>
+            Логирует с уровнем "Information"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="ex">Исключение.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessDebug(Microsoft.Extensions.Logging.ILogger,System.String)">
+            <summary>
+            Логирует с уровнем "Debug"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="M:SmartSchedule.API.Extensions.LoggerExtensions.ProcessDebug(Microsoft.Extensions.Logging.ILogger,System.Exception,System.String)">
+            <summary>
+            Логирует с уровнем "Debug"
+            </summary>
+            <param name="logger">Логер.</param>
+            <param name="ex">Исключение.</param>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="T:SmartSchedule.API.Models.RequestDetails">
+            <summary>
+            Моедль запроса к серверу.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.API.Models.RequestDetails.#ctor(System.String,System.Boolean,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:SmartSchedule.API.Models.RequestDetails"/>.
+            </summary>
+            <param name="contentType">Тип контента.</param>
+            <param name="host">Хост.</param>
+            <param name="isHttps">Флаг использования https протокола.</param>
+            <param name="method">Метод запроса.</param>
+            <param name="path">Путь.</param>
+            <param name="protocol">Протокол.</param>
+            <param name="queryString">Параметры запроса.</param>
+        </member>
+        <member name="P:SmartSchedule.API.Models.RequestDetails.ContentType">
+            <summary>
+            Возвращает или задает тип контента.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.RequestDetails.Host">
+            <summary>
+            Возвращает или задает хост запроса.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.RequestDetails.IsHttps">
+            <summary>
+            Возвращает или задает флаг Https запроса.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.RequestDetails.Method">
+            <summary>
+            Возвращает или задает метод запроса.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.RequestDetails.Path">
+            <summary>
+            Возвращает или задает путь запроса.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.RequestDetails.Protocol">
+            <summary>
+            Возвращает или задает протокол запроса.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.RequestDetails.QueryString">
+            <summary>
+            Возвращает или задает параметры запроса.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.API.Models.Settings.AppSettings">
+            <summary>
+            Настройки приложения
+            </summary>
+        </member>
+        <member name="F:SmartSchedule.API.Models.Settings.AppSettings.AppSettingsName">
+            <summary>
+            Название блока AppSettings.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.AppSettings.DbOptions">
+            <summary>Возвращает или задает настройки БД.</summary>
+            <value>
+            <para>Настройки БД.</para>
+            </value>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "DbOptions": {
+                ...
+            },
+            </code>
+            Cм. описание полей <see cref="P:SmartSchedule.API.Models.Settings.AppSettings.DbOptions"/>
+            </example>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.AppSettings.Swagger">
+            <summary>Возвращает или задает настройки сваггера.</summary>
+            <value>
+            <para>Настройки сваггера.</para>
+            </value>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "Swagger": {
+                .....
+            },
+            </code>
+            См. описание полей <see cref="T:SmartSchedule.API.Models.Settings.SwaggerConfiguration"/>
+            </example>
+        </member>
+        <member name="T:SmartSchedule.API.Models.Settings.DbOptions">
+            <summary>
+            Модель настроек бд.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.DbOptions.ConnectionString">
+            <summary>Возвращает или задает строку подключения к БД по умолчанию.</summary>
+            <value>
+            <para>Строка подключения к базе данных.</para>
+            <para>Документация PostgreSQL connection strings: https://www.connectionstrings.com/postgresql/ </para>
+            </value>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "ConnectionString": "User ID=userId;Password=password;Host=host;Port=port;Database=dbName;Pooling=true;",
+            </code>
+            </example>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.DbOptions.UseInMemory">
+            <summary>Возвращает или задает флаг использования бд в памяти.</summary>
+            <value>
+            <para>Флаг использования бд в памяти.</para>
+            <para>Используется при разработке, в продуктовой версии указывать значение false или не указывать вообще.</para>
+            </value>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "UseInMemory": true,
+            </code>
+            </example>
+        </member>
+        <member name="T:SmartSchedule.API.Models.Settings.SwaggerConfiguration">
+            <summary>
+            Модель настроек сваггера.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.SwaggerConfiguration.UseSwagger">
+            <summary>Возвращает или задает флаг использования сваггера.</summary>
+            <value>
+            <para>Флаг использования сваггера.</para>
+            </value>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "UseSwagger": true,
+            </code>
+            </example>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.SwaggerConfiguration.Title">
+            <summary>Возвращает или задает заголовок.</summary>
+            <value>
+            <para>Заголовок.</para>
+            </value>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "Title": "Swagger Title",
+            </code>
+            </example>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.SwaggerConfiguration.Description">
+            <summary>Возвращает или задает описание.</summary>
+            <value>
+            <para>Описание.</para>
+            </value>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "Description": "Swagger Description",
+            </code>
+            </example>
+        </member>
+        <member name="P:SmartSchedule.API.Models.Settings.SwaggerConfiguration.ProxyPass">
+            <summary>Фраза прокси.</summary>
+            <example>
+            В файле appsettings.json :
+            <code>
+            "ProxyPass": "proxy",
+            </code>
+            </example>
+        </member>
+        <member name="T:SmartSchedule.API.Validators.DefaultValidatorInterceptor">
+            <summary>
+            Реализация <see cref="T:FluentValidation.AspNetCore.IValidatorInterceptor"/> по умолчанию
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.API.Validators.DefaultValidatorInterceptor.BeforeAspNetValidation(Microsoft.AspNetCore.Mvc.ActionContext,FluentValidation.IValidationContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.API.Validators.DefaultValidatorInterceptor.AfterAspNetValidation(Microsoft.AspNetCore.Mvc.ActionContext,FluentValidation.IValidationContext,FluentValidation.Results.ValidationResult)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.API.Validators.RecursiveValidator">
+            <summary>
+            Определяет вспомогательный класс, который может использоваться для проверки объектов 
+            и вложенных объектов рекурсивно если они имеют связанные атрибуты 
+            System.ComponentModel.DataAnnotations.ValidationAttribute.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.API.Validators.RecursiveValidator.TryValidateObjectRecursive``1(``0,System.Collections.Generic.ICollection{System.ComponentModel.DataAnnotations.ValidationResult})">
+            <summary>
+            Проверяет рекурсионно, является ли данный экземпляр объекта валидным.
+            </summary>
+            <typeparam name="T">Тип валидируемого объекта.</typeparam>
+            <param name="obj">Валидируемый объект.</param>
+            <param name="results"></param>
+            <returns><c>true</c> если объект валидный, <c>false</c>, если обнаружены какие-либо ошибки проверки.</returns>
+        </member>
+        <member name="T:SmartSchedule.Extensions.DependencyExtensions">
+            <summary>
+            Dependency Injection Extensions
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Extensions.DependencyExtensions.AddRepositories(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds repositories to the DI container
+            </summary>
+            <param name="services">Service collection</param>
+        </member>
+        <member name="M:SmartSchedule.Extensions.DependencyExtensions.AddServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds services to the DI container
+            </summary>
+            <param name="services">Service collection</param>
+        </member>
+        <member name="T:EduRoomLoad.API.Errors.ProblemDetailsError">
+            <summary>
+            Объект ошибки Http-запроса для логирования.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.API.Errors.ProblemDetailsError.#ctor(SmartSchedule.API.Models.RequestDetails,Microsoft.AspNetCore.Mvc.ProblemDetails)">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:EduRoomLoad.API.Errors.ProblemDetailsError"/>.
+            </summary>
+        </member>
+        <member name="P:EduRoomLoad.API.Errors.ProblemDetailsError.Request">
+            <summary>
+            Возвращает или задает запрос, в котором произошла ошибка.
+            </summary>
+        </member>
+        <member name="P:EduRoomLoad.API.Errors.ProblemDetailsError.Error">
+            <summary>
+            Возвращает или задает объект ошибки.
+            </summary>
+        </member>
+        <member name="T:EduRoomLoad.API.Errors.ValidationError">
+            <summary>
+            Объект ошибки валидации.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.API.Errors.ValidationError.#ctor(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:EduRoomLoad.API.Errors.ValidationError"/>.
+            </summary>
+            <param name="propertyName">Наименование свойства.</param>
+            <param name="errorMessages">Сообщения об ошибках.</param>
+        </member>
+        <member name="P:EduRoomLoad.API.Errors.ValidationError.PropertyName">
+            <summary>
+            Возвращает или задает имя свойства с ошибкой валидации.
+            </summary>
+        </member>
+        <member name="P:EduRoomLoad.API.Errors.ValidationError.ErrorMessages">
+            <summary>
+            Возвращает или задает список с текстами ошибок.
+            </summary>
+        </member>
+        <member name="T:EduRoomLoad.API.Extensions.SwaggerExtensions">
+            <summary>
+            Расширения сваггера.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.API.Extensions.SwaggerExtensions.AddSwagger(Microsoft.Extensions.DependencyInjection.IServiceCollection,SmartSchedule.API.Models.Settings.SwaggerConfiguration)">
+            <summary>
+            Конфигурирует сваггер.
+            </summary>
+            <param name="services">Коллекция сервисов.</param>
+            <param name="configuration">Настройки сваггера.</param>
+        </member>
+        <member name="M:EduRoomLoad.API.Extensions.SwaggerExtensions.UseSwagger(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider,SmartSchedule.API.Models.Settings.SwaggerConfiguration)">
+            <summary>
+            Добавляет ПО промежуточного слоя сваггера.
+            </summary>
+            <param name="app">Построитель сервиса.</param>
+            <param name="env">Окружение сервиса.</param>
+            <param name="provider">Поставщик заголовков версий API.</param>
+            <param name="configuration">Настройки сваггера.</param>
+        </member>
+        <member name="T:EduRoomLoad.API.Extensions.ValidationExtensions">
+            <summary>
+            Расширения валидатора.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.API.Extensions.ValidationExtensions.ConfigureValidationException(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Конфигурирует исключение валидации.
+            </summary>
+            <param name="services">Коллекция сервисов.</param>
+            <exception cref="T:FluentValidation.ValidationException">Исключение валидации.</exception>
+        </member>
+        <member name="T:EduRoomLoad.API.Models.ExtendedProblemDetails.ExtendedExceptionProblemDetails">
+            <summary>Детали ошибки для RFC 7807</summary>
+            <seealso cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails" />
+        </member>
+        <member name="M:EduRoomLoad.API.Models.ExtendedProblemDetails.ExtendedExceptionProblemDetails.#ctor(System.Exception,System.Int32)">
+            <summary>Создает новый экземпляр класса <see cref="T:EduRoomLoad.API.Models.ExtendedProblemDetails.ExtendedExceptionProblemDetails"/>.</summary>
+            <param name="ex">Исключение.</param>
+            <param name="statusCode">Код ошибки.</param>
+        </member>
+        <member name="P:EduRoomLoad.API.Models.ExtendedProblemDetails.ExtendedExceptionProblemDetails.Exception">
+            <summary>Возвращает исключение.</summary>
+        </member>
+        <member name="T:EduRoomLoad.API.Models.ExtendedProblemDetails.ValidationExceptionProblemDetails">
+            <summary>
+            Детали ошибки валидации для RFC 7807
+            </summary>
+            <seealso cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails" />
+        </member>
+        <member name="M:EduRoomLoad.API.Models.ExtendedProblemDetails.ValidationExceptionProblemDetails.#ctor(FluentValidation.ValidationException,System.Int32)">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:EduRoomLoad.API.Models.ExtendedProblemDetails.ValidationExceptionProblemDetails"/>.
+            </summary>
+            <param name="ex">Исключение.</param>
+            <param name="statusCode">Код ошибки.</param>
+        </member>
+        <member name="T:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions">
+            <summary>
+            Класс конфигурации сваггера.
+            </summary>
+        </member>
+        <member name="F:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions._provider">
+            <summary>
+            Поставщик заголовков версий API.
+            </summary>
+        </member>
+        <member name="F:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions._configuration">
+            <summary>
+            Настройки сваггера.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions.#ctor(Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider,System.IServiceProvider)">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions"/>.
+            </summary>
+            <param name="provider">Поставщик заголовков версий API.</param>
+            <param name="serviceProvider">Поставщик сервисов.</param>
+        </member>
+        <member name="M:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions.Configure(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions)">
+            <summary>
+            Конфигурирует сваггер.
+            </summary>
+            <param name="options">Опции сваггера.</param>
+        </member>
+        <member name="M:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions.Configure(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions,SmartSchedule.API.Models.Settings.SwaggerConfiguration)">
+            <summary>
+            Конфигурирует сваггер.
+            </summary>
+            <param name="options">Опции сваггера.</param>
+            <param name="configuration">Настройки сваггера.</param>
+        </member>
+        <member name="M:EduRoomLoad.API.Models.Options.ConfigureSwaggerOptions.CreateInfoForApiVersion(Asp.Versioning.ApiExplorer.ApiVersionDescription,SmartSchedule.API.Models.Settings.SwaggerConfiguration)">
+            <summary>
+            Создает объект с информацией для конфигурации сваггера.
+            </summary>
+            <param name="description">Заголовок версии API.</param>
+            <param name="configuration">Настройки сваггера.</param>
+        </member>
+        <member name="T:EduRoomLoad.API.Startup">
+            <summary>
+            Класс-конфигуратор
+            </summary>
+        </member>
+        <member name="F:EduRoomLoad.API.Startup._appSettings">
+            <summary>
+            Настройки приложения.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.API.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:EduRoomLoad.API.Startup"/>.
+            </summary>
+            <param name="configuration">Конфигурация сервиса.</param>
+            <param name="env">Окружение хостинга.</param>
+        </member>
+        <member name="P:EduRoomLoad.API.Startup.Configuration">
+            <summary>
+            Конфигурация сервиса.
+            </summary>
+        </member>
+        <member name="P:EduRoomLoad.API.Startup.HostingEnvironment">
+            <summary>
+            Окружение хостинга.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.API.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Конфигурирует сервисы.
+            </summary>
+            <param name="services">Список сервисов.</param>
+        </member>
+        <member name="M:EduRoomLoad.API.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider,SmartSchedule.Infrastructure.Data.AppDbContext)">
+            <summary>
+            Конфигурирует сервис.
+            </summary>
+            <param name="app">Построитель сервиса.</param>
+            <param name="env">Окружение сервиса.</param>
+            <param name="provider">Поставщик заголовков версий API.</param>
+            <param name="dbContext">Контекст базы данных.</param>
+        </member>
+        <member name="T:EduRoomLoad.Extensions.ProblemDetailsExtensions">
+            <summary>
+            Расширения идентификации исключений.
+            </summary>
+        </member>
+        <member name="M:EduRoomLoad.Extensions.ProblemDetailsExtensions.ConfigureProblemDetails(Hellang.Middleware.ProblemDetails.ProblemDetailsOptions)">
+            <summary>
+            Конфигурирует ответы сервера по RFC 7807.
+            </summary>
+            <param name="options">Настройки конфигурации.</param>
+        </member>
+    </members>
+</doc>

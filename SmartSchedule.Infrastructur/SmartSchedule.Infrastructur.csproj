@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  	  <TargetFramework>net8.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
+	  <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+	  <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+	  <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+	  <AnalysisLevel>latest</AnalysisLevel>
+	  <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="StackExchange.Redis" Version="2.7.27" />
+	</ItemGroup>	
+  <ItemGroup>
+    <ProjectReference Include="..\SmartSchedule.Core\SmartSchedule.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,504 @@
+﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
+
+<style>
+    .container-fluid {
+        overflow-x: hidden;
+    }
+
+    .table-scroll-wrapper {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+        .table-scroll-wrapper thead th {
+            position: sticky;
+            top: 0;
+            background-color: #F7F7F9;
+            z-index: 2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+    @@media (min-width: 992px) {
+        .table-scroll-wrapper {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+            .table-scroll-wrapper::-webkit-scrollbar {
+                display: none;
+            }
+    }
+
+    .mobile-scroll-wrapper {
+        height: calc(100vh - 420px);
+        min-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 100px !important;
+    }
+
+    .sticky-stats-card {
+        position: sticky;
+        top: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .floating-chart-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 320px;
+        z-index: 990;
+        display: none;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+        border-radius: 16px;
+        background: white;
+        border: 1px solid rgba(0,0,0,0.05);
+        animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @@keyframes slideInUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .mobile-card {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .chart-actions .btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="container-fluid px-0">
+
+    <div class="material-card mb-4">
+        <h5 class="mb-3" style="color: var(--md-sys-color-primary); font-weight: 600;">Загруженность групп</h5>
+        <form id="groupUsageFilterForm" class="row g-3 align-items-end" onsubmit="return false;">
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Тип недели</label>
+                <select id="GroupUsageWeekTypeSelect" class="form-select">
+                    <option value="">— Выбрать —</option>
+                    @foreach (var weekTy in Model.WeekTypes)
+                    {
+                        <option value="@weekTy.Id">@weekTy.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">День недели</label>
+                <select id="GroupUsageDayOfWeekSelect" class="form-select">
+                    <option value="">— Все дни —</option>
+                    @foreach (var weekday in Model.WeekDays)
+                    {
+                        <option value="@weekday.Id">@weekday.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="button" id="ShowGroupUsageBtn" class="btn btn-primary w-100">
+                    Сформировать отчет
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="material-card p-0 overflow-hidden h-100">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold fs-5 text-dark">Результаты</span>
+                        <span id="GroupUsageRecordsCount" class="badge bg-light text-dark border">0</span>
+                    </div>
+                    <button id="ExportGroupUsageExcelBtn" class="btn btn-sm btn-outline-success d-none align-items-center gap-2 px-3 rounded-pill">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        <span class="d-none d-sm-inline fw-medium">Скачать Excel</span>
+                    </button>
+                </div>
+
+                <div class="d-none d-md-block table-scroll-wrapper">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4" style="width: 40%;">Группа</th>
+                                <th class="text-center">Занято</th>
+                                <th class="text-center">Возможно</th>
+                                <th class="text-center pe-4">Загрузка</th>
+                            </tr>
+                        </thead>
+                        <tbody id="GroupUsageData">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-5">
+                                    <i class="bi bi-bar-chart-steps fs-1 d-block mb-2 text-secondary opacity-25"></i>
+                                    Выберите параметры и нажмите «Сформировать»
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-md-none p-3 bg-light mobile-scroll-wrapper" id="GroupUsageMobileContainer">
+                    <div class="text-center text-muted py-4">Нет данных</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="material-card sticky-stats-card">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-primary"><i class="bi bi-pie-chart-fill me-2"></i>Топ-5 Групп</h6>
+
+                    <div class="d-flex gap-2 chart-actions">
+                        <button class="btn btn-light text-primary border shadow-sm" onclick="shareGroupChart('desktop')" title="Поделиться">
+                            <i class="bi bi-share-fill"></i>
+                        </button>
+                        <button class="btn btn-light text-muted border shadow-sm" onclick="downloadGroupChartPng('desktop')" title="Скачать PNG">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 position-relative" style="height: 300px;">
+                    <canvas id="DesktopGroupPieChart"></canvas>
+                </div>
+                <div class="p-3 bg-light border-top rounded-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small text-uppercase fw-bold">Средняя загрузка</span>
+                        <span id="DesktopGroupTotalUsage" class="fs-5 fw-bold text-dark">0%</span>
+                    </div>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div id="DesktopGroupTotalUsageBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="floatingGroupWidget" class="floating-chart-widget d-lg-none">
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+        <span class="fw-bold small text-uppercase text-primary">Топ-5</span>
+
+        <div class="d-flex align-items-center gap-2">
+            <div class="d-flex gap-2 chart-actions">
+                <button class="btn btn-white text-primary border shadow-sm" onclick="shareGroupChart('mobile')">
+                    <i class="bi bi-share-fill"></i>
+                </button>
+                <button class="btn btn-white text-secondary border shadow-sm" onclick="downloadGroupChartPng('mobile')">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
+            </div>
+            <div style="width: 1px; height: 24px; background: #eee; margin: 0 4px;"></div>
+            <button type="button" class="btn-close" onclick="closeGroupWidget()"></button>
+        </div>
+    </div>
+    <div class="p-3 text-center bg-white">
+        <div style="height: 250px; position: relative;">
+            <canvas id="floatingGroupPieChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+    (function () {
+        let groupReportData = [];
+        let desktopGroupChart = null;
+        let mobileGroupChart = null;
+        let currentGroupAvg = "0%";
+
+        document.getElementById("ShowGroupUsageBtn").addEventListener("click", async () => {
+            const weekType = document.getElementById("GroupUsageWeekTypeSelect").value;
+            const day = document.getElementById("GroupUsageDayOfWeekSelect").value;
+
+            const btn = document.getElementById("ShowGroupUsageBtn");
+            btn.style.width = `${btn.offsetWidth}px`;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>...';
+
+            setTimeout(async () => {
+                try {
+                    const params = new URLSearchParams();
+                    if (weekType) params.append('weekTypeId', weekType);
+                    if (day) params.append('dayOfWeekId', day);
+
+                    const url = `http://localhost:5062/api/Lesson/group-usage?${params.toString()}`;
+                    const res = await fetch(url);
+
+                    if (!res.ok) throw new Error("Server Error");
+
+                    const data = await res.json();
+                    groupReportData = data;
+
+                    renderGroupResults(data);
+
+                    if (data && data.length > 0) {
+                        requestAnimationFrame(() => {
+                            updateGroupCharts(data);
+                            document.getElementById("ExportGroupUsageExcelBtn").classList.remove("d-none");
+                            document.getElementById("ExportGroupUsageExcelBtn").classList.add("d-flex");
+
+                            if (window.innerWidth < 992) {
+                                document.getElementById('floatingGroupWidget').style.display = 'block';
+                            }
+                        });
+                    } else {
+                        closeGroupWidget();
+                        document.getElementById("ExportGroupUsageExcelBtn").classList.add("d-none");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Ошибка загрузки данных");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    btn.style.width = '';
+                }
+            }, 0);
+        });
+
+        function renderGroupResults(data) {
+            const tbody = document.getElementById("GroupUsageData");
+            const mobileContainer = document.getElementById("GroupUsageMobileContainer");
+            const countLabel = document.getElementById("GroupUsageRecordsCount");
+
+            tbody.innerHTML = "";
+            mobileContainer.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">Нет данных</td></tr>`;
+                mobileContainer.innerHTML = `<div class="text-center text-muted py-4">Нет данных</div>`;
+                countLabel.innerText = "0";
+                updateGroupTotalStats(0);
+                return;
+            }
+
+            countLabel.innerText = data.length;
+            let totalBusy = 0, totalMax = 0;
+            let tableRows = "";
+            let mobileCards = "";
+
+            data.forEach(t => {
+                const busy = t.totalScheduledLessons;
+                const max = t.maxPossibleLessons;
+                totalBusy += busy;
+                totalMax += max;
+
+                const percent = max > 0 ? ((busy / max) * 100).toFixed(1) : 0;
+                const colorClass = percent > 70 ? "text-success" : percent > 40 ? "text-warning" : "text-danger";
+                const bgClass = percent > 70 ? "bg-success" : percent > 40 ? "bg-warning" : "bg-danger";
+                const borderClass = percent > 70 ? "border-success" : percent > 40 ? "border-warning" : "border-danger";
+
+                tableRows += `
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">${t.groupName}</td>
+                        <td class="text-center font-monospace">${busy}</td>
+                        <td class="text-center text-muted font-monospace">${max}</td>
+                        <td class="text-center">
+                            <span class="badge ${bgClass} bg-opacity-10 ${colorClass} border ${borderClass} rounded-pill px-3">${percent}%</span>
+                        </td>
+                    </tr>`;
+
+                mobileCards += `
+                    <div class="mobile-card shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="fw-bold text-dark">${t.groupName}</div>
+                            <span class="fw-bold ${colorClass}">${percent}%</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar ${bgClass}" style="width: ${percent}%"></div>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between small text-muted">
+                            <span>Занято: ${busy}</span>
+                            <span>Всего: ${max}</span>
+                        </div>
+                    </div>`;
+            });
+
+            tbody.innerHTML = tableRows;
+            mobileContainer.innerHTML = mobileCards;
+
+            const overall = totalMax > 0 ? ((totalBusy / totalMax) * 100).toFixed(1) : 0;
+            currentGroupAvg = `${overall}%`;
+            updateGroupTotalStats(overall);
+        }
+
+        function updateGroupTotalStats(percent) {
+            const el = document.getElementById("DesktopGroupTotalUsage");
+            if(el) el.innerText = `${percent}%`;
+            const bar = document.getElementById("DesktopGroupTotalUsageBar");
+            if(bar) {
+                bar.style.width = `${percent}%`;
+                bar.className = `progress-bar ${percent > 70 ? 'bg-success' : percent > 40 ? 'bg-warning' : 'bg-primary'}`;
+            }
+        }
+
+        window.shareGroupChart = function(type) {
+            const chart = type === 'mobile' ? mobileGroupChart : desktopGroupChart;
+            if (!chart) return alert("График не найден");
+
+            chart.canvas.toBlob(async (blob) => {
+                if (!blob) return;
+                const file = new File([blob], "group_chart.png", { type: "image/png" });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Загруженность групп',
+                            text: `Общая загрузка групп: ${currentGroupAvg}`,
+                        });
+                    } catch (error) { }
+                }
+                else {
+                    try {
+                        await navigator.clipboard.write([ new ClipboardItem({ "image/png": blob }) ]);
+                        window.open('https://vk.com/share.php?comment=' + encodeURIComponent(`Загрузка групп: ${currentGroupAvg}`), '_blank');
+                        alert("📷 Диаграмма скопирована в буфер обмена!\n\nПросто нажмите Ctrl+V в окне ВК.");
+                    } catch (err) {
+                        saveAs(blob, "group_stats.png");
+                        alert("Файл скачан. Загрузите его вручную.");
+                    }
+                }
+            }, 'image/png');
+        };
+
+        function updateGroupCharts(data) {
+            const sorted = [...data].sort((a, b) => {
+                const pA = a.maxPossibleLessons > 0 ? (a.totalScheduledLessons / a.maxPossibleLessons) : 0;
+                const pB = b.maxPossibleLessons > 0 ? (b.totalScheduledLessons / b.maxPossibleLessons) : 0;
+                return pB - pA;
+            });
+            const top5 = sorted.slice(0, 5);
+
+            const labels = top5.map(t => {
+                const percent = t.maxPossibleLessons > 0 ? ((t.totalScheduledLessons/t.maxPossibleLessons)*100).toFixed(0) : 0;
+                return `${t.groupName} (${percent}%)`;
+            });
+
+            const values = top5.map(t => t.maxPossibleLessons > 0 ? ((t.totalScheduledLessons/t.maxPossibleLessons)*100).toFixed(1) : 0);
+            const bgColors = ['#EF5350', '#42A5F5', '#66BB6A', '#FFA726', '#AB47BC'];
+
+            const config = {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: values, backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff' }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, padding: 15 } },
+                        tooltip: { enabled: false }
+                    },
+                    cutout: '70%',
+                    layout: { padding: 10 }
+                }
+            };
+
+            const ctxDesk = document.getElementById('DesktopGroupPieChart');
+            if (Chart.getChart(ctxDesk)) Chart.getChart(ctxDesk).destroy();
+            desktopGroupChart = new Chart(ctxDesk, config);
+
+            const ctxMob = document.getElementById('floatingGroupPieChart');
+            if (Chart.getChart(ctxMob)) Chart.getChart(ctxMob).destroy();
+
+            const mobConfig = JSON.parse(JSON.stringify(config));
+            mobConfig.options.plugins.legend.position = 'bottom';
+            mobConfig.options.plugins.legend.labels.boxWidth = 10;
+            mobConfig.options.layout.padding = 5;
+
+            mobileGroupChart = new Chart(ctxMob, mobConfig);
+        }
+
+        window.downloadGroupChartPng = function(type) {
+            const chart = type === 'mobile' ? mobileGroupChart : desktopGroupChart;
+            if (!chart) return alert("График не построен");
+            const a = document.createElement('a');
+            a.href = chart.toBase64Image();
+            a.download = `Groups_Chart_${type}.png`;
+            a.click();
+        }
+
+        window.closeGroupWidget = function() {
+            document.getElementById('floatingGroupWidget').style.display = 'none';
+        }
+
+        document.getElementById("ExportGroupUsageExcelBtn").addEventListener("click", async () => {
+            if (!groupReportData.length) return;
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('Группы');
+
+            const borderStyle = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+            const headerFont = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+            sheet.mergeCells('A1:D1');
+            sheet.getCell('A1').value = 'ОТЧЕТ ПО ЗАГРУЗКЕ ГРУПП';
+            sheet.getCell('A1').font = { size: 14, bold: true };
+            sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+            sheet.getRow(3).values = ['Группа', 'Занято', 'Всего', 'Загрузка %'];
+            sheet.columns = [{ width: 30 }, { width: 15 }, { width: 15 }, { width: 15 }];
+
+            const headerRow = sheet.getRow(3);
+            headerRow.eachCell(cell => {
+                cell.fill = headerFill;
+                cell.font = headerFont;
+                cell.alignment = { horizontal: 'center' };
+                cell.border = borderStyle;
+            });
+
+            let totalBusy = 0, totalMax = 0;
+            groupReportData.forEach((t, i) => {
+                const r = sheet.getRow(4 + i);
+                const pct = t.maxPossibleLessons > 0 ? (t.totalScheduledLessons / t.maxPossibleLessons) : 0;
+                totalBusy += t.totalScheduledLessons;
+                totalMax += t.maxPossibleLessons;
+
+                r.values = [t.groupName, t.totalScheduledLessons, t.maxPossibleLessons, pct];
+                r.getCell(4).numFmt = '0.0%';
+
+                if (pct >= 0.7) r.getCell(4).font = { color: { argb: 'FF009900' }, bold: true };
+                else if (pct < 0.4) r.getCell(4).font = { color: { argb: 'FFFF0000' } };
+
+                r.eachCell(c => { c.border = borderStyle; c.alignment = { horizontal: 'center' }; });
+                r.getCell(1).alignment = { horizontal: 'left' };
+            });
+
+            const sumRow = sheet.getRow(4 + groupReportData.length);
+            const avgPct = totalMax > 0 ? (totalBusy / totalMax) : 0;
+            sumRow.values = ['ИТОГО:', totalBusy, totalMax, avgPct];
+            sumRow.eachCell(c => { c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEEEEE' } }; c.border = borderStyle; c.alignment = { horizontal: 'center' }; });
+            sumRow.getCell(1).alignment = { horizontal: 'right' };
+            sumRow.getCell(4).numFmt = '0.0%';
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `Groups_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+        });
+    })();
+</script>

@@ -1,0 +1,292 @@
+﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
+<div class="container mt-4">
+    <h4>📊 Занятость аудитории</h4>
+
+    <form id="heatmapFilterForm" class="row g-3 mb-3" onsubmit="return false;">
+        <div class="col-md-4">
+            <label for="cabinetSelect" class="form-label">Выберите аудиторию:</label>
+            <select id="cabinetSelect" class="form-select">
+                <option value="">-- Выберите аудиторию --</option>
+                @foreach (var cabinet in Model.Cabinets)
+                {
+                    <option value="@cabinet.Id">@cabinet.number@cabinet.BuildingName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="WeekTypeSelect" class="form-label">Выберите тип недели:</label>
+            <select id="WeekTypeSelect" class="form-select">
+                <option value="0">-- Все --</option>
+                @foreach (var weekTy in Model.WeekTypes)
+                {
+                    <option value="@weekTy.Id">@weekTy.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-12 d-flex gap-2 mt-2">
+            <button type="button" id="showHeatmapBtn" class="btn btn-primary">Показать занятость</button>
+            <button type="button" id="exportExcelBtn" class="btn btn-danger d-none" onclick="exportToPDF()">
+                <i class="bi bi-file-excel"></i> Экспорт в PDF
+            </button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center" id="scheduleTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Время</th>
+                    <th>Пн</th>
+                    <th>Вт</th>
+                    <th>Ср</th>
+                    <th>Чт</th>
+                    <th>Пт</th>
+                    <th>Сб</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleMatrix">
+                <tr><td colspan="7" class="text-muted">Выберите аудиторию</td></tr>
+            </tbody>
+            <tfoot id="heatmapFooter" class="table-info">
+                <tr>
+                    <td colspan="7" id="heatmapStats">📊 Статистика: Занятые - 0, Свободные - 0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/jspdf.umd.min.js"></script>
+
+<style>
+
+    /* Добавляем стиль для поддержки кириллицы */
+        #scheduleTable {
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+
+    }
+
+        .pdf-export-container {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+                width: 297mm; /* A4 landscape */
+                padding: 20px;
+                background: white;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+
+    }
+
+            .pdf-export-container h2 {
+                    text-align: center;
+                    margin-bottom: 20px;
+
+    }
+
+            .pdf-export-container table {
+                    width: 100%;
+                    border-collapse: collapse;
+
+    }
+
+            .pdf-export-container th,
+            .pdf-export-container td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+
+    }
+</style>
+
+<script>
+    document.getElementById('showHeatmapBtn')?.addEventListener('click', async function () {
+        const cabinetId = document.getElementById('cabinetSelect').value;
+        const WeekTypeId = document.getElementById('WeekTypeSelect').value;
+
+        if (!cabinetId) {
+            alert('Пожалуйста, выберите аудиторию');
+            return;
+        }
+
+        const btn = this;
+        const originalText = btn.textContent;
+
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Загрузка...';
+
+            const response = await fetch(`http://localhost:5062/api/Lesson/${cabinetId}/schedule?weekTypeId=${WeekTypeId}`);
+
+            if (!response.ok) {
+                throw new Error(`Ошибка HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+            updateHeatmap(data);
+
+            document.getElementById('exportExcelBtn').classList.remove('d-none');
+        } catch (err) {
+            console.error('Ошибка загрузки расписания:', err);
+            alert('Ошибка загрузки данных');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    });
+
+  
+    function updateHeatmap(data) {
+        const matrix = document.getElementById('scheduleMatrix');
+        matrix.innerHTML = '';
+
+        
+        const uniqueSlotIds = Array.from(new Set(data.map(d => d.timeSlotId)));
+
+        
+        const timeSlots = uniqueSlotIds
+            .map(id => {
+    
+                const item = data.find(d => d.timeSlotId === id);
+                return {
+                    id: id,
+                    display: item.timeSlotDisplay
+                };
+            })
+            .sort((a, b) => a.id - b.id); 
+        
+
+        let busyCount = 0;
+        let freeCount = 0;
+
+
+        timeSlots.forEach(timeSlot => {
+            const row = document.createElement('tr');
+
+            const timeCell = document.createElement('td');
+            timeCell.textContent = timeSlot.display;
+            row.appendChild(timeCell);
+
+            for (let day = 1; day <= 6; day++) {
+                const cell = document.createElement('td');
+                const lesson = data.find(d => d.dayOfWeekId === day && d.timeSlotId === timeSlot.id);
+
+                if (lesson) {
+                    if (lesson.isBusy) {
+                        cell.className = "table-danger";
+                        cell.textContent = "❌ Занято";
+                        busyCount++;
+                    } else {
+                        cell.className = "table-success";
+                        cell.textContent = "✅ Свободно";
+                        freeCount++;
+                    }
+                } else {
+                    cell.className = "table-secondary";
+                    cell.textContent = "Нет данных";
+                    freeCount++;
+                }
+
+                row.appendChild(cell);
+            }
+
+            matrix.appendChild(row);
+        });
+
+        
+        const statsCell = document.getElementById("heatmapStats");
+
+        const total = busyCount + freeCount;
+        const busyPercent = total > 0 ? ((busyCount / total) * 100).toFixed(1) : 0;
+        const freePercent = total > 0 ? ((freeCount / total)* 100).toFixed(1) : 0;
+
+        statsCell.textContent = `📊 Статистика: Занятые - ${busyCount}, Свободные - ${freeCount}`;
+        statsCell.textContent += ` | Процент занятости: ${busyPercent}%, свобода: ${freePercent}%`;
+    }
+        async function exportToPDF() {
+        const table = document.getElementById("scheduleTable");
+        const cabinetSelect = document.getElementById("cabinetSelect");
+        const weekTypeSelect = document.getElementById("WeekTypeSelect");
+
+        if (!table || !cabinetSelect.value) {
+            alert("Сначала загрузите данные о занятости аудитории.");
+            return;
+        }
+
+        
+        const cabinetName = cabinetSelect.options[cabinetSelect.selectedIndex].text;
+        const weekTypeName = weekTypeSelect.options[weekTypeSelect.selectedIndex].text;
+
+        
+        const wrapper = document.createElement("div");
+        wrapper.className = "pdf-export-container";
+
+        
+        const logoUrl = '/images/logo.png'; 
+
+        const contentHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <img id="logo" src="${logoUrl}" alt="Логотип" style="height: 50px; width: auto;" />
+                <div style="text-align: center; flex-grow: 1;">
+                    <h2 style="margin: 0; font-size: 26px;">Занятость аудитории</h2>
+                    <h3 style="margin: 5px 0; font-size: 16px;">Кабинет: ${cabinetName}</h3>
+                    <p style="margin: 0; font-size: 14px;">Тип недели: ${weekTypeName}</p>
+                </div>
+                <div style="width: 50px;"></div>             </div>
+            <div id="table-container" style="width: 100%;">
+                ${table.outerHTML}
+            </div>
+        `;
+
+        wrapper.innerHTML = contentHTML;
+        document.body.appendChild(wrapper);
+
+        
+        const logoImg = wrapper.querySelector("#logo");
+
+        
+        await new Promise((resolve, reject) => {
+            if (logoImg.complete && logoImg.naturalHeight !== 0) {
+                resolve();
+            } else {
+                logoImg.onload = resolve;
+                logoImg.onerror = () => {
+                    console.warn("Не удалось загрузить логотип");
+                    resolve(); 
+                };
+            }
+        });
+
+
+        await document.fonts.ready;
+
+        try {
+            const canvas = await html2canvas(wrapper, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                allowTaint: false
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jspdf.jsPDF({
+                orientation: 'landscape'
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+
+            pdf.save(`Занятость_${encodeURIComponent(cabinetName)}_${weekTypeName}.pdf`);
+        } catch (error) {
+            console.error("Ошибка экспорта:", error);
+            alert("Ошибка при экспорте в PDF");
+        } finally {
+            document.body.removeChild(wrapper); 
+        }
+    }
+</script>

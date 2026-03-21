@@ -1,0 +1,163 @@
+﻿@page
+@{
+    ViewData["Title"] = "Справка";
+}
+
+<style>
+    html {
+        overflow-y: scroll;
+    }
+</style>
+
+<div class="container fade-in py-3">
+    <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+        <i class="bi bi-question-circle-fill text-primary fs-3 me-3"></i>
+        <div>
+            <h2 class="mb-0">Руководство пользователя</h2>
+            <p class="text-muted mb-0">Инструкция по работе с системой управления расписанием «Аудиториум»</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="accordion shadow-sm" id="helpAccordion">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            <i class="bi bi-info-circle-fill me-2 text-info"></i> Общие сведения
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>Информационная система <strong>«Аудиториум»</strong> предназначена для автоматизации работы учебного отдела. Основные возможности:</p>
+                            <ul>
+                                <li>Ведение справочников (группы, преподаватели, аудитории).</li>
+                                <li>Составление расписания с автоматической проверкой конфликтов.</li>
+                                <li>Анализ загруженности аудиторного фонда.</li>
+                                <li>Экспорт отчетности в PDF и Excel.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            <i class="bi bi-journal-text me-2 text-primary"></i> Управление справочниками
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>Перейдите в соответствующий раздел меню (например, "Кабинеты" или "Группы").</p>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex align-items-start">
+                                    <span class="badge bg-success me-2"><i class="bi bi-plus-lg"></i> Добавить</span>
+                                    <span>Нажмите кнопку добавления, заполните обязательные поля и нажмите "Сохранить".</span>
+                                </div>
+                                <div class="d-flex align-items-start">
+                                    <span class="badge bg-warning text-dark me-2"><i class="bi bi-pencil-fill"></i> Изменить</span>
+                                    <span>Нажмите иконку карандаша в строке записи для редактирования данных.</span>
+                                </div>
+                                <div class="d-flex align-items-start">
+                                    <span class="badge bg-danger me-2"><i class="bi bi-trash-fill"></i> Удалить</span>
+                                    <span>Нажмите иконку корзины для удаления записи (потребуется подтверждение).</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            <i class="bi bi-calendar-check-fill me-2 text-success"></i> Работа с расписанием
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>В разделе <strong>"Расписание"</strong> вы можете назначать занятия, кликая на пустые ячейки сетки.</p>
+
+                            <div class="alert alert-light border-start border-4 border-warning">
+                                <h6><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Автоматическая проверка конфликтов</h6>
+                                <p class="mb-0 small">Система не даст создать занятие, если:</p>
+                                <ul class="mb-0 small">
+                                    <li>Выбранный кабинет уже занят в это время.</li>
+                                    <li>Преподаватель уже ведет пару в другой группе.</li>
+                                    <li>У группы уже есть занятие.</li>
+                                </ul>
+                            </div>
+
+                            <p class="mb-0">Для поиска свободной аудитории используйте вкладку <strong>"Свободные каб."</strong> — там можно отфильтровать доступные помещения по времени и вместимости.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingAnalytics">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnalytics" aria-expanded="false" aria-controls="collapseAnalytics">
+                            <i class="bi bi-graph-up-arrow me-2 text-purple" style="color: #6f42c1;"></i> Аналитика и Отчеты
+                        </button>
+                    </h2>
+                    <div id="collapseAnalytics" class="accordion-collapse collapse" aria-labelledby="headingAnalytics" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>Для анализа эффективности использования ресурсов доступны следующие инструменты:</p>
+                            <ul>
+                                <li>
+                                    <strong>Загруженность кабинетов:</strong> Таблица с цветовой индикацией:
+                                    <br><span class="badge bg-danger rounded-pill">Красный</span> > 80% (Перегрузка)
+                                    <br><span class="badge bg-warning text-dark rounded-pill">Желтый</span> 50-79% (Норма)
+                                    <br><span class="badge bg-success rounded-pill">Зеленый</span> < 50% (Свободно)
+                                </li>
+                                <li class="mt-2"><strong>Тепловые карты:</strong> Визуальная сетка занятости ("шахматка") для конкретной аудитории или преподавателя.</li>
+                            </ul>
+                            <div class="text-end">
+                                <small class="text-muted"><i class="bi bi-file-earmark-excel"></i> Все отчеты можно выгрузить в Excel или Pdf</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingErrors">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseErrors" aria-expanded="false" aria-controls="collapseErrors">
+                            <i class="bi bi-tools me-2 text-secondary"></i> Возможные ошибки и решения
+                        </button>
+                    </h2>
+                    <div id="collapseErrors" class="accordion-collapse collapse" aria-labelledby="headingErrors" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <table class="table table-sm table-striped table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ошибка</th>
+                                        <th>Решение</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Кабинет уже занят</td>
+                                        <td>Выберите другой кабинет или используйте поиск свободных.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Преподаватель занят</td>
+                                        <td>Назначьте другого преподавателя или измените время пары.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Таймаут подключения</td>
+                                        <td>Проверьте соединение с Интернетом. Если ошибка повторяется, обратитесь к администратору.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Приложение зависло</td>
+                                        <td>Обновите страницу (F5) или очистите кэш браузера.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

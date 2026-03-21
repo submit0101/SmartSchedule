@@ -1,0 +1,742 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SmartSchedule.Infrastructur</name>
+    </assembly>
+    <members>
+        <member name="T:SmartSchedule.Infrastructure.Caching.RedisCachingService">
+            <summary>
+            Сервис кэширования через Redis.
+            Реализует паттерн Cache-Aside с защитой от Cache Stampede (через Keyed Locking).
+            При недоступности Redis продолжает работу, обращаясь напрямую к БД.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Caching.RedisCachingService.#ctor(StackExchange.Redis.IConnectionMultiplexer)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Caching.RedisCachingService"/>.
+            </summary>
+            <param name="redis">Мультиплексор подключения к Redis.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Caching.RedisCachingService.GetOrSetAsync``1(System.String,System.Func{System.Threading.Tasks.Task{``0}},System.Nullable{System.TimeSpan},System.Threading.CancellationToken)">
+            <summary>
+            Получает данные из кэша или выполняет фабричный метод для их загрузки (с защитой от гонки потоков).
+            </summary>
+            <typeparam name="T">Тип данных.</typeparam>
+            <param name="key">Ключ кэша.</param>
+            <param name="factory">Метод загрузки данных из источника (БД), если кэш пуст.</param>
+            <param name="expiration">Время жизни кэша (по умолчанию 30 минут).</param>
+            <param name="cancellationToken">Токен отмены операции.</param>
+            <returns>Данные типа <typeparamref name="T"/>.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Caching.RedisCachingService.RemoveAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Удаляет запись из кэша по ключу.
+            </summary>
+            <param name="key">Ключ записи.</param>
+            <param name="cancellationToken">Токен отмены.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Caching.RedisCachingService.RemoveByPatternAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Удаляет группу записей по шаблону ключа.
+            </summary>
+            <param name="pattern">Шаблон ключа (например "users:*").</param>
+            <param name="cancellationToken">Токен отмены.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Caching.RedisCachingService.Deserialize``1(StackExchange.Redis.RedisValue)">
+            <summary>
+            Безопасная десериализация объекта из JSON.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.BuildingConfiguration">
+            <summary>
+            Конфигурация сущности Building.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.BuildingConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Building})">
+            <summary>
+            Метод конфигурации для сущности Building.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.CabinetConfiguration">
+            <summary>
+            Конфигурация сущности Cabinet.
+            Определяет настройки таблицы, ключи и связи с другими сущностями.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.CabinetConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Cabinet})">
+            <summary>
+            конфигуриет сущность
+            </summary>
+            <param name="builder"></param>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.GroupConfiguration">
+            <summary>
+            Конфигурация сущности Group.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.GroupConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Group})">
+            <summary>
+            Метод конфигурации для сущности Group.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.LessonConfiguration">
+            <summary>
+            Конфигурация сущности Lesson.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.LessonConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Lesson})">
+            <summary>
+            Метод конфигурации для сущности Lesson.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.PositionConfiguration">
+            <summary>
+            Конфигурация сущности Position.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.PositionConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Position})">
+            <summary>
+            Метод конфигурации для сущности Position.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.SubjectConfiguration">
+            <summary>
+            Конфигурация сущности Subject.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.SubjectConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Subject})">
+            <summary>
+            Метод конфигурации для сущности Subject.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.TeacherConfiguration">
+            <summary>
+            Конфигурация сущности Teacher.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.TeacherConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Teacher})">
+            <summary>
+            Метод конфигурации для сущности Teacher.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.TimeSlotConfiguration">
+            <summary>
+            Конфигурация сущности TimeSlot.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.TimeSlotConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.TimeSlot})">
+            <summary>
+            Метод конфигурации для сущности TimeSlot.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.WeekDayConfiguration">
+            <summary>
+            Конфигурация сущности <see cref="T:SmartSchedule.Core.Entities.WeekDay"/>.
+            Определяет настройки таблицы, ограничения и начальные данные.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.WeekDayConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.WeekDay})">
+            <summary>
+            Конфигурирует таблицу WeekDays, включая первичный ключ, свойства и начальные данные.
+            </summary>
+            <param name="builder">Построитель конфигурации для сущности <see cref="T:SmartSchedule.Core.Entities.WeekDay"/>.</param>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Configurations.WeekTypeConfiguration">
+            <summary>
+            Конфигурация сущности WeekType.
+            Определяет настройки таблицы, ключи и связи.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Configurations.WeekTypeConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.WeekType})">
+            <summary>
+            Метод конфигурации для сущности WeekType.
+            </summary>
+            <param name="builder">Построитель сущности</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Data.AppDbContext">
+            <summary>
+            Контекст базы данных для приложения "Расписание кабинетов"
+            <seealso cref="T:Microsoft.EntityFrameworkCore.DbContext"/>
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Cabinets">
+            <summary>
+            Таблица аудиторий.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Groups">
+            <summary>
+            Таблица групп.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Lessons">
+            <summary>
+            Таблица занятий.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Subjects">
+            <summary>
+            Таблица предметов.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Teachers">
+            <summary>
+            Таблица преподавателей.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Positions">
+            <summary>
+            Таблица Должностей.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.TimeSlots">
+            <summary>
+            Таблица временных слотов.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.WeekTypes">
+            <summary>
+            Таблица типов недель.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Buildings">
+            <summary>
+             Таблица Корпусов
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Data.AppDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{SmartSchedule.Infrastructure.Data.AppDbContext})">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Data.AppDbContext"/>.
+            </summary>
+            <param name="options">Параметры контекста базы данных</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Data.AppDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc/>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.BaseRepository`3">
+            <summary>
+            Базовый репозиторий.
+            </summary>
+            <typeparam name="TEntity">Тип сущности.</typeparam>
+            <typeparam name="TId">Тип идентификатора сущности.</typeparam>
+            <typeparam name="TDbContext">Тип контекста базы данных.</typeparam>
+        </member>
+        <member name="F:SmartSchedule.Infrastructure.Repositories.BaseRepository`3._context">
+            <summary>
+            Контекст базы данных.
+            </summary>
+        </member>
+        <member name="F:SmartSchedule.Infrastructure.Repositories.BaseRepository`3._dbSet">
+            <summary>
+            Множество (сет) сущностей.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.#ctor(`2)">
+            <summary>
+            Создает новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.BaseRepository`3"/>.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если context равен null.</exception>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.GetAllShorts(System.Threading.CancellationToken)">
+            <summary>
+            Получает сущности в коротком формате.
+            </summary>
+            <param name="ct">Токен отмены асинхронной операции.</param>
+            <returns>Список всех сущностей типа <typeparamref name="TEntity"/>.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получает сущности в полном формате.
+            </summary>
+            <param name="ct">Токен отмены асинхронной операции.</param>
+            <returns>Список всех сущностей типа <typeparamref name="TEntity"/>.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.GetAllAsync(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Threading.CancellationToken)">
+            <summary>
+            Получает список сущностей, соответствующих заданному условию.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.GetByIdAsync(`1,System.Threading.CancellationToken)">
+            <summary>
+            Получает сущность по идентификатору.
+            </summary>
+            <param name="id">Идентификатор сущности.</param>
+            <param name="ct">Токен отмены асинхронной операции.</param>
+            <returns>Сущность типа <typeparamref name="TEntity"/> или null, если не найдена.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.CreateAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Создает новую сущность и сохраняет её в базе данных.
+            </summary>
+            <param name="entity">Сущность для создания.</param>
+            <param name="ct">Токен отмены асинхронной операции.</param>
+            <returns>Созданная сущность.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.UpdateAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Обновляет существующую сущность.
+            </summary>
+            <param name="entity">Сущность для обновления.</param>
+            <param name="ct">Токен отмены асинхронной операции.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.DeleteByIdAsync(`1,System.Threading.CancellationToken)">
+            <summary>
+            Удаляет сущность по идентификатору.
+            </summary>
+            <param name="id">Идентификатор сущности для удаления.</param>
+            <param name="ct">Токен отмены асинхронной операции.</param>
+            <exception cref="T:SmartSchedul.Core.Exceptions.ObjectNotFoundException">Выбрасывается, если сущность не найдена.</exception>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.BuildingRepository">
+            <summary>
+            Репозиторий для работы со зданиями (корпусами).
+            Все данные кэшируются в Redis с автоматической инвалидацией при изменении.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BuildingRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.BuildingRepository"/>.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+            <exception cref="T:System.ArgumentNullException">
+            Выбрасывается, если <paramref name="context"/> или <paramref name="cache"/> равны <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BuildingRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверяет, существует ли здание с указанным названием.
+            </summary>
+            <param name="name">Название здания.</param>
+            <param name="excludeId">Идентификатор здания, которое следует исключить из проверки.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns><see langword="true"/>, если здание с таким названием уже существует; иначе — <see langword="false"/>.</returns>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если <paramref name="name"/> равен <see langword="null"/> или пуст.</exception>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BuildingRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BuildingRepository.CreateAsync(SmartSchedule.Core.Entities.Building,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BuildingRepository.UpdateAsync(SmartSchedule.Core.Entities.Building,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BuildingRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.CabinetRepository">
+            <summary>
+            Репозиторий для работы с Кабинетами.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.CabinetRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext)">
+            <summary>
+            Конструктор репозитория Cabinet.
+            </summary>
+            <param name="context">Контекст базы данных</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.CabinetRepository.GetAllWithBuldingAsync(System.Threading.CancellationToken)">
+            <summary>
+            Асинхронно получает все кабинеты, включая связанные строения.
+            </summary>
+            <param name="ct">Токен отмены</param>
+            <returns>Список кабинетов с загруженными строениями</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.CabinetRepository.SearchAsync(System.String,System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            Выполняет поиск кабинетов по номеру и/или зданию с возможностью сортировки.
+            </summary>
+            <param name="searchTerm">Числовой номер кабинета (например "310")</param>
+            <param name="buildingNumber">Номер здания (1 или 2)</param>
+            <param name="sortBy">Поле для сортировки ("number", "building")</param>
+            <param name="descending">Направление сортировки (true - по убыванию)</param>
+            <returns>Список кабинетов, удовлетворяющих условиям</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.CabinetRepository.GetAllFilteredAsync(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            фильтер кабинетов
+            </summary>
+            <param name="buildingId">здание</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.CabinetRepository.GetWithLessonsByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            получить кабинеты с расписанием
+            </summary>
+            <param name="cabinetId"></param>
+            <param name="ct"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.CabinetRepository.ExistsAsync(System.String,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверка уникальности кабинета
+            </summary>
+            <param name="number">номер кабинета</param>
+            <param name="buildingId">номер корпуса</param>
+            <param name="excludeId">уникальный иднтификатор записи</param>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.GroupRepository">
+            <summary>
+            Репозиторий для работы с Группами.
+            Реализует кэширование списка групп.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.GroupRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.GroupRepository"/>.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.GroupRepository.ExistsByAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверяет уникальность названия группы.
+            Не использует кэш, чтобы гарантировать точность данных.
+            </summary>
+            <param name="name">Название группы.</param>
+            <param name="excludeId">ID группы для исключения из проверки (при обновлении).</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>True, если группа с таким именем существует.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.GroupRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.GroupRepository.CreateAsync(SmartSchedule.Core.Entities.Group,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.GroupRepository.UpdateAsync(SmartSchedule.Core.Entities.Group,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.GroupRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.LessonRepository">
+            <summary>
+            Репозиторий для работы с сущностями занятий с точечным кэшированием.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.LessonRepository"/>.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetByGroupIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetByTeacherIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetFilteredLessonsAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetBusyCabinetIdsAsync(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает уникальные идентификаторы кабинетов, которые заняты в указанный слот.
+            </summary>
+            <param name="dayOfWeekId">Идентификатор дня недели.</param>
+            <param name="timeSlotId">Идентификатор временного слота.</param>
+            <param name="weekTypeId">Идентификатор типа недели.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>Множество занятых ID кабинетов.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.CreateAsync(SmartSchedule.Core.Entities.Lesson,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.UpdateAsync(SmartSchedule.Core.Entities.Lesson,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.PositionRepository">
+            <summary>
+            Репозиторий для работы с должностями преподавателей.
+            Данные кэшируются в Redis с автоматической инвалидацией при изменении.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.PositionRepository"/>.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+            <exception cref="T:System.ArgumentNullException">
+            Выбрасывается, если <paramref name="context"/> или <paramref name="cache"/> равны <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверяет, существует ли должность с указанным названием.
+            </summary>
+            <param name="name">Название должности.</param>
+            <param name="excludeId">Идентификатор должности, которую следует исключить из проверки.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns><see langword="true"/>, если должность с таким названием уже существует; иначе — <see langword="false"/>.</returns>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если <paramref name="name"/> равен <see langword="null"/> или пуст.</exception>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.CreateAsync(SmartSchedule.Core.Entities.Position,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.UpdateAsync(SmartSchedule.Core.Entities.Position,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.SubjectRepository">
+            <summary>
+            Репозиторий для работы с сущностями предметов.
+            Реализует кэширование и валидацию уникальности названий.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.SubjectRepository"/>.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+            <exception cref="T:System.ArgumentNullException">
+            Выбрасывается, если <paramref name="context"/> или <paramref name="cache"/> равны <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Проверяет, существует ли предмет с указанным названием.
+            </summary>
+            <param name="name">Название предмета.</param>
+            <param name="excludeId">Идентификатор предмета, который следует исключить из проверки.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns><see langword="true"/>, если предмет с таким названием уже существует; иначе — <see langword="false"/>.</returns>
+            <exception cref="T:System.ArgumentNullException">Выбрасывается, если <paramref name="name"/> равен <see langword="null"/> или пуст.</exception>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.CreateAsync(SmartSchedule.Core.Entities.Subject,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.UpdateAsync(SmartSchedule.Core.Entities.Subject,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.TeacherRepository">
+            <summary>
+            Репозиторий для работы с Преподавателями
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext)">
+            <summary>
+            Конструктор репозитория Teacher
+            </summary>
+            <param name="context">Контекст базы данных</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.GetAllWithPositonAsync(System.Threading.CancellationToken)">
+            <summary>
+            Ансихрнонно получает всех учителй включая связанные позиции
+            </summary>
+            <param name="ct">токен отмены</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.SearchAsync(System.String,System.Nullable{System.Int32})">
+            <summary>
+            Выполняет поиск преподавателей по ФИО и фильтрацию по должности.
+            </summary>
+            <param name="search">Часть ФИО для поиска.</param>
+            <param name="positionValue">Идентификатор должности.</param>
+            <returns>Список найденных преподавателей.</returns>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.GetWithLessonsByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получает преподавателя по идентификатору с присоединенными (Eagerly Loaded) связанными занятиями.
+            </summary>
+            <param name="id">Уникальный идентификатор преподавателя.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>
+            Объект сущности <see cref="T:SmartSchedule.Core.Entities.Teacher"/> с заполненной коллекцией <see cref="P:SmartSchedule.Core.Entities.Teacher.Lessons"/> 
+            (включая <see cref="T:SmartSchedule.Core.Entities.Group"/> и <see cref="T:SmartSchedule.Core.Entities.TimeSlot"/>), 
+            или <see langword="null"/>, если преподаватель не найден.
+            </returns>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.TimeSlotRepository">
+            <summary>
+            Репозиторий для работы с Временными слотами.
+            Данные кэшируются на длительный срок.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TimeSlotRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Конструктор репозитория TimeSlot.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TimeSlotRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TimeSlotRepository.CreateAsync(SmartSchedule.Core.Entities.TimeSlot,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TimeSlotRepository.UpdateAsync(SmartSchedule.Core.Entities.TimeSlot,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TimeSlotRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.WeekDayRepository">
+            <summary>
+            Репозиторий для работы с Днями недели.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekDayRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Конструктор репозитория WeekDay.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekDayRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekDayRepository.CreateAsync(SmartSchedule.Core.Entities.WeekDay,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekDayRepository.UpdateAsync(SmartSchedule.Core.Entities.WeekDay,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekDayRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Repositories.WeekTypeRepository">
+            <summary>
+            Репозиторий для работы с Типами недель.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekTypeRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
+            <summary>
+            Конструктор репозитория WeekType.
+            </summary>
+            <param name="context">Контекст базы данных.</param>
+            <param name="cache">Сервис кэширования.</param>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekTypeRepository.GetAllAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekTypeRepository.CreateAsync(SmartSchedule.Core.Entities.WeekType,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekTypeRepository.UpdateAsync(SmartSchedule.Core.Entities.WeekType,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.WeekTypeRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructur.Migrations.InitualCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.InitualCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.InitualCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.InitualCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructur.Migrations.CreateNewEntities">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.CreateNewEntities.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.CreateNewEntities.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.CreateNewEntities.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructur.Migrations.FullChipWiewDataBase">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.FullChipWiewDataBase.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.FullChipWiewDataBase.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.FullChipWiewDataBase.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructur.Migrations.NewUnique">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.NewUnique.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.NewUnique.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.NewUnique.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructur.Migrations.RefactorCascadKeys">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.RefactorCascadKeys.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.RefactorCascadKeys.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.RefactorCascadKeys.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:ComputerShop.Infrastructure.Extensions.ModelBuilderExtensions">
+            <summary>
+            Методы расширения для класса <see cref="T:Microsoft.EntityFrameworkCore.ModelBuilder"/>.
+            </summary>
+        </member>
+        <member name="M:ComputerShop.Infrastructure.Extensions.ModelBuilderExtensions.ConfigureEntities(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Конфигурирует сущности 
+            </summary>
+            <param name="modelBuilder">Строитель сущностей</param>
+        </member>
+    </members>
+</doc>

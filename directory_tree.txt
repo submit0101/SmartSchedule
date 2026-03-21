@@ -1,0 +1,399 @@
+Дерево директорий проекта:
+│   ├── SmartSchedule/
+│   │   ├── Controllers/
+│   │   ├── 📄 BuildingController.cs
+│   │   ├── 📄 CabinetController.cs
+│   │   ├── 📄 GroupController.cs
+│   │   ├── 📄 LessonController.cs
+│   │   ├── 📄 PositionController.cs
+│   │   ├── 📄 SubjectController.cs
+│   │   ├── 📄 TeacherController.cs
+│   │   ├── 📄 TimeSlotController.cs
+│   │   ├── 📄 WeekDayController.cs
+│   │   └── 📄 WeekTypeController.cs
+│   │   ├── Errors/
+│   │   ├── 📄 ProblemDetailsError.cs
+│   │   └── 📄 ValidationError.cs
+│   │   ├── Extensions/
+│   │   ├── 📄 AppSettingsExtensions.cs
+│   │   ├── 📄 DependencyExtensions.cs
+│   │   ├── 📄 LoggerExtensions.cs
+│   │   ├── 📄 ProblemDetailsExtensions.cs
+│   │   ├── 📄 SwaggerExtensions.cs
+│   │   └── 📄 ValidationExtensions.cs
+│   │   ├── Models/
+│   │   │   ├── ExtendedProblemDetails/
+│   │   │   ├── 📄 ExtendedExceptionProblemDetails.cs
+│   │   │   └── 📄 ValidationExceptionProblemDetails.cs
+│   │   │   ├── Options/
+│   │   │   └── 📄 ConfigureSwaggerOptions.cs
+│   │   │   ├── Settings/
+│   │   │   ├── 📄 AppSettings.cs
+│   │   │   ├── 📄 DbOptions.cs
+│   │   │   └── 📄 SwaggerConfiguration.cs
+│   │   └── 📄 RequestDetails.cs
+│   │   ├── Properties/
+│   │   └── 📋 launchSettings.json
+│   │   ├── Validators/
+│   │   │   ├── Pages/
+│   │   ├── 📄 DefaultValidatorInterceptor.cs
+│   │   └── 📄 RecursiveValidator.cs
+│   │   ├── Новая папка/
+│   ├── 📋 appsettings.Development.json
+│   ├── 📋 appsettings.json
+│   ├── 📄 Program.cs
+│   ├── 📦 SmartSchedule.csproj
+│   ├── 📄 SmartSchedule.csproj.user
+│   ├── 📄 SmartSchedule.http
+│   ├── 📄 SmartSchedule.xml
+│   └── 📄 Startup.cs
+│   ├── SmartSchedule.Core/
+│   │   ├── Constants/
+│   │   └── 📄 WeekTypeConstants.cs
+│   │   ├── Entities/
+│   │   │   ├── Abstractions/
+│   │   │   ├── 📄 BaseEntity.cs
+│   │   │   └── 📄 IEntity.cs
+│   │   ├── 📄 Building.cs
+│   │   ├── 📄 Cabinet.cs
+│   │   ├── 📄 Group.cs
+│   │   ├── 📄 Lesson.cs
+│   │   ├── 📄 Positon.cs
+│   │   ├── 📄 Subject.cs
+│   │   ├── 📄 Teacher.cs
+│   │   ├── 📄 TimeSlot.cs
+│   │   ├── 📄 WeekDay.cs
+│   │   └── 📄 WeekType.cs
+│   │   ├── Exceptions/
+│   │   ├── 📄 BusinessException.cs
+│   │   ├── 📄 CabinetConflictException.cs
+│   │   ├── 📄 ObjectNotFoundException.cs
+│   │   ├── 📄 ScheduleConflictException .cs
+│   │   └── 📄 UniqueNameConflictException.cs
+│   │   ├── Extensions/
+│   │   ├── 📄 EnumExtensions.cs
+│   │   ├── 📄 StringExtensions.cs
+│   │   └── 📄 TypeExtensions.cs
+│   │   ├── Mapper/
+│   │   ├── 📄 BuildingProfile.cs
+│   │   ├── 📄 CabinetProfile.cs
+│   │   ├── 📄 GroupProfile.cs
+│   │   ├── 📄 LessonProfile.cs
+│   │   ├── 📄 PositionProfile.cs
+│   │   ├── 📄 SubjectProfile.cs
+│   │   ├── 📄 TeacherProfile.cs
+│   │   ├── 📄 TimeSlotProfile.cs
+│   │   ├── 📄 WeekdayProfile.cs
+│   │   └── 📄 WeekTypeProfile.cs
+│   │   ├── Models/
+│   │       ├── DTO/
+│   │       │   ├── BuildingDTO/
+│   │       │   ├── 📄 CreateBuildingDto.cs
+│   │       │   ├── 📄 ResponseCabinetDto.cs
+│   │       │   ├── 📄 ShortBuildingDTO.cs
+│   │       │   └── 📄 UpdateBuildingDto.cs
+│   │       │   ├── CabinetDTO/
+│   │       │   ├── 📄 CabinetScheduleReportDto.cs
+│   │       │   ├── 📄 CabinetUsageFilterDto.cs
+│   │       │   ├── 📄 CabinetUsageReportDto.cs
+│   │       │   ├── 📄 CreateCabinetDto.cs
+│   │       │   ├── 📄 ResponseCabinetDto.cs
+│   │       │   ├── 📄 ShortCabinetDto.cs
+│   │       │   └── 📄 UpdateCabinetDto.cs
+│   │       │   ├── GroupDTO/
+│   │       │   ├── 📄 CreateGroupDto.cs
+│   │       │   ├── 📄 GroupUsageFilterDto.cs
+│   │       │   ├── 📄 GroupUsageReportDto.cs
+│   │       │   ├── 📄 ResponseGroupDto.cs
+│   │       │   └── 📄 UpdateGroupDto.cs
+│   │       │   ├── LessonDTO/
+│   │       │   ├── 📄 ConflictCheckResultDto.cs
+│   │       │   ├── 📄 CreateLessonDto.cs
+│   │       │   ├── 📄 LessonResponseDto.cs
+│   │       │   ├── 📄 StructuredLessonDto.cs
+│   │       │   └── 📄 UpdateLessonDto.cs
+│   │       │   ├── PosittonDTO/
+│   │       │   ├── 📄 CreatePositionDto.cs
+│   │       │   ├── 📄 ResponsePositionDto.cs
+│   │       │   ├── 📄 ShortPositionDto.cs
+│   │       │   └── 📄 UpdatePositionDto.cs
+│   │       │   ├── SubjectDTO/
+│   │       │   ├── 📄 CreateSubjectDto.cs
+│   │       │   ├── 📄 ResponseSubjectDto.cs
+│   │       │   └── 📄 UpdateSubjectDto.cs
+│   │       │   ├── TeacherDTO/
+│   │       │   ├── 📄 CreateTeacherDto.cs
+│   │       │   ├── 📄 ResponseTeacherDto.cs
+│   │       │   ├── 📄 ShortTeacherDto.cs
+│   │       │   ├── 📄 TeacherScheduleReportDto.cs
+│   │       │   ├── 📄 TeacherUsageFilterDto.cs
+│   │       │   ├── 📄 TeacherUsageReportDto.cs
+│   │       │   └── 📄 UpdateTeacherDto.cs
+│   │       │   ├── TimeSlotDTO/
+│   │       │   ├── 📄 CreateTimeSlotDto.cs
+│   │       │   ├── 📄 ResponseTimeSlotDto.cs
+│   │       │   └── 📄 UpdateTimeSlotDto.cs
+│   │       │   ├── WeekDayDTO/
+│   │       │   └── 📄 WeekDayShortDto.cs
+│   │           ├── WeekTypeDTO/
+│   │           ├── 📄 CreateWeekTypeDto.cs
+│   │           ├── 📄 ResponseWeekTypeDto.cs
+│   │           └── 📄 UpdateWeekTypeDto.cs
+│   │   ├── Repositories/
+│   │   ├── 📄 IBaseRepository.cs
+│   │   ├── 📄 IBuildingRepository.cs
+│   │   ├── 📄 ICabinetRepository.cs
+│   │   ├── 📄 IGroupRepository.cs
+│   │   ├── 📄 ILessonRepository.cs
+│   │   ├── 📄 IPositionRepository.cs
+│   │   ├── 📄 ISubjectRepository.cs
+│   │   ├── 📄 ITeacherRepository.cs
+│   │   ├── 📄 ITimeSlotRepository.cs
+│   │   ├── 📄 IWeekDayRepository.cs
+│   │   └── 📄 IWeekTypeRepository.cs
+│   │   ├── Service/
+│   │   │   ├── Interfaces/
+│   │   │   ├── 📄 IBuildingService.cs
+│   │   │   ├── 📄 ICabinetService.cs
+│   │   │   ├── 📄 ICachingService.cs
+│   │   │   ├── 📄 IGroupService.cs
+│   │   │   ├── 📄 ILessonService.cs
+│   │   │   ├── 📄 IPositionService.cs
+│   │   │   ├── 📄 ISubjectService.cs
+│   │   │   ├── 📄 ITeacherService.cs
+│   │   │   ├── 📄 ITimeSlotService.cs
+│   │   │   ├── 📄 IWeekDayService.cs
+│   │   │   └── 📄 IWeekTypeService.cs
+│   │   ├── 📄 BuildingService.cs
+│   │   ├── 📄 CabinetService.cs
+│   │   ├── 📄 GroupService.cs
+│   │   ├── 📄 LessonService.cs
+│   │   ├── 📄 PositionService.cs
+│   │   ├── 📄 SubjectService.cs
+│   │   ├── 📄 TeacherService.cs
+│   │   ├── 📄 TimeSlotService.cs
+│   │   ├── 📄 WeekDaySerive.cs
+│   │   └── 📄 WeekTypeService.cs
+│   ├── 📋 efpt.config.json
+│   ├── 📦 SmartSchedule.Core.csproj
+│   └── 📄 SmartSchedule.Core.xml
+│   ├── SmartSchedule.Infrastructur/
+│   │   ├── Caching/
+│   │   └── 📄 RedisCachingService.cs
+│   │   ├── Configurations/
+│   │   ├── 📄 BuildingConfiguration.cs
+│   │   ├── 📄 CabinetConfiguration.cs
+│   │   ├── 📄 GroupConfiguration.cs
+│   │   ├── 📄 LessonConfiguration.cs
+│   │   ├── 📄 PositionConfiguration.cs
+│   │   ├── 📄 SubjectConfiguration.cs
+│   │   ├── 📄 TeacherConfiguration.cs
+│   │   ├── 📄 TimeSlotConfiguration.cs
+│   │   ├── 📄 WeekDayConfiguration.cs
+│   │   └── 📄 WeekTypeConfiguration.cs
+│   │   ├── Data/
+│   │   └── 📄 AppDbContext.cs
+│   │   ├── Extensions/
+│   │   └── 📄 ModelBuilderExtensions.cs
+│   │   ├── Migrations/
+│   │   ├── 📄 20250603080036_InitualCreate.cs
+│   │   ├── 📄 20250603080036_InitualCreate.Designer.cs
+│   │   ├── 📄 20250604185447_CreateNewEntities.cs
+│   │   ├── 📄 20250604185447_CreateNewEntities.Designer.cs
+│   │   ├── 📄 20250604194608_FullChipWiewDataBase.cs
+│   │   ├── 📄 20250604194608_FullChipWiewDataBase.Designer.cs
+│   │   ├── 📄 20250614143546_NewUnique.cs
+│   │   ├── 📄 20250614143546_NewUnique.Designer.cs
+│   │   ├── 📄 20251206183110_RefactorCascadKeys.cs
+│   │   ├── 📄 20251206183110_RefactorCascadKeys.Designer.cs
+│   │   └── 📄 AppDbContextModelSnapshot.cs
+│   │   ├── Repository/
+│   │   ├── 📄 BaseRepository.cs
+│   │   ├── 📄 BuildingRepository.cs
+│   │   ├── 📄 CabinetRepository.cs
+│   │   ├── 📄 GroupRepository.cs
+│   │   ├── 📄 LessonRepository.cs
+│   │   ├── 📄 PositionRepository.cs
+│   │   ├── 📄 SubjectRepository.cs
+│   │   ├── 📄 TeacherRepository.cs
+│   │   ├── 📄 TimeSlotRepository.cs
+│   │   ├── 📄 WeekDayRepository.cs
+│   │   └── 📄 WeekTypeRepository.cs
+│   ├── 📦 SmartSchedule.Infrastructur.csproj
+│   └── 📄 SmartSchedule.Infrastructur.xml
+│   ├── WebSmartSchedule/
+│   │   ├── Pages/
+│   │   │   ├── About/
+│   │   │   └── 📄 Index.cshtml
+│   │   │   ├── Building/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   └── 📄 _BuildingModals.cshtml
+│   │   │   ├── Cabinet/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   └── 📄 _CabinetModals.cshtml
+│   │   │   ├── Groups/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   ├── 📄 _GroupModals.cshtml
+│   │   │   └── 📄 _GroupModals.cshtml.cs
+│   │   │   ├── Help/
+│   │   │   └── 📄 Index.cshtml
+│   │   │   ├── Lessons/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   ├── 📄 _CabinetHeatmapTab.cshtml
+│   │   │   ├── 📄 _CabinetsTab.cshtml
+│   │   │   ├── 📄 _CabinetUsageReportTab.cshtml
+│   │   │   ├── 📄 _FiltersPartial.cshtml
+│   │   │   ├── 📄 _GroupUsage.cshtml
+│   │   │   ├── 📄 _ModalLesson.cshtml
+│   │   │   ├── 📄 _ScheduleTab.cshtml
+│   │   │   ├── 📄 _TeacherHeatmapTab.cshtml
+│   │   │   └── 📄 _TeacherUsage.cshtml
+│   │   │   ├── Positions/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   └── 📄 _PositionModals.cshtml
+│   │   │   ├── Shared/
+│   │   │   ├── 📄 _Layout.cshtml
+│   │   │   ├── 📄 _Layout.cshtml.css
+│   │   │   └── 📄 _ValidationScriptsPartial.cshtml
+│   │   │   ├── Subjects/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   └── 📄 _SubjectModals.cshtml
+│   │   │   ├── Teatchers/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   ├── 📄 _TeatcherModals.cshtml
+│   │   │   └── 📄 _TeatcherModals.cshtml.cs
+│   │   │   ├── TimeSlots/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   ├── 📄 _TimeSlotsModals.cshtml
+│   │   │   └── 📄 _TimeSlotsModals.cshtml.cs
+│   │   │   ├── WeekTypes/
+│   │   │   ├── 📄 Index.cshtml
+│   │   │   ├── 📄 Index.cshtml.cs
+│   │   │   └── 📄 _WeekTypeModals.cshtml
+│   │   ├── 📄 Error.cshtml
+│   │   ├── 📄 Error.cshtml.cs
+│   │   ├── 📄 Index.cshtml
+│   │   ├── 📄 Index.cshtml.cs
+│   │   ├── 📄 Privacy.cshtml
+│   │   ├── 📄 Privacy.cshtml.cs
+│   │   ├── 📄 _ViewImports.cshtml
+│   │   └── 📄 _ViewStart.cshtml
+│   │   ├── Properties/
+│   │   └── 📋 launchSettings.json
+│   │   ├── wwwroot/
+│   │   │   ├── audio/
+│   │   │   └── 📄 SearchSound.mp3
+│   │   │   ├── css/
+│   │   │   ├── 📄 LessonStyle.css
+│   │   │   ├── 📄 site.css
+│   │   │   ├── 📄 StylePdf.css
+│   │   │   └── 📄 UnionStyle.css
+│   │   │   ├── images/
+│   │   │   └── 📄 logo.png
+│   │   │   ├── js/
+│   │   │   │   ├── schedule/
+│   │   │   │   ├── 📄 schedule-api.js
+│   │   │   │   ├── 📄 schedule-clipboard.js
+│   │   │   │   ├── 📄 schedule-core.js
+│   │   │   │   ├── 📄 schedule-dnd.js
+│   │   │   │   ├── 📄 schedule-group-features.js
+│   │   │   │   ├── 📄 schedule-modal.js
+│   │   │   │   ├── 📄 schedule-store.js
+│   │   │   │   ├── 📄 schedule-teacher.js
+│   │   │   │   └── 📄 schedule-utils.js
+│   │   │   ├── 📄 html2canvas.min.js
+│   │   │   ├── 📄 jspdf.umd.min.js
+│   │   │   ├── 📄 mobilefilter.js
+│   │   │   ├── 📄 modal.js
+│   │   │   ├── 📄 resetFormValidation.js
+│   │   │   ├── 📄 searchHandler.js
+│   │   │   ├── 📄 searchmobail.js
+│   │   │   ├── 📄 site.js
+│   │   │   ├── 📄 ValidationModal.js
+│   │   │   └── 📄 ValidationToolTip.js
+│   │   │   ├── lib/
+│   │   │   │   ├── bootstrap/
+│   │   │   │   │   ├── dist/
+│   │   │   │   │   │   ├── css/
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.css
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.min.css
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.min.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.rtl.css
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.rtl.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.rtl.min.css
+│   │   │   │   │   │   ├── 📄 bootstrap-grid.rtl.min.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.css
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.min.css
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.min.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.rtl.css
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.rtl.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.rtl.min.css
+│   │   │   │   │   │   ├── 📄 bootstrap-reboot.rtl.min.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.css
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.min.css
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.min.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.rtl.css
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.rtl.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.rtl.min.css
+│   │   │   │   │   │   ├── 📄 bootstrap-utilities.rtl.min.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap.css
+│   │   │   │   │   │   ├── 📄 bootstrap.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap.min.css
+│   │   │   │   │   │   ├── 📄 bootstrap.min.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap.rtl.css
+│   │   │   │   │   │   ├── 📄 bootstrap.rtl.css.map
+│   │   │   │   │   │   ├── 📄 bootstrap.rtl.min.css
+│   │   │   │   │   │   └── 📄 bootstrap.rtl.min.css.map
+│   │   │   │   │       ├── js/
+│   │   │   │   │       ├── 📄 bootstrap.bundle.js
+│   │   │   │   │       ├── 📄 bootstrap.bundle.js.map
+│   │   │   │   │       ├── 📄 bootstrap.bundle.min.js
+│   │   │   │   │       ├── 📄 bootstrap.bundle.min.js.map
+│   │   │   │   │       ├── 📄 bootstrap.esm.js
+│   │   │   │   │       ├── 📄 bootstrap.esm.js.map
+│   │   │   │   │       ├── 📄 bootstrap.esm.min.js
+│   │   │   │   │       ├── 📄 bootstrap.esm.min.js.map
+│   │   │   │   │       ├── 📄 bootstrap.js
+│   │   │   │   │       ├── 📄 bootstrap.js.map
+│   │   │   │   │       ├── 📄 bootstrap.min.js
+│   │   │   │   │       └── 📄 bootstrap.min.js.map
+│   │   │   │   └── 📄 LICENSE
+│   │   │   │   ├── jquery/
+│   │   │   │   │   ├── dist/
+│   │   │   │   │   ├── 📄 jquery.js
+│   │   │   │   │   ├── 📄 jquery.min.js
+│   │   │   │   │   └── 📄 jquery.min.map
+│   │   │   │   └── 📝 LICENSE.txt
+│   │   │   │   ├── jquery-validation/
+│   │   │   │   │   ├── dist/
+│   │   │   │   │   ├── 📄 additional-methods.js
+│   │   │   │   │   ├── 📄 additional-methods.min.js
+│   │   │   │   │   ├── 📄 jquery.validate.js
+│   │   │   │   │   └── 📄 jquery.validate.min.js
+│   │   │   │   └── 📘 LICENSE.md
+│   │   │       ├── jquery-validation-unobtrusive/
+│   │   │       ├── 📄 jquery.validate.unobtrusive.js
+│   │   │       ├── 📄 jquery.validate.unobtrusive.min.js
+│   │   │       └── 📝 LICENSE.txt
+│   │   └── 📄 favicon.ico
+│   ├── 📋 appsettings.Development.json
+│   ├── 📋 appsettings.json
+│   ├── 📄 Program.cs
+│   ├── 📦 WebSmartSchedule.csproj
+│   └── 📄 WebSmartSchedule.csproj.user
+├── 📄 .editorconfig
+├── 📝 directory_tree.txt
+├── 🧩 SmartSchedule.sln
+└── 📄 SmartSchedule.slnLaunch.user
+

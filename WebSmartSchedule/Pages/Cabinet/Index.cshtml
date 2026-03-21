@@ -1,0 +1,255 @@
+﻿@page
+@model WebSmartSchedule.Pages.Cabinet.IndexModel
+@{
+    ViewData["Title"] = "Кабинеты";
+}
+
+<link rel="stylesheet" href="~/css/UnionStyle.css" />
+<div class="container-xxl py-4">
+    <div class="page-section p-4 bg-white rounded shadow-sm">
+        <!-- Сообщения об успехе/ошибке -->
+        @if (TempData["CASuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["CASuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["CAErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["CAErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Заголовок и кнопка добавления -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <h2 class="mb-0 text-primary fw-bold">📚 Список кабинетов</h2>
+            <button type="button" class="btn btn-outline-primary d-md-none" onclick="toggleSearchForm()">
+                <i class="bi bi-search"></i> Поиск
+            </button>
+            <a href="#"
+               class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
+               onclick="openModal('createCabinetModal')">
+                <i class="bi bi-plus-lg"></i> Добавить кабинет
+            </a>
+        </div>
+
+        <!-- Форма поиска -->
+        <div id="searchForm" class="search-form collapsed">
+            <form method="get" class="mb-0">
+                <div class="d-md-none mb-3"></div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label for="SearchTerm" class="form-label">Номер кабинета</label>
+                        <input type="text" class="form-control" id="SearchTerm" name="SearchTerm"
+                               value="@Model.SearchTerm" placeholder="Например: 310">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="BuildingNumber" class="form-label">Корпус</label>
+                        <select class="form-select" id="BuildingNumber" name="BuildingNumber">
+                            <option value="">Все корпуса</option>
+                            @foreach (var building in Model.Buildings)
+                            {
+                                <option value="@building.Id"
+                                        selected="@(building.Id == Model.BuildingNumber ? "selected" : null)">
+                                    @building.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex flex-wrap align-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100 w-md-auto">
+                            <i class="bi bi-search"></i> Поиск
+                        </button>
+                        <a href="@Url.Page("Index")" class="btn btn-secondary w-100 w-md-auto">
+                            <i class="bi bi-arrow-counterclockwise"></i> Сбросить
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Кнопки сортировки внутри формы -->
+                <div class="sort-buttons mt-3 d-flex flex-wrap gap-2">
+                    <span class="me-2">Сортировка:</span>
+                    <button type="submit" name="SortBy" value="number"
+                            class="btn btn-outline-primary sort-btn @(Model.SortBy == "number" ? "active-sort" : "")">
+                        По номеру
+                        @if (Model.SortBy == "number" && Model.Descending)
+                        {
+                            <span>↓</span>
+                        }
+                        else if (Model.SortBy == "number")
+                        {
+                            <span>↑</span>
+                        }
+                    </button>
+                    <button type="submit" name="SortBy" value="building"
+                            class="btn btn-outline-primary sort-btn @(Model.SortBy == "building" ? "active-sort" : "")">
+                        По корпусу
+                        @if (Model.SortBy == "building" && Model.Descending)
+                        {
+                            <span>↓</span>
+                        }
+                        else if (Model.SortBy == "building")
+                        {
+                            <span>↑</span>
+                        }
+                    </button>
+                    <input type="hidden" name="Descending" id="Descending" value="@Model.Descending.ToString().ToLower()" />
+                </div>
+            </form>
+        </div>
+
+        <!-- Отображение результатов или сообщений -->
+        @if (!Model.Cabinet.Any())
+        {
+            <div class="text-center py-5 bg-light rounded mt-3">
+                @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.BuildingNumber.HasValue ||
+               !string.IsNullOrEmpty(Model.SortBy))
+                {
+                    <p class="lead mb-2">Ничего не найдено.</p>
+                    <p class="text-muted">Измените параметры поиска или сбросьте фильтр.</p>
+                    <a href="@Url.Page("Index")" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-counterclockwise"></i> Сбросить фильтры
+                    </a>
+                }
+                else
+                {
+                    <p class="lead mb-2">Нет данных о кабинетах.</p>
+                    <p class="text-muted">Добавьте их через Swagger или миграции.</p>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Карточки для мобильных -->
+            <div class="d-block d-md-none" style="max-height: 60vh; overflow-y: auto;">
+                <div class="container-fluid p-0">
+                    @foreach (var cabinet in Model.Cabinet)
+                    {
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Кабинет @cabinet.Number</h5>
+                                <p class="card-text mb-1">Корпус: @cabinet.BuldingName</p>
+                                <p class="card-text mb-1">Вместимость: @cabinet.Capacity</p>
+                                <p class="card-text mb-1">Оборудование: @cabinet.Equipment</p>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                                            onclick="fillEditModal(this)"
+                                            data-id="@cabinet.Id"
+                                            data-number="@cabinet.Number"
+                                            data-building="@cabinet.BuldingName"
+                                            data-capacity="@cabinet.Capacity"
+                                            data-equipment="@cabinet.Equipment">
+                                        <i class="bi bi-pencil"></i> Изменить
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@cabinet.Id)">
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Таблица для десктопа -->
+            <div class="table-container border rounded overflow-auto d-none d-md-block" style="max-height: 60vh;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th class="col">Номер</th>
+                            <th class="col">Корпус</th>
+                            <th class="col">Вместимость</th>
+                            <th class="col d-none d-md-table-cell">Оборудование</th>
+                            <th class="col">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cabinet in Model.Cabinet)
+                        {
+                            <tr class="align-middle">
+                                <td data-label="Номер">@cabinet.Number</td>
+                                <td data-label="Корпус">@cabinet.BuldingName</td>
+                                <td data-label="Вместимость">@cabinet.Capacity</td>
+                                <td class="d-none d-md-table-cell" data-label="Оборудование">@cabinet.Equipment</td>
+                                <td data-label="Действия">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                onclick="fillEditModal(this)"
+                                                data-id="@cabinet.Id"
+                                                data-number="@cabinet.Number"
+                                                data-building="@cabinet.BuldingName"
+                                                data-capacity="@cabinet.Capacity"
+                                                data-equipment="@cabinet.Equipment">
+                                            <i class="bi bi-pencil"></i> Изменить
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@cabinet.Id)">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<partial name="_CabinetModals" />
+
+<script>
+
+
+    function fillEditModal(button) {
+        const id = button.getAttribute('data-id');
+        const number = button.getAttribute('data-number');
+        const buildingName = button.getAttribute('data-building');
+        const capacity = button.getAttribute('data-capacity');
+        const equipment = button.getAttribute('data-equipment');
+
+        document.getElementById('editCabinetId').value = id;
+        document.getElementById('editCabinetNumber').value = number;
+
+        const buildingSelect = document.getElementById('editCabinetBuildingId');
+        for (let option of buildingSelect.options) {
+            if (option.text === buildingName) {
+                buildingSelect.value = option.value;
+                break;
+            }
+        }
+
+        document.getElementById('editCabinetCapacity').value = capacity;
+        document.getElementById('editCabinetEquipment').value = equipment;
+
+        openModal('editCabinetModal');
+    }
+
+    // === Переключение направления сортировки ===
+    document.addEventListener('DOMContentLoaded', function () {
+        const sortButtons = document.querySelectorAll('button[name="SortBy"]');
+        sortButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                const currentSort = this.value;
+                const descInput = document.getElementById('Descending');
+                if (currentSort === '@Model.SortBy') {
+                    descInput.value = ('@Model.Descending'.toLowerCase() === 'true' ? 'false' : 'true');
+                } else {
+                    descInput.value = 'false';
+                }
+            });
+        });
+    });
+
+
+    function confirmDelete(id) {
+        document.getElementById('deleteCabinetId').value = id;
+        openModal('deleteConfirmModal');
+    }
+</script>
+<script src="/js/modal.js"></script>
+<script src="/js/searchmobail.js"></script>
+<script src="/js/ValidationModal.js"></script>

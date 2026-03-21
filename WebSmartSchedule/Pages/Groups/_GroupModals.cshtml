@@ -1,0 +1,186 @@
+﻿@model WebSmartSchedule.Pages.Groups.IndexModel
+
+<div id="createGroupModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('createGroupModal')" style="position: absolute; right: 15px; top: 15px;">&times;</button>
+        <div class="modal-header mb-3">
+            <h3>Добавить новую группу</h3>
+        </div>
+        <form id="createGroupForm" method="post" asp-page-handler="Create" class="needs-validation" novalidate>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="createGroupName" class="form-label">Название группы</label>
+                    <input type="text"
+                           name="Name"
+                           id="createGroupName"
+                           class="form-control"
+                           required
+                           maxlength="10"
+                           pattern="^[1-9]\d?-[A-ZА-Я]{3}-[1-4]$"
+                           placeholder="Например: 12-ABC-3"
+                           autocomplete="off" />
+
+                    <small id="createGroupHint" class="form-text text-primary" style="display: block; margin-top: 5px; font-weight: 500;">
+                        Введите год (2 цифры)
+                    </small>
+
+                    <div class="invalid-feedback">
+                        Формат: 12-ABC-3
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createGroupModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editGroupModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('editGroupModal')" style="position: absolute; right: 15px; top: 15px;">&times;</button>
+        <div class="modal-header mb-3">
+            <h3>Редактировать группу</h3>
+        </div>
+        <form method="post" asp-page-handler="Update" class="needs-validation" novalidate>
+            <input type="hidden" id="editGroupId" name="Id" />
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editGroupName" class="form-label">Название группы</label>
+                    <input type="text"
+                           name="Name"
+                           id="editGroupName"
+                           class="form-control"
+                           required
+                           maxlength="10"
+                           pattern="^[1-9]\d?-[A-ZА-Я]{3}-[1-4]$"
+                           placeholder="Например: 34-XYZ-2"
+                           autocomplete="off" />
+
+                    <small id="editGroupHint" class="form-text text-primary" style="display: block; margin-top: 5px; font-weight: 500;">
+                        Группа сформирована!
+                    </small>
+
+                    <div class="invalid-feedback">
+                        Формат: 12-ABC-3
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editGroupModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('deleteConfirmModal')">&times;</button>
+        <div class="modal-header mb-3">
+            <h3>Подтверждение удаления</h3>
+        </div>
+        <form method="post" asp-page-handler="Delete">
+            <input type="hidden" id="deleteGroupId" name="Id" />
+            <p>Вы уверены, что хотите удалить эту группу? Это действие нельзя будет отменить.</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Отмена</button>
+                <button type="submit" class="btn btn-danger">Удалить</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    // --- Управление окнами ---
+    function openModal(id) {
+        document.getElementById(id).style.display = 'block';
+        setTimeout(() => document.getElementById(id).classList.add('show'), 10);
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+        setTimeout(() => document.getElementById(id).style.display = 'none', 150);
+    }
+
+    function openEditGroup(id, name) {
+        document.getElementById('editGroupId').value = id;
+        document.getElementById('editGroupName').value = name;
+        // Вызываем событие input, чтобы маска сразу проверила формат при открытии
+        document.getElementById('editGroupName').dispatchEvent(new Event('input'));
+        openModal('editGroupModal');
+    }
+
+    function openDeleteGroup(id, name) {
+        document.getElementById('deleteGroupId').value = id;
+        if(document.getElementById('deleteGroupNameDisplay')) {
+            document.getElementById('deleteGroupNameDisplay').innerText = name;
+        }
+        openModal('deleteConfirmModal');
+    }
+
+    // --- Логика маски (валидация ввода) ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const hints = [
+            "Введите год (2 цифры)", "Еще цифру года",
+            "Код специальности (3 буквы)", "Еще 2 буквы", "Последняя буква",
+            "Номер подгруппы (1-4)", "Группа сформирована!"
+        ];
+
+        function applyMask(inputId, hintId) {
+            const input = document.getElementById(inputId);
+            const hint = document.getElementById(hintId);
+            if (!input) return;
+
+            input.addEventListener('input', function() {
+                // Убираем тире, переводим в UpperCase
+                let raw = this.value.replace(/-/g, "").toUpperCase();
+                let sb = "";
+                let count = 0;
+
+                // Проходим по каждому символу ввода
+                for (let char of raw) {
+                    if (count >= 6) break; // Максимум 6 значимых символов (без тире)
+
+                    let valid = false;
+                    // Проверка по позициям
+                    if (count < 2 && /\d/.test(char)) valid = true;        // 0-1: Цифры
+                    else if (count >= 2 && count < 5 && /[А-Я]/.test(char)) valid = true; // 2-4: Буквы
+                    else if (count === 5 && /[1-4]/.test(char)) valid = true; // 5: Цифра 1-4
+
+                    if (valid) {
+                        // Добавляем тире автоматически
+                        if (count === 2 || count === 5) sb += "-";
+                        sb += char;
+                        count++;
+                    }
+                }
+
+                // Если текст изменился (форматирование или отброс символа), обновляем поле
+                if (this.value !== sb) this.value = sb;
+
+                // Обновляем подсказку
+                if (hint) {
+                    hint.textContent = hints[count] || "Начинайте ввод...";
+
+                    // Меняем цвет подсказки и рамки
+                    if (count === 6) {
+                        hint.classList.remove('text-primary', 'text-danger');
+                        hint.classList.add('text-success'); // Зеленый при успехе
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    } else {
+                        hint.classList.remove('text-success', 'text-danger');
+                        hint.classList.add('text-primary'); // Синий в процессе
+                        input.classList.remove('is-valid');
+                        // Если начали вводить, но не закончили - можно подсветить ошибкой, или оставить нейтральным
+                    }
+                }
+            });
+        }
+
+        applyMask('createGroupName', 'createGroupHint');
+        applyMask('editGroupName', 'editGroupHint');
+    });
+</script>

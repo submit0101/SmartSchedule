@@ -1,0 +1,320 @@
+﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <h4>📊 Занятость преподавателя</h4>
+
+    <form id="teacherHeatmapFilterForm" class="row g-3 mb-3" onsubmit="return false;">
+        <div class="col-md-4">
+            <label for="teacherHeatmapSelect" class="form-label">Выберите преподавателя:</label>
+            <select id="teacherHeatmapSelect" class="form-select">
+                <option value="">-- Выберите преподавателя --</option>
+                @foreach (var teacher in Model.Teachers)
+                {
+                    <option value="@teacher.Id">@teacher.FullName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="teacherWeekTypeSelect" class="form-label">Выберите тип недели:</label>
+            <select id="teacherWeekTypeSelect" class="form-select">
+                <option value="0">-- Все --</option>
+                @foreach (var weekTy in Model.WeekTypes)
+                {
+                    <option value="@weekTy.Id">@weekTy.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-12 d-flex gap-2 mt-2">
+            <button type="button" id="showTeacherHeatmapBtn" class="btn btn-primary">Показать занятость</button>
+            <button type="button" id="exportPDFBtn" class="btn btn-danger d-none" onclick="exportTeacherHeatmapToPDF()">
+                <i class="bi bi-file-earmark-pdf"></i> Экспорт в PDF
+            </button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center" id="teacherScheduleTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Время</th>
+                    <th>Пн</th>
+                    <th>Вт</th>
+                    <th>Ср</th>
+                    <th>Чт</th>
+                    <th>Пт</th>
+                    <th>Сб</th>
+                </tr>
+            </thead>
+            <tbody id="teacherScheduleMatrix">
+                <tr><td colspan="7" class="text-muted">Выберите преподавателя</td></tr>
+            </tbody>
+            <tfoot id="teacherHeatmapFooter" class="table-info">
+                <tr>
+                    <td colspan="7" id="teacherHeatmapStats">📊 Статистика: Занятые - 0, Свободные - 0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/jspdf.umd.min.js"></script>
+
+<style>
+    #teacherScheduleTable {
+        font-family: 'Arial', 'DejaVu Sans', sans-serif;
+    }
+
+    .pdf-export-container {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        width: 297mm;
+        padding: 20px;
+        background: white;
+        font-family: 'Arial', 'DejaVu Sans', sans-serif;
+    }
+
+        .pdf-export-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .pdf-export-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pdf-export-container th,
+        .pdf-export-container td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        console.log("DOM полностью загружен. Привязываем слушатели...");
+
+        // Функция обновления тепловой карты (Внутри DOMContentLoaded)
+        function updateHeatmap(data) {
+            console.log('Запуск функции updateHeatmap...');
+            const matrix = document.getElementById('teacherScheduleMatrix');
+
+            if (!matrix) {
+                 console.error("КРИТИЧЕСКАЯ ОШИБКА: Элемент #teacherScheduleMatrix не найден!");
+                 return;
+            }
+
+            matrix.innerHTML = '';
+            const uniqueSlotIds = Array.from(new Set(data.map(d => d.timeSlotId)));
+            console.log(`Обнаружено уникальных временных слотов: ${uniqueSlotIds.length}`);
+
+            const timeSlots = uniqueSlotIds
+                .map(id => {
+                    const item = data.find(d => d.timeSlotId === id);
+                    return {
+                        id: id,
+                        display: item.timeSlotDisplay
+                    };
+                })
+                .sort((a, b) => a.id - b.id);
+
+            let busyCount = 0;
+            let freeCount = 0;
+
+
+            timeSlots.forEach(timeSlot => {
+                const row = document.createElement('tr');
+                const timeCell = document.createElement('td');
+                timeCell.textContent = timeSlot.display;
+                row.appendChild(timeCell);
+
+                for (let day = 1; day <= 6; day++) {
+                    const cell = document.createElement('td');
+                    const lesson = data.find(d => d.dayOfWeekId === day && d.timeSlotId === timeSlot.id);
+
+                    if (lesson) {
+                        if (lesson.isBusy) {
+                            cell.className = "table-danger";
+                            cell.textContent = "❌ Занято";
+                            busyCount++;
+                        } else {
+                            cell.className = "table-success";
+                            cell.textContent = "✅ Свободно";
+                            freeCount++;
+                        }
+                    } else {
+                        cell.className = "table-secondary";
+                        cell.textContent = "Нет данных";
+                        freeCount++;
+                    }
+                    row.appendChild(cell);
+                }
+                matrix.appendChild(row);
+            });
+
+            const total = busyCount + freeCount;
+            console.log(`Итоговая статистика: Занято: ${busyCount}, Свободно: ${freeCount}, Всего: ${total}`);
+            const statsCell = document.getElementById("teacherHeatmapStats");
+
+            const busyPercent = total > 0 ? ((busyCount / total) * 100).toFixed(1) : 0;
+            const freePercent = total > 0 ? ((freeCount / total)* 100).toFixed(1) : 0;
+
+            statsCell.textContent = `📊 Статистика: Занятые - ${busyCount}, Свободные - ${freeCount}`;
+            statsCell.textContent += ` | Процент занятости: ${busyPercent}%, свобода: ${freePercent}%`;
+        }
+
+        // Обработчик кнопки "Показать занятость"
+        document.getElementById('showTeacherHeatmapBtn')?.addEventListener('click', async function () {
+
+            const teacherSelect = document.getElementById('teacherHeatmapSelect');
+            const teacherId = teacherSelect.value;
+            const WeekTypeSelect = document.getElementById('teacherWeekTypeSelect');
+            const WeekTypeId = WeekTypeSelect.value;
+            const teacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
+
+            console.log('--- Нажата кнопка "Показать занятость" (УЧИТЕЛЬ) ---');
+            console.log(`Выбран преподаватель ID: ${teacherId}, Имя: ${teacherName}`);
+            console.log(`Выбран тип недели ID: ${WeekTypeId}`);
+
+            if (!teacherId) {
+                console.warn('Предупреждение: ID преподавателя не выбран. Выполнение прервано.');
+                alert('Пожалуйста, выберите преподавателя');
+                return;
+            }
+
+            const btn = this;
+            const originalText = btn.textContent;
+
+            const apiUrl = `http://localhost:5062/api/Lesson/teacher/${teacherId}/schedule?weekTypeId=${WeekTypeId}`;
+            console.log(`Формирование запроса к API: ${apiUrl}`);
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Загрузка...';
+
+                const response = await fetch(apiUrl);
+                console.log(`Получен ответ API. Статус: ${response.status} (${response.statusText})`);
+
+                if (!response.ok) {
+                    console.error(`Ошибка: API вернул статус ${response.status}.`);
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Данные успешно получены. Количество записей:', data.length);
+                console.log('Проверка данных: timeSlotDisplay первого элемента:', data.length > 0 ? data[0].timeSlotDisplay : 'нет данных');
+
+                updateHeatmap(data);
+
+                document.getElementById('exportPDFBtn').classList.remove('d-none');
+            } catch (err) {
+                console.error('Критическая ошибка загрузки или обработки расписания:', err);
+                alert('Ошибка загрузки данных. Проверьте консоль для деталей.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                console.log('--- Выполнение завершено ---');
+            }
+        });
+    });
+
+    // *******************************************************************
+    // НОВАЯ УНИКАЛЬНАЯ ФУНКЦИЯ ЭКСПОРТА (ВНЕ DOMContentLoaded для onclick)
+    // *******************************************************************
+    async function exportTeacherHeatmapToPDF() {
+        // Используем УНИКАЛЬНЫЙ ID ТАБЛИЦЫ
+        const table = document.getElementById("teacherScheduleTable");
+        const teacherSelect = document.getElementById("teacherHeatmapSelect");
+        const weekTypeSelect = document.getElementById("teacherWeekTypeSelect");
+
+        if (!table || !teacherSelect.value) {
+            // Эта проверка гарантирует, что мы не получим ошибку "Сначала загрузите данные о занятости аудитории",
+            // если бы там был другой, конфликтный код.
+            alert("Сначала загрузите данные о занятости преподавателя.");
+            return;
+        }
+
+        const teacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
+        const weekTypeName = weekTypeSelect.options[weekTypeSelect.selectedIndex].text;
+
+        console.log(`Запуск экспорта в PDF для преподавателя: ${teacherName}, Тип недели: ${weekTypeName}`);
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "pdf-export-container";
+
+
+        const logoUrl = '/images/logo.png';
+
+        const contentHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <img id="logo" src="${logoUrl}" alt="Логотип" style="height: 50px; width: auto;" />
+                <div style="text-align: center; flex-grow: 1;">
+                    <h2 style="margin: 0; font-size: 26px;">Занятость преподавателя</h2>
+                    <h3 style="margin: 5px 0; font-size: 16px;">Преподаватель: ${teacherName}</h3>
+                    <p style="margin: 0; font-size: 14px;">Тип недели: ${weekTypeName}</p>
+                </div>
+                <div style="width: 50px;"></div>
+            </div>
+            <div id="table-container" style="width: 100%;">
+                ${table.outerHTML}
+            </div>
+        `;
+
+        wrapper.innerHTML = contentHTML;
+        document.body.appendChild(wrapper);
+
+
+        const logoImg = wrapper.querySelector("#logo");
+
+
+        await new Promise((resolve, reject) => {
+            if (logoImg.complete && logoImg.naturalHeight !== 0) {
+                resolve();
+            } else {
+                logoImg.onload = resolve;
+                logoImg.onerror = () => {
+                    console.warn("Не удалось загрузить логотип");
+                    resolve();
+                };
+            }
+        });
+
+        await document.fonts.ready;
+        console.log('Логотип и шрифты готовы. Создание Canvas.');
+
+        try {
+            const canvas = await html2canvas(wrapper, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                allowTaint: false
+            });
+            console.log('Canvas успешно создан.');
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jspdf.jsPDF({
+                orientation: 'landscape'
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+            pdf.save(`Занятость_Преподаватель_${encodeURIComponent(teacherName)}_${weekTypeName}.pdf`);
+            console.log('PDF сохранен.');
+        } catch (error) {
+            console.error("Ошибка экспорта:", error);
+            alert("Ошибка при экспорте в PDF. Проверьте консоль.");
+        } finally {
+            document.body.removeChild(wrapper);
+            console.log('Временный контейнер PDF удален.');
+        }
+    }
+</script>

@@ -1,0 +1,153 @@
+﻿@page
+@model WebSmartSchedule.Pages.Positions.IndexModel
+@{
+    ViewData["Title"] = "Должности";
+}
+<link rel="stylesheet" href="~/css/UnionStyle.css" />
+<div class="container-xxl py-4">
+    <div class="page-section p-4 bg-white rounded shadow-sm">
+        <!-- Сообщения -->
+        @if (TempData["POSuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["POSuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["POErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["POErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Заголовок и кнопка добавления -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <h2 class="mb-0 text-primary fw-bold">🧑‍🏫 Список должностей</h2>
+            <a href="#"
+               class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
+               onclick="openModal('createPositionModal')">
+                <i class="bi bi-plus-lg"></i> Добавить должность
+            </a>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+
+                    </span>
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control border-start-0 ps-0"
+                           placeholder="Найти...">
+                    <button class="btn btn-outline-primary"
+                            type="button"
+                            id="searchButton"
+                            onclick="performSearch()">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Отображение результатов -->
+        @if (!Model.Positions.Any())
+        {
+            <div class="text-center py-5 bg-light rounded">
+                <p class="lead mb-2">Нет данных о должностях.</p>
+                <p class="text-muted">Добавьте их через Swagger или миграции.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Карточки для мобильных устройств -->
+            <div class="d-block d-md-none mt-3" style="max-height: 60vh; overflow-y: auto;">
+                <div class="container-fluid p-0">
+                    @foreach (var position in Model.Positions)
+                    {
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">@position.Name</h5>
+                                <p class="card-text mb-1">Описание: @position.Description</p>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                                            onclick="fillEditModal(this)"
+                                            data-id="@position.Id"
+                                            data-name="@position.Name"
+                                            data-description="@position.Description">
+                                        <i class="bi bi-pencil"></i> Изменить
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@position.Id)">
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Таблица для десктопа -->
+            <div class="table-container border rounded overflow-auto d-none d-md-block mt-3" style="max-height: 60vh;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Название</th>
+                            <th>Описание</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var position in Model.Positions)
+                        {
+                            <tr>
+                                <td data-label="Название">@position.Name</td>
+                                <td data-label="Описание">@position.Description</td>
+                                <td data-label="Действия">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                onclick="fillEditModal(this)"
+                                                data-id="@position.Id"
+                                                data-name="@position.Name"
+                                                data-description="@position.Description">
+                                            <i class="bi bi-pencil"></i> Изменить
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                onclick="confirmDelete(@position.Id)">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<partial name="_PositionModals" />
+<script>
+    function fillEditModal(button) {
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name');
+        const description = button.getAttribute('data-description');
+
+        document.getElementById('editPositionId').value = id;
+        document.getElementById('editPositionName').value = name;
+        document.getElementById('editPositionDescription').value = description;
+
+        openModal('editPositionModal');
+    }
+            
+    function confirmDelete(id) {
+        document.getElementById('deletePositionId').value = id;
+        openModal('deleteConfirmModal');
+    }
+
+
+</script>
+<script src="/js/modal.js"></script>
+<script src="/js/searchHandler.js"></script>
+<script src="/js/ValidationModal.js"></script>

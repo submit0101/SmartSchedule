@@ -1,0 +1,57 @@
+﻿@model WebSmartSchedule.Pages.WeekTypes.IndexModel
+<!-- Modal создания -->
+<div id="createWeekTypeModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('createWeekTypeModal')">&times;</button>
+        <div class="modal-header">
+            <h3>Добавить тип недели</h3>
+        </div>
+        <form method="post" asp-page-handler="Create">
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input type="text" class="form-control" name="Name" required />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createWeekTypeModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal редактирования -->
+<div id="editWeekTypeModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('editWeekTypeModal')">&times;</button>
+        <div class="modal-header">
+            <h3>Изменить тип недели</h3>
+        </div>
+        <form method="post" asp-page-handler="Update">
+            <input type="hidden" id="editWeekTypeId" name="Id" />
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input type="text" id="editWeekTypeName" class="form-control" name="Name" required />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editWeekTypeModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Обновить</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal удаления -->
+<div id="deleteWeekTypeConfirmModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('deleteWeekTypeConfirmModal')">&times;</button>
+        <div class="modal-header">
+            <h3>Подтвердите удаление</h3>
+        </div>
+        <form method="post" asp-page-handler="Delete">
+            <input type="hidden" id="deleteWeekTypeId" name="id" />
+            <p>Вы действительно хотите удалить этот тип недели?</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteWeekTypeConfirmModal')">Отмена</button>
+                <button type="submit" class="btn btn-danger">Удалить</button>
+            </div>
+        </form>
+    </div>
+</div>

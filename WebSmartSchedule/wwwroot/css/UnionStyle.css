@@ -1,0 +1,361 @@
+
+    .table td, .table th {
+        padding: 8px;
+        white-space: nowrap;
+        text-align: center; /* Выравнивание по центру для всех ячеек */
+    }
+
+        /* Установка фиксированной ширины для некоторых столбцов */
+        .table td:nth-child(1), .table th:nth-child(1) { /* Номер */
+            min-width: 80px;
+            width: 80px;
+        }
+
+        .table td:nth-child(2), .table th:nth-child(2) { /* Корпус */
+            min-width: 150px;
+            width: 150px;
+        }
+
+        .table td:nth-child(3), .table th:nth-child(3) { /* Вместимость */
+            min-width: 100px;
+            width: 100px;
+            text-align: center; /* Центрирование чисел */
+        }
+
+        .table td:nth-child(4), .table th:nth-child(4) { /* Оборудование */
+            min-width: 200px;
+            width: 200px;
+        }
+
+        .table td:nth-child(5), .table th:nth-child(5) { /* Действия */
+            min-width: 150px;
+            width: 150px;
+            text-align: center; /* Выравнивание по центру для всей ячейки */
+        }
+
+    /* Стили для мобильных устройств */
+    @media (max-width: 768px) {
+        .table thead {
+            display: none;
+            overflow: hidden;
+        }
+
+        .table tbody tr {
+            display: block;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+        }
+
+        .table tbody td {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+        }
+
+            .table tbody td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                min-width: 100px;
+            }
+
+        .d-md-none-mobile {
+            display: none !important;
+        }
+    }
+
+    @media (max-width: 375px) {
+        .table td, .table th {
+            padding: 6px;
+        }
+    }
+
+    @media not all and (max-width: 768px) {
+
+
+        html {
+            overflow: hidden;
+        }
+    }
+
+    .table-container {
+        max-height: calc(100vh - 200px);
+    }
+    /* === Модальное окно === */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(30, 30, 30, 0.6); /* Более насыщенное затемнение */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+        transition: opacity 0.3s ease;
+    }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+    /* === Контейнер содержимого === */
+    .modal-content {
+        background-color: #ffffff;
+        padding: 24px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 520px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeInUp 0.4s ease-out forwards;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* === Анимация появления сверху === */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* === Кнопка закрытия === */
+    .btn-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .btn-close:hover {
+            color: #333;
+        }
+
+    /* === Заголовок модалки === */
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    /* === Форма внутри === */
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        transition: border-color 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        }
+
+    .valid-feedback {
+        display: none;
+        color: green;
+        font-size: 0.85rem;
+    }
+
+    .invalid-feedback {
+        display: none;
+        color: red;
+        font-size: 0.85rem;
+    }
+
+    /* === Футер с кнопками === */
+    .modal-footer {
+        display: flex;
+        justify-content: end;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .btn-secondary {
+        background-color: #e2e3e5;
+        color: #495057;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .btn-secondary:hover {
+            background-color: #d4d5d7;
+        }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #0a58ca;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+    @supports (-webkit-touch-callout: none) {
+        .form-control {
+            font-size: 16px;
+        }
+    }
+
+    .search-form {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .search-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .search-field {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .search-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .sort-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .sort-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .active-sort {
+        background-color: #0d6efd;
+        color: white;
+    }
+    /* Скрытие формы */
+    .search-form {
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, display 0s ease-out 0.4s;
+        max-height: 250px; /* Высота формы при открытии */
+    }
+
+        .search-form.collapsed {
+            max-height: 0;
+ 
+        }
+    
+    /* На десктопе форма всегда показана нормально */
+    @media (min-width: 769px) {
+        #searchForm {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+    }
+@keyframes flash {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.alert {
+    position: relative;
+    opacity: 1;
+    animation: fadeInUp 0.5s ease forwards, fadeOutDown 3s ease forwards 4s;
+    margin-bottom: 1rem;
+}
+
+/* Анимация появления */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes fadeOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+.search-highlight {
+    outline: 3px solid #ffc107 !important; 
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); 
+    background-color: rgba(255, 193, 7, 0.1); 
+    transition: all 0.3s ease-in-out;
+}

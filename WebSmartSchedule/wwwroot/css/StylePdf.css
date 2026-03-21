@@ -1,0 +1,61 @@
+/* === СТИЛИ ДЛЯ PDF ЭКСПОРТА === */
+
+/* Контейнер при экспорте */
+.pdf-export-view {
+    font-family: Arial, sans-serif !important;
+    color: black !important;
+    background: white !important;
+    border: 2px solid black !important;
+    gap: 0 !important; /* Убираем щели между ячейками */
+}
+
+    /* Ячейки */
+    .pdf-export-view .lesson-slot {
+        border: 1px solid black !important;
+        background: white !important;
+        color: black !important;
+        /* ВАЖНО: Запрещаем вертикальный текст */
+        white-space: nowrap !important;
+        /* Центрируем */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 4px !important;
+        min-height: 80px !important; /* Минимальная высота, чтобы было красиво */
+    }
+
+        /* Скрываем текст "Нет занятия" (будут пустые белые клетки) */
+        .pdf-export-view .empty-slot-text,
+        .pdf-export-view .lesson-slot:empty::before {
+            display: none !important;
+        }
+
+    /* Скрываем иконки копирования, удаления и т.д. */
+    .pdf-export-view i,
+    .pdf-export-view .bi,
+    .pdf-export-view button {
+        display: none !important;
+    }
+
+    /* Карточки занятий - делаем их простыми */
+    .pdf-export-view .schedule-card,
+    .pdf-export-view .lesson-item {
+        background: #f0f0f0 !important;
+        border: none !important;
+        border-left: 4px solid black !important; /* Черная полоска слева */
+        box-shadow: none !important;
+        color: black !important;
+        white-space: normal !important; /* Внутри карточки текст может переноситься */
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* Заголовки (Дни и Время) */
+    .pdf-export-view .grid-header,
+    .pdf-export-view .time-header,
+    .pdf-export-view .day-header-grid {
+        background: #e0e0e0 !important;
+        color: black !important;
+        border: 1px solid black !important;
+        font-weight: bold !important;
+    }

@@ -1,0 +1,144 @@
+﻿@model WebSmartSchedule.Pages.Teacher.IndexModel
+
+<!-- Modal создания -->
+<div id="createTeacherModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('createTeacherModal')"></button>
+        <div class="modal-header">
+            <h3>Добавить преподавателя</h3>
+        </div>
+        <form method="post" asp-page-handler="Create" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label class="form-label">Фамилия</label>
+                <input type="text" class="form-control" name="LastName"
+                       required maxlength="50"
+                       pattern="^[а-яА-ЯёЁ\-]+$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ\-]/g, '')"
+                       placeholder="Иванов"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Только русские буквы и дефис">
+                <div class="invalid-feedback">Только русские буквы и дефис</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Имя</label>
+                <input type="text" class="form-control" name="FirstName"
+                       required maxlength="50"
+                       pattern="^[а-яА-ЯёЁ\-]+$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ\-]/g, '')"
+                       placeholder="Иван"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Только русские буквы и дефис">
+                <div class="invalid-feedback">Только русские буквы и дефис</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Отчество</label>
+                <input type="text" class="form-control" name="MiddleName"
+                       maxlength="50"
+                       pattern="^[а-яА-ЯёЁ\-]*$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ\-]/g, '')"
+                       placeholder="Иванович"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Только русские буквы и дефис (необязательно)">
+                <div class="invalid-feedback">Только русские буквы</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Должность</label>
+                <select class="form-select" name="PositionId" required
+                        data-bs-toggle="tooltip" title="Выберите должность из списка">
+                    <option value="" disabled selected>-- Выберите должность --</option>
+                    @foreach (var position in Model.Positions)
+                    {
+                        <option value="@position.Id">@position.Name</option>
+                    }
+                </select>
+                <div class="invalid-feedback">Выберите должность</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createTeacherModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal изменения -->
+<div id="editTeacherModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('editTeacherModal')"></button>
+        <div class="modal-header">
+            <h3>Редактировать преподавателя</h3>
+        </div>
+        <form method="post" asp-page-handler="Update" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="editTeacherId" name="Id" />
+            <div class="form-group">
+                <label class="form-label">Фамилия</label>
+                <input type="text" id="editTeacherLastName" class="form-control" name="LastName"
+                       required maxlength="50"
+                       pattern="^[а-яА-ЯёЁ\-]+$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ\-]/g, '')"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Только русские буквы и дефис">
+                <div class="invalid-feedback">Только русские буквы и дефис</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Имя</label>
+                <input type="text" id="editTeacherFirstName" class="form-control" name="FirstName"
+                       required maxlength="50"
+                       pattern="^[а-яА-ЯёЁ\-]+$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ\-]/g, '')"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Только русские буквы и дефис">
+                <div class="invalid-feedback">Только русские буквы и дефис</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Отчество</label>
+                <input type="text" id="editTeacherMiddleName" class="form-control" name="MiddleName"
+                       maxlength="50"
+                       pattern="^[а-яА-ЯёЁ\-]*$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ\-]/g, '')"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Только русские буквы и дефис (необязательно)">
+                <div class="invalid-feedback">Только русские буквы</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Должность</label>
+                <select id="editTeacherPositionId" class="form-select" name="PositionId" required
+                        data-bs-toggle="tooltip" title="Выберите должность из списка">
+                    @foreach (var position in Model.Positions)
+                    {
+                        <option value="@position.Id">@position.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editTeacherModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal подтверждения удаления -->
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('deleteConfirmModal')">&times;</button>
+        <div class="modal-header">
+            <h3>Подтвердите удаление</h3>
+        </div>
+        <form method="post" asp-page-handler="Delete">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="deleteTeacherId" name="Id" />
+            <p>Вы уверены, что хотите удалить этого преподавателя? Это действие нельзя будет отменить. </p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Отмена</button>
+                <button type="submit" class="btn btn-danger">Удалить</button>
+            </div>
+        </form>
+    </div>
+</div>

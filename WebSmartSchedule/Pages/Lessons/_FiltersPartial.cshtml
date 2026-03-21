@@ -1,0 +1,227 @@
+﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
+
+<!-- Основной контейнер с новым ID и классом -->
+<div id="filtersContainer" class="filters-container-sticky">
+    
+    <!-- === Навигация (Вкладки) === -->
+    <ul class="nav nav-tabs" id="filterTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-filters" type="button" role="tab">
+                <i class="bi bi-filter me-1"></i> Фильтры
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-group" type="button" role="tab">
+                <i class="bi bi-people me-1"></i> Группа
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-teacher" type="button" role="tab">
+                <i class="bi bi-person me-1"></i> Преподаватель
+            </button>
+        </li>
+    </ul>
+
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="pane-filters" role="tabpanel">
+            <div class="cards-scroll-container">
+                
+                <!-- Карточка 1: Тип недели -->
+                <div class="filter-card" id="weekFilterPanel">
+                    <div class="filter-card-header">
+                        <span>Тип недели</span>
+                        <i class="bi bi-calendar3 text-muted"></i>
+                    </div>
+                    <div class="filter-card-body">
+                        <div class="grid-2x2">
+                            <button class="week-btn active" data-weektype="all" title="Показать все занятия">
+                                <i class="bi bi-calendar-week"></i>
+                            </button>
+                            <button class="week-btn" data-weektype="1" title="Только для числителя">
+                                <i class="bi bi-square-fill" style="color: #16a34a;"></i>
+                            </button>
+                            <button class="week-btn" data-weektype="2" title="Только для знаменателя">
+                                <i class="bi bi-square-fill" style="color: #2563eb;"></i>
+                            </button>
+                            <button class="week-btn" data-weektype="3" title="Занятия, проходящие каждую неделю">
+                                <i class="bi bi-square-fill" style="color: #dc2626;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 2: Поиск -->
+                <div class="filter-card">
+                    <div class="filter-card-header">
+                        <span>Поиск</span>
+                        <i class="bi bi-search text-muted"></i>
+                    </div>
+                    <div class="filter-card-body">
+                        <input type="text" id="scheduleSearch" class="form-control" placeholder="Название..." />
+                        <div class="card-actions">
+                            <button class="btn btn-primary" id="searchBtn">Найти</button>
+                            <button class="btn btn-outline-secondary" id="clearSearchBtn" title="Очистить"><i class="bi bi-x-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-card">
+                    <div class="filter-card-header">
+                        <span>Пары</span>
+                        <i class="bi bi-clock text-muted"></i>
+                    </div>
+                    <div class="filter-card-body scrollable-list" id="timeSlotFilterContent">
+                       
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="pane-group" role="tabpanel">
+            <div class="cards-scroll-container">
+
+                <!-- Карточка 1: Выбор группы -->
+                <div class="filter-card wide">
+                    <div class="filter-card-header">Выбор группы</div>
+                    <div class="filter-card-body">
+                        <select id="groupId" name="SelectedGroupId" class="form-select"
+                                asp-for="@Model.SelectedGroupId"
+                                asp-items="@(new SelectList(Model.Groups, "Id", "Name", Model.SelectedGroupId))">
+                        </select>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-primary" id="showGroupButton">Показать</button>
+                            <button type="button" id="exportPdfBtn" class="btn btn-danger" title="Экспорт в PDF">
+                                <i class="bi bi-file-pdf"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 2: Режим отображения -->
+                <div class="filter-card">
+                    <div class="filter-card-header">Вид</div>
+                    <div class="filter-card-body">
+                        <div class="nav flex-column gap-2 w-100" role="tablist">
+                            <button class="nav-link btn btn-sm btn-outline-primary active w-100 text-start"
+                                    id="btn-group-schedule"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-schedule"
+                                    role="tab">
+                                <i class="bi bi-calendar-week me-1"></i> Сетка
+                            </button>
+                            <button class="nav-link btn btn-sm btn-outline-secondary w-100 text-start"
+                                    id="btn-group-usage"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-group-usage"
+                                    role="tab">
+                                <i class="bi bi-bar-chart-steps me-1"></i> Нагрузка
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="pane-teacher" role="tabpanel">
+            <div class="cards-scroll-container">
+
+                <!-- Карточка 1: Выбор преподавателя -->
+                <div class="filter-card wide">
+                    <div class="filter-card-header">Преподаватель</div>
+                    <div class="filter-card-body">
+                        <select id="teacherSelect" name="SelectedTeacherId" class="form-select">
+                            <option value="">-- Выберите --</option>
+                            @foreach (var t in Model.Teachers)
+                            {
+                                <option value="@t.Id">@t.FullName</option>
+                            }
+                        </select>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-primary" id="showTeacherButton">Показать</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 2: Свободное время -->
+                <div class="filter-card">
+                    <div class="filter-card-header">Свободные окна</div>
+                    <div class="filter-card-body">
+                        <div class="text-muted small text-center flex-grow-1 d-flex align-items-center justify-content-center" style="line-height: 1.2;">
+                            Отобразить пустые слоты
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-success" id="showFreeTimeBtn">Показать</button>
+                            <button type="button" class="btn btn-secondary" id="hideFreeTimeBtn" style="display: none;">Скрыть</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 3: Сравнение -->
+                <div class="filter-card wide">
+                    <div class="filter-card-header">Сравнение</div>
+                    <div class="filter-card-body">
+                        <select id="compareWithTeacher" class="form-select">
+                            <option value="">С кем сравнить?</option>
+                             <!-- Заполняется JS -->
+                        </select>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-info text-white" id="findCommonFreeTimeBtn">
+                                <i class="bi bi-clock-history me-1"></i> Общее
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="clearComparisonBtn" style="display: none;">Сброс</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 4: Группы преподавателя -->
+                <div class="filter-card wide">
+                    <div class="filter-card-header">Фильтр группы</div>
+                    <div class="filter-card-body">
+                        <select id="teacherGroupsSelect" class="form-select" disabled>
+                           <!-- Заполняется JS -->
+                        </select>
+                        <div class="card-actions">
+                            <button id="applyTeacherGroupFilterBtn" type="button" class="btn btn-warning text-white">
+                                Фильтровать
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 5: Режим отображения -->
+                <div class="filter-card">
+                    <div class="filter-card-header">Вид</div>
+                    <div class="filter-card-body scrollable-list">
+                        <div class="nav flex-column gap-2 w-100" role="tablist">
+                            <button type="button" class="nav-link btn btn-sm btn-outline-primary active w-100 text-start mb-1"
+                                    id="btn-show-schedule"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-schedule"
+                                    role="tab">
+                                <i class="bi bi-grid-3x3 me-1"></i> Сетка
+                            </button>
+                            <button type="button" class="nav-link btn btn-sm btn-outline-secondary w-100 text-start mb-1"
+                                    id="btn-show-usage"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-teacher-usage"
+                                    role="tab">
+                                <i class="bi bi-bar-chart me-1"></i> Нагрузка
+                            </button>
+                            <button type="button" class="nav-link btn btn-sm btn-outline-secondary w-100 text-start"
+                                    id="btn-show-heatmap"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-teacher-heatmap"
+                                    role="tab">
+                                <i class="bi bi-map me-1"></i> Карта
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

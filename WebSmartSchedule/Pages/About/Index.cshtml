@@ -1,0 +1,49 @@
+﻿@page
+@{
+    ViewData["Title"] = "О программе";
+}
+
+<div class="container fade-in py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-body text-center p-5">
+                    <img src="~/images/logo.png" alt="Logo" width="80" class="mb-3 rounded-circle shadow-sm">
+                    <h2 class="fw-bold mb-1">Аудиториум</h2>
+                    <p class="text-muted mb-3">Система управления расписанием колледжа</p>
+                    <span class="badge bg-primary rounded-pill px-3 py-2">Версия 1.0.0 (Release)</span>
+                </div>
+            </div>
+
+            <h4 class="mb-3"><i class="bi bi-cpu-fill me-2"></i>Технологический стек</h4>
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold">Серверная часть</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item bg-transparent"><i class="bi bi-check2-circle text-success me-2"></i>.NET 7 (ASP.NET Core)</li>
+                                <li class="list-group-item bg-transparent"><i class="bi bi-check2-circle text-success me-2"></i>Entity Framework Core </li>
+                                <li class="list-group-item bg-transparent"><i class="bi bi-check2-circle text-success me-2"></i>MS SQL Server 2022</li>
+                                <li class="list-group-item bg-transparent"><i class="bi bi-check2-circle text-success me-2"></i>Redis (Кэширование)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold">Клиентская часть</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item bg-transparent"><i class="bi bi-phone text-primary me-2"></i>Android (Kotlin + Jetpack Compose)</li>
+                                <li class="list-group-item bg-transparent"><i class="bi bi-window text-primary me-2"></i>Web (Razor Pages + Bootstrap 5)</li>
+                                <li class="list-group-item bg-transparent"><i class="bi bi-filetype-js text-primary me-2"></i>jQuery + AJAX</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5 text-muted small">
+                <p>&copy; 2025 Политехнический колледж БГТУ. Разработано в рамках ПП.</p>
+            </div>
+
+        </div>
+    </div>
+</div>

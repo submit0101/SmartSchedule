@@ -1,0 +1,148 @@
+﻿@page
+@model WebSmartSchedule.Pages.Building.IndexModel
+@{
+    ViewData["Title"] = "Корпуса";
+}
+<link rel="stylesheet" href="~/css/UnionStyle.css" />
+<div class="container-xxl py-4">
+    <div class="page-section p-4 bg-white rounded shadow-sm">
+        @if (TempData["BUSuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["BUSuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["BUErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["BUErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <h2 class="mb-0 text-primary fw-bold">Список зданий</h2>
+            <a href="#"
+               class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
+               onclick="openModal('createBuildingModal')">
+                <i class="bi bi-plus-lg"></i> Добавить здание
+            </a>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                    </span>
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control border-start-0 ps-0"
+                           placeholder="Найти...">
+                    <button class="btn btn-outline-primary"
+                            type="button"
+                            id="searchButton"
+                            onclick="performSearch()">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Buildings.Any())
+        {
+            <div class="text-center py-5 bg-light rounded">
+                <p class="lead mb-2">Нет данных о зданиях.</p>
+                <p class="text-muted">Добавьте их через Swagger или миграции.</p>
+            </div>
+        }
+        else
+        {
+            <div class="d-block d-md-none mt-3" style="max-height: 60vh; overflow-y: auto;">
+                <div class="container-fluid p-0">
+                    @foreach (var building in Model.Buildings)
+                    {
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title search-item">@building.Name</h5>
+                                <p class="card-text mb-1">Адрес: <span class="search-item">@building.Address</span></p>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                                            onclick="fillEditModal(this)"
+                                            data-id="@building.Id"
+                                            data-name="@building.Name"
+                                            data-address="@building.Address">
+                                        <i class="bi bi-pencil"></i> Изменить
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@building.Id)">
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="table-container border rounded overflow-auto d-none d-md-block mt-3" style="max-height: 60vh;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Название</th>
+                            <th>Адрес</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var building in Model.Buildings)
+                        {
+                            <tr>
+                                <td data-label="Название" class="search-item">@building.Name</td>
+                                <td data-label="Адрес" class="search-item">@building.Address</td>
+                                <td data-label="Действия">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                onclick="fillEditModal(this)"
+                                                data-id="@building.Id"
+                                                data-name="@building.Name"
+                                                data-address="@building.Address">
+                                            <i class="bi bi-pencil"></i> Изменить
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                onclick="confirmDelete(@building.Id)">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<partial name="_BuildingModals" />
+
+<script>
+    function fillEditModal(button) {
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name');
+        const address = button.getAttribute('data-address');
+
+        document.getElementById('editBuildingId').value = id;
+        document.getElementById('editBuildingName').value = name;
+        document.getElementById('editBuildingAddress').value = address;
+
+        openModal('editBuildingModal');
+    }
+
+    function confirmDelete(id) {
+        document.getElementById('deleteBuildingId').value = id;
+        openModal('deleteConfirmModal');
+    }
+</script>
+<script src="/js/modal.js"></script>
+<script src="/js/ValidationModal.js"></script>
+<script src="/js/searchHandler.js"></script>

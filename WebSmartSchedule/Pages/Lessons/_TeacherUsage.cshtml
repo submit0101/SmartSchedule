@@ -1,0 +1,513 @@
+@model WebSmartSchedule.Pages.Lessons.IndexModel
+
+<style>
+    .container-fluid {
+        overflow-x: hidden;
+    }
+
+    .table-scroll-wrapper {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+        .table-scroll-wrapper thead th {
+            position: sticky;
+            top: 0;
+            background-color: #F7F7F9;
+            z-index: 2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+    @@media (min-width: 992px) {
+        .table-scroll-wrapper
+
+    {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .table-scroll-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    }
+
+    .mobile-scroll-wrapper {
+        height: calc(100vh - 420px);
+        min-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 100px !important;
+    }
+
+    .sticky-stats-card {
+        position: sticky;
+        top: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .floating-chart-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 320px;
+        z-index: 990;
+        display: none;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+        border-radius: 16px;
+        background: white;
+        border: 1px solid rgba(0,0,0,0.05);
+        animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @@keyframes slideInUp {
+        from
+
+    {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    }
+
+    .mobile-card {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .chart-actions .btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="container-fluid px-0">
+
+    <div class="material-card mb-4">
+        <h5 class="mb-3" style="color: var(--md-sys-color-primary); font-weight: 600;">Фильтры преподавателей</h5>
+        <form id="teacherUsageFilterForm" class="row g-3 align-items-end" onsubmit="return false;">
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Тип недели</label>
+                <select id="TeacherUsageWeekTypeSelect" class="form-select">
+                    <option value="">— Выбрать —</option>
+                    @foreach (var weekTy in Model.WeekTypes)
+                    {
+                        <option value="@weekTy.Id">@weekTy.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">День недели</label>
+                <select id="TeacherUsageDayOfWeekSelect" class="form-select">
+                    <option value="">— Все дни —</option>
+                    @foreach (var weekday in Model.WeekDays)
+                    {
+                        <option value="@weekday.Id">@weekday.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="button" id="ShowTeacherUsageBtn" class="btn btn-primary w-100">
+                    Сформировать отчет
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="material-card p-0 overflow-hidden h-100">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold fs-5 text-dark">Результаты</span>
+                        <span id="TeacherUsageRecordsCount" class="badge bg-light text-dark border">0</span>
+                    </div>
+                    <button id="ExportTeacherUsageExcelBtn" class="btn btn-sm btn-outline-success d-none align-items-center gap-2 px-3 rounded-pill">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        <span class="d-none d-sm-inline fw-medium">Скачать Excel</span>
+                    </button>
+                </div>
+
+                <div class="d-none d-md-block table-scroll-wrapper">
+                    <table id="TeacherUsageTable" class="table table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4" style="width: 40%;">Преподаватель</th>
+                                <th class="text-center">Занято</th>
+                                <th class="text-center">Возможно</th>
+                                <th class="text-center pe-4">Загрузка</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TeacherUsageData">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-5">
+                                    <i class="bi bi-bar-chart-steps fs-1 d-block mb-2 text-secondary opacity-25"></i>
+                                    Выберите параметры и нажмите «Сформировать»
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-md-none p-3 bg-light mobile-scroll-wrapper" id="TeacherUsageMobileContainer">
+                    <div class="text-center text-muted py-4">Нет данных</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="material-card sticky-stats-card">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-primary"><i class="bi bi-pie-chart-fill me-2"></i>Топ-5 Загруженности</h6>
+
+                    <div class="d-flex gap-2 chart-actions">
+                        <button class="btn btn-light text-primary border shadow-sm" onclick="shareChart('desktop')" title="Поделиться в ВК">
+                            <i class="bi bi-share-fill"></i>
+                        </button>
+                        <button class="btn btn-light text-muted border shadow-sm" onclick="downloadChartPng('desktop')" title="Скачать PNG">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 position-relative" style="height: 300px;">
+                    <canvas id="DesktopPieChart"></canvas>
+                </div>
+                <div class="p-3 bg-light border-top rounded-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small text-uppercase fw-bold">Средняя нагрузка</span>
+                        <span id="DesktopTotalUsage" class="fs-5 fw-bold text-dark">0%</span>
+                    </div>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div id="DesktopTotalUsageBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="floatingChartWidget" class="floating-chart-widget d-lg-none">
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+        <span class="fw-bold small text-uppercase text-primary">Топ-5</span>
+
+        <div class="d-flex align-items-center gap-2">
+            <div class="d-flex gap-2 chart-actions">
+                <button class="btn btn-white text-primary border shadow-sm" onclick="shareChart('mobile')">
+                    <i class="bi bi-share-fill"></i>
+                </button>
+                <button class="btn btn-white text-secondary border shadow-sm" onclick="downloadChartPng('mobile')">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
+            </div>
+
+            <div style="width: 1px; height: 24px; background: #eee; margin: 0 4px;"></div>
+            <button type="button" class="btn-close" onclick="closeChartWidget()"></button>
+        </div>
+    </div>
+    <div class="p-3 text-center bg-white">
+        <div style="height: 250px; position: relative;">
+            <canvas id="floatingPieChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    (function () {
+        let reportData = [];
+        let desktopChart = null;
+        let mobileChart = null;
+        let currentAvg = "0%";
+
+        document.getElementById("ShowTeacherUsageBtn").addEventListener("click", async () => {
+            const weekType = document.getElementById("TeacherUsageWeekTypeSelect").value;
+            const day = document.getElementById("TeacherUsageDayOfWeekSelect").value;
+            const btn = document.getElementById("ShowTeacherUsageBtn");
+
+            // Фиксируем ширину, чтобы кнопка не дергалась
+            btn.style.width = `${btn.offsetWidth}px`;
+            const originalText = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>...';
+
+            // ГЛАВНЫЙ ФИКС INP: Выносим логику из потока отрисовки интерфейса
+            setTimeout(async () => {
+                try {
+                    const params = new URLSearchParams();
+                    if (weekType) params.append('weekTypeId', weekType);
+                    if (day) params.append('dayOfWeekId', day);
+
+                    const url = `http://localhost:5062/api/Lesson/teacher-usage?${params.toString()}`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error("Server Error");
+
+                    const data = await res.json();
+                    reportData = data;
+
+                    // Оптимизированный рендер (см. функцию ниже)
+                    renderResults(data);
+
+                    if (data && data.length > 0) {
+                        // requestAnimationFrame делает появление графиков плавным для глаза
+                        requestAnimationFrame(() => {
+                            updateCharts(data);
+                            document.getElementById("ExportTeacherUsageExcelBtn").classList.remove("d-none");
+                            document.getElementById("ExportTeacherUsageExcelBtn").classList.add("d-flex");
+
+                            if (window.innerWidth < 992) {
+                                document.getElementById('floatingChartWidget').style.display = 'block';
+                            }
+                        });
+                    } else {
+                        closeChartWidget();
+                        document.getElementById("ExportTeacherUsageExcelBtn").classList.add("d-none");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Ошибка загрузки данных");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    btn.style.width = '';
+                }
+            }, 0);
+        });
+
+        function renderResults(data) {
+            const tbody = document.getElementById("TeacherUsageData");
+            const mobileContainer = document.getElementById("TeacherUsageMobileContainer");
+            const countLabel = document.getElementById("TeacherUsageRecordsCount");
+
+            // Очищаем DOM только один раз перед вставкой
+            tbody.innerHTML = "";
+            mobileContainer.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">Нет данных</td></tr>`;
+                mobileContainer.innerHTML = `<div class="text-center text-muted py-4">Нет данных</div>`;
+                countLabel.innerText = "0";
+                updateTotalStats(0);
+                return;
+            }
+
+            countLabel.innerText = data.length;
+            let totalLessons = 0, totalPossible = 0;
+
+            // СТРОКИ СОБИРАЕМ В ПЕРЕМЕННЫЕ (БЫСТРО)
+            let tableRows = "";
+            let mobileCards = "";
+
+            data.forEach(t => {
+                totalLessons += t.totalLessons;
+                totalPossible += t.maxPossibleLessons;
+
+                const percent = t.maxPossibleLessons > 0 ? ((t.totalLessons / t.maxPossibleLessons) * 100).toFixed(1) : 0;
+                const colorClass = percent > 70 ? "text-success" : percent > 40 ? "text-warning" : "text-danger";
+                const bgClass = percent > 70 ? "bg-success" : percent > 40 ? "bg-warning" : "bg-danger";
+                const borderClass = percent > 70 ? "border-success" : percent > 40 ? "border-warning" : "border-danger";
+
+                tableRows += `
+                    <tr>
+                        <td class="ps-4"><div class="fw-bold text-dark">${t.teacherFullName}</div></td>
+                        <td class="text-center font-monospace fs-6">${t.totalLessons}</td>
+                        <td class="text-center text-muted font-monospace">${t.maxPossibleLessons}</td>
+                        <td class="text-center">
+                            <span class="badge ${bgClass} bg-opacity-10 ${colorClass} border ${borderClass} rounded-pill px-3">${percent}%</span>
+                        </td>
+                    </tr>`;
+
+                const initials = t.teacherFullName.split(' ').map(n => n[0]).join('').substring(0, 2);
+                mobileCards += `
+                    <div class="mobile-card shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center fw-bold me-2" style="width:36px; height:36px;">${initials}</div>
+                                <div class="fw-bold text-dark" style="font-size: 0.95rem;">${t.teacherFullName}</div>
+                            </div>
+                            <span class="fw-bold ${colorClass}">${percent}%</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar ${bgClass}" style="width: ${percent}%"></div>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between small text-muted">
+                            <span>Занято: ${t.totalLessons}</span>
+                            <span>Всего: ${t.maxPossibleLessons}</span>
+                        </div>
+                    </div>`;
+            });
+
+            // ОБНОВЛЯЕМ DOM ОДНИМ МАХОМ (УБИРАЕТ ЛАГИ)
+            tbody.innerHTML = tableRows;
+            mobileContainer.innerHTML = mobileCards;
+
+            const overallPercent = totalPossible > 0 ? ((totalLessons / totalPossible) * 100).toFixed(1) : 0;
+            currentAvg = `${overallPercent}%`;
+            updateTotalStats(overallPercent);
+        }
+
+        function updateTotalStats(percent) {
+            const el = document.getElementById("DesktopTotalUsage");
+            if(el) el.innerText = `${percent}%`;
+            const bar = document.getElementById("DesktopTotalUsageBar");
+            if(bar) {
+                bar.style.width = `${percent}%`;
+                bar.className = `progress-bar ${percent > 70 ? 'bg-success' : percent > 40 ? 'bg-warning' : 'bg-primary'}`;
+            }
+        }
+
+        window.shareChart = function(type) {
+            const chart = type === 'mobile' ? mobileChart : desktopChart;
+            if (!chart) return alert("График не найден");
+
+            chart.canvas.toBlob(async (blob) => {
+                if (!blob) return;
+                const file = new File([blob], "chart.png", { type: "image/png" });
+
+                // Для мобильных устройств (Android/iOS)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Статистика преподавателей',
+                            text: `Общая загрузка преподавателей: ${currentAvg}`,
+                        });
+                    } catch (error) { console.log('Share dismissed'); }
+                }
+                // Для ПК (буфер обмена + ссылка)
+                else {
+                    try {
+                        await navigator.clipboard.write([ new ClipboardItem({ "image/png": blob }) ]);
+                        window.open('https://vk.com/share.php?comment=' + encodeURIComponent(`Загрузка преподавателей: ${currentAvg}`), '_blank');
+                        alert("📷 Диаграмма скопирована в буфер обмена!\n\nПросто нажмите Ctrl+V (Вставить) в открывшемся окне ВК.");
+                    } catch (err) {
+                        saveAs(blob, "chart_stats.png");
+                        window.open('https://vk.com/', '_blank');
+                        alert("Файл скачан. Загрузите его в ВК вручную.");
+                    }
+                }
+            }, 'image/png');
+        };
+
+        function updateCharts(data) {
+            // Сортируем и берем ТОП-5
+            const sorted = [...data].sort((a, b) => {
+                const pA = a.maxPossibleLessons > 0 ? (a.totalLessons / a.maxPossibleLessons) : 0;
+                const pB = b.maxPossibleLessons > 0 ? (b.totalLessons / b.maxPossibleLessons) : 0;
+                return pB - pA;
+            });
+            const top5 = sorted.slice(0, 5);
+
+            const labels = top5.map(t => {
+                const parts = t.teacherFullName.split(' ');
+                const name = parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : t.teacherFullName;
+                const percent = t.maxPossibleLessons > 0 ? ((t.totalLessons / t.maxPossibleLessons) * 100).toFixed(1) : 0;
+                return `${name} (${percent}%)`;
+            });
+
+            const values = top5.map(t => t.maxPossibleLessons > 0 ? ((t.totalLessons / t.maxPossibleLessons) * 100).toFixed(1) : 0);
+            const bgColors = ['#EF5350', '#42A5F5', '#66BB6A', '#FFA726', '#AB47BC'];
+
+            // БАЗОВЫЙ КОНФИГ
+            const config = {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: values, backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff' }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        // Для десктопа оставляем легенду внизу, но компактно
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, padding: 15 } },
+                        tooltip: { enabled: false }
+                    },
+                    cutout: '70%',
+                    layout: { padding: 10 }
+                }
+            };
+
+            // ДЕСКТОП ГРАФИК
+            const ctxDesk = document.getElementById('DesktopPieChart');
+            if (Chart.getChart(ctxDesk)) Chart.getChart(ctxDesk).destroy();
+            desktopChart = new Chart(ctxDesk, config);
+
+            // МОБИЛЬНЫЙ ГРАФИК
+            const ctxMob = document.getElementById('floatingPieChart');
+            if (Chart.getChart(ctxMob)) Chart.getChart(ctxMob).destroy();
+
+            const mobConfig = JSON.parse(JSON.stringify(config));
+
+            // ФИКС ОТОБРАЖЕНИЯ НА МОБИЛКЕ:
+            // Ставим легенду ВНИЗ (bottom), чтобы она не "съедала" ширину графика
+            mobConfig.options.plugins.legend.position = 'bottom';
+            mobConfig.options.plugins.legend.labels.boxWidth = 10;
+            mobConfig.options.layout.padding = 5;
+
+            mobileChart = new Chart(ctxMob, mobConfig);
+        }
+
+        window.downloadChartPng = function(type) {
+            const chartToDownload = (type === 'mobile') ? mobileChart : desktopChart;
+            if (!chartToDownload) return alert("График еще не построен");
+            const a = document.createElement('a');
+            a.href = chartToDownload.toBase64Image();
+            a.download = `Teachers_Load_${type}.png`;
+            a.click();
+        }
+
+        window.closeChartWidget = function() {
+            document.getElementById('floatingChartWidget').style.display = 'none';
+        }
+
+        document.getElementById("ExportTeacherUsageExcelBtn").addEventListener("click", async () => {
+            if (!reportData || reportData.length === 0) return;
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('Отчет');
+            const borderStyle = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            const headerFont = { bold: true, color: { argb: 'FFFFFFFF' } };
+            const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+
+            sheet.mergeCells('A1:D1');
+            sheet.getCell('A1').value = 'ОТЧЕТ: ПРЕПОДАВАТЕЛИ';
+            sheet.getCell('A1').font = { size: 14, bold: true };
+            sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+            sheet.getRow(3).values = ['Преподаватель', 'Занято', 'Всего', 'Загрузка %'];
+            sheet.columns = [{ width: 35 }, { width: 15 }, { width: 15 }, { width: 15 }];
+
+            const headerRow = sheet.getRow(3);
+            headerRow.eachCell(c => { c.fill = headerFill; c.font = headerFont; c.alignment = { horizontal: 'center' }; c.border = borderStyle; });
+
+            reportData.forEach((t, i) => {
+                const r = sheet.getRow(4 + i);
+                const pct = t.maxPossibleLessons > 0 ? t.totalLessons / t.maxPossibleLessons : 0;
+                r.values = [t.teacherFullName, t.totalLessons, t.maxPossibleLessons, pct];
+                r.getCell(4).numFmt = '0.0%';
+                r.eachCell(c => { c.border = borderStyle; c.alignment = { horizontal: 'center' }; });
+                r.getCell(1).alignment = { horizontal: 'left' };
+                if (pct > 0.7) r.getCell(4).font = { color: { argb: 'FF009900' }, bold: true };
+            });
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `Teachers_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+        });
+    })();
+</script>

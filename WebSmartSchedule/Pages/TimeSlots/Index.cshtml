@@ -1,0 +1,162 @@
+﻿@page
+@model WebSmartSchedule.Pages.TimeSlots.IndexModel
+@{
+    ViewData["Title"] = "Пары";
+}
+<div class="container-xxl py-4">
+    <div class="page-section p-4 bg-white rounded shadow-sm">
+
+        <!-- Сообщения -->
+        @if (TempData["TSSuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["TSSuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["TSErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["TSErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Заголовок и кнопка добавления -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <h2 class="mb-0 text-primary fw-bold">⏰ Список временных слотов</h2>
+            <a href="#"
+               class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
+               onclick="openModal('createTimeSlotModal')">
+                <i class="bi bi-plus-lg"></i> Добавить временной слот
+            </a>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+
+                    </span>
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control border-start-0 ps-0"
+                           placeholder="Найти...">
+                    <button class="btn btn-outline-primary"
+                            type="button"
+                            id="searchButton"
+                            onclick="performSearch()">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Отображение результатов -->
+        @if (!Model.TimeSlots.Any())
+        {
+            <div class="text-center py-5 bg-light rounded">
+                <p class="lead mb-2">Нет данных о временных слотах.</p>
+                <p class="text-muted">Добавьте их через Swagger или миграции.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Карточки для мобильных устройств -->
+            <div class="d-block d-md-none mt-3" style="max-height: 60vh; overflow-y: auto;">
+                <div class="container-fluid p-0">
+                    @foreach (var slot in Model.TimeSlots)
+                    {
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Слот №@slot.SlotNumber</h5>
+                                <p class="card-text mb-1">Время: @slot.StartTime — @slot.EndTime</p>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                                            onclick="fillEditModal(this)"
+                                            data-id="@slot.Id"
+                                            data-slotnumber="@slot.SlotNumber"
+                                            data-starttime="@slot.StartTime.ToString("HH:mm")"
+                                            data-endtime="@slot.EndTime.ToString("HH:mm")">
+                                        <i class="bi bi-pencil"></i> Изменить
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                            onclick="confirmDelete(@slot.Id)">
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Таблица для десктопа -->
+            <div class="table-container border rounded overflow-auto d-none d-md-block mt-3" style="max-height: 60vh;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Номер слота</th>
+                            <th>Начало</th>
+                            <th>Конец</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var slot in Model.TimeSlots)
+                        {
+                            <tr>
+                                <td data-label="Номер слота">@slot.SlotNumber</td>
+                                <td data-label="Начало">@slot.StartTime.ToString("HH:mm")</td>
+                                <td data-label="Конец">@slot.EndTime.ToString("HH:mm")</td>
+                                <td data-label="Действия">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                onclick="fillEditModal(this)"
+                                                data-id="@slot.Id"
+                                                data-slotnumber="@slot.SlotNumber"
+                                                data-starttime="@slot.StartTime.ToString("HH:mm")"
+                                                data-endtime="@slot.EndTime.ToString("HH:mm")">
+                                            <i class="bi bi-pencil"></i> Изменить
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                onclick="confirmDelete(@slot.Id)">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+
+<partial name="_TimeSlotsModals" />
+
+<script>
+    function fillEditModal(button) {
+        const id = button.getAttribute('data-id');
+        const slotNumber = button.getAttribute('data-slotnumber');
+        const startTime = button.getAttribute('data-starttime');
+        const endTime = button.getAttribute('data-endtime');
+
+        document.getElementById('editTimeSlotId').value = id;
+        document.getElementById('editSlotNumber').value = slotNumber;
+        document.getElementById('editStartTime').value = startTime;
+        document.getElementById('editEndTime').value = endTime;
+
+        openModal('editTimeSlotModal');
+    }
+
+    function confirmDelete(id) {
+        document.getElementById('deleteTimeSlotId').value = id;
+        openModal('deleteConfirmModal');
+    }
+</script>
+
+<script src="/js/modal.js"></script>
+<script src="/js/searchHandler.js"></script>
+<script src="/js/ValidationModal.js"></script>

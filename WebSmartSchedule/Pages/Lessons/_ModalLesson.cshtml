@@ -1,0 +1,214 @@
+﻿<div id="createLessonModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('createLessonModal')"></span>
+            <form method="post" asp-page-handler="CreateLesson" class="needs-validation" novalidate>
+                <h5 class="mb-3">Добавить занятие</h5>
+                <input type="hidden" name="GroupId" value="@Model.SelectedGroupId" />
+
+                <div class="mb-3">
+                    <label class="form-label">Предмет</label>
+                    <select name="SubjectId" class="form-select" required title="Выберите предмет из списка">
+                        @foreach (var item in Model.Subjects)
+                        {
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Преподаватель</label>
+                    <select name="TeacherId" class="form-select" required title="Выберите преподавателя">
+                        @foreach (var item in Model.Teachers)
+                        {
+                            <option value="@item.Id">@item.FullName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Кабинет</label>
+                    <select name="CabinetId" class="form-select" required title="Выберите аудиторию">
+                        @foreach (var item in Model.Cabinets)
+                        {
+                            <option value="@item.Id">@item.number@(string.IsNullOrEmpty(item.BuildingName) ? "" : $" ({item.BuildingName})")</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Временной слот</label>
+                    <select name="TimeSlotId" class="form-select" required title="Выберите время занятия">
+                        <option value="">-- Выберите Пару --</option>
+                        @foreach (var item in Model.TimeSlots)
+                        {
+                            <option value="@item.Id">@item.SlotNumber</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Тип недели</label>
+                    <select name="WeekTypeId" class="form-select" required title="Укажите периодичность">
+                        @foreach (var item in Model.WeekTypes)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">День недели</label>
+                    <select name="DayOfWeekId" class="form-select" required title="Выберите день недели">
+                        <option value="1">Понедельник</option>
+                        <option value="2">Вторник</option>
+                        <option value="3">Среда</option>
+                        <option value="4">Четверг</option>
+                        <option value="5">Пятница</option>
+                        <option value="6">Суббота</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createLessonModal')">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="editLessonModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('editLessonModal')"></span>
+            <form id="editLessonForm" method="post" class="needs-validation" novalidate>
+                <h5 class="mb-3">Редактировать занятие</h5>
+                <input type="hidden" name="Id" id="editLessonId" />
+
+                <div class="mb-3">
+                    <label class="form-label">Группа</label>
+                    <select name="GroupId" id="editGroupId" class="form-select" required title="Выберите учебную группу"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Предмет</label>
+                    <select name="SubjectId" id="editSubjectId" class="form-select" required title="Выберите предмет"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Преподаватель</label>
+                    <select name="TeacherId" id="editTeacherId" class="form-select" required title="Выберите преподавателя"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Кабинет</label>
+                    <select name="CabinetId" id="editCabinetId" class="form-select" required title="Выберите кабинет"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Временной слот</label>
+                    <select name="TimeSlotId" id="editTimeSlotId" class="form-select" required title="Выберите время занятия"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Тип недели</label>
+                    <select name="WeekTypeId" id="editWeekTypeId" class="form-select" required title="Укажите периодичность"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">День недели</label>
+                    <select name="DayOfWeekId" id="editDayOfWeekId" class="form-select" required title="Выберите день недели">
+                        <option value="1">Понедельник</option>
+                        <option value="2">Вторник</option>
+                        <option value="3">Среда</option>
+                        <option value="4">Четверг</option>
+                        <option value="5">Пятница</option>
+                        <option value="6">Суббота</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="deleteLesson()">Удалить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editLessonModal')">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('deleteConfirmModal')"></span>
+            <h5 class="mb-3">Подтвердите удаление</h5>
+            <p>Вы действительно хотите удалить это занятие?</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Отмена</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="createLessonGridModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('createLessonGridModal')"></span>
+            <form id="createLessonGridForm" class="needs-validation" novalidate>
+                <h5 class="mb-3">Добавить занятие</h5>
+
+                <input type="hidden" id="gridTimeSlotId" name="TimeSlotId" />
+                <input type="hidden" id="gridDayOfWeekId" name="DayOfWeekId" />
+
+                <div class="mb-3">
+                    <label for="gridGroupId" class="form-label">Группа</label>
+                    <select id="gridGroupId" name="GroupId" class="form-select" required title="Выберите группу">
+                        <option value="">-- Выберите группу --</option>
+                    </select>
+                    <div class="invalid-feedback">Пожалуйста, выберите группу.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="gridSubjectId" class="form-label">Предмет</label>
+                    <select id="gridSubjectId" name="SubjectId" class="form-select" required title="Выберите предмет">
+                        <option value="">-- Выберите предмет --</option>
+                    </select>
+                    <div class="invalid-feedback">Пожалуйста, выберите предмет.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="gridTeacherId" class="form-label">Преподаватель</label>
+                    <select id="gridTeacherId" name="TeacherId" class="form-select" required title="Выберите преподавателя">
+                        <option value="">-- Выберите преподавателя --</option>
+                    </select>
+                    <div class="invalid-feedback">Пожалуйста, выберите преподавателя.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="gridWeekTypeId" class="form-label">Тип недели</label>
+                    <select id="gridWeekTypeId" name="WeekTypeId" class="form-select" required title="Выберите тип недели">
+                        <option value="">-- Выберите тип недели --</option>
+                    </select>
+                    <div class="invalid-feedback">Пожалуйста, выберите тип недели.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="gridCabinetId" class="form-label">Кабинет</label>
+                    <select id="gridCabinetId" name="CabinetId" class="form-select" required title="Выберите кабинет">
+                        <option value="">-- Выберите кабинет --</option>
+                    </select>
+                    <div class="invalid-feedback">Пожалуйста, выберите кабинет.</div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createLessonGridModal')">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/js/ValidationToolTip.js"></script>
+<script src="~/js/resetFormValidation.js"></script>

@@ -1,0 +1,90 @@
+﻿@model WebSmartSchedule.Pages.Positions.IndexModel
+
+<!-- Модальное окно создания должности -->
+<div id="createPositionModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('createPositionModal')"></button>
+        <div class="modal-header mb-3">
+            <h3>Добавить новую должность</h3>
+        </div>
+        <form method="post" asp-page-handler="Create" class="needs-validation" novalidate>
+            <div class="form-group">
+                <label for="createPositionName" class="form-label">Название должности</label>
+                <input type="text" class="form-control" id="createPositionName" name="Name"
+                       required maxlength="30"
+                       pattern="^[А-Яа-яЁё\-\s]+$"
+                       oninput="this.value = this.value.replace(/[^А-Яа-яЁё\-\s]/g, '')"
+                       placeholder="Например: Доцент"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Русские буквы, пробелы и дефисы (макс. 30)">
+                <div class="invalid-feedback">Русские буквы, пробелы, дефисы</div>
+            </div>
+            <div class="form-group">
+                <label for="createPositionDescription" class="form-label">Описание</label>
+                <textarea class="form-control" id="createPositionDescription" name="Description"
+                          rows="3" maxlength="100"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="Краткое описание (макс. 100 символов)"></textarea>
+                <div class="invalid-feedback">Максимум 100 символов</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createPositionModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Модальное окно редактирования должности -->
+<div id="editPositionModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('editPositionModal')"></button>
+        <div class="modal-header mb-3">
+            <h3>Редактировать должность</h3>
+        </div>
+        <form method="post" asp-page-handler="Update" class="needs-validation" novalidate>
+            <input type="hidden" id="editPositionId" name="Id">
+            <div class="form-group">
+                <label for="editPositionName" class="form-label">Название должности</label>
+                <input type="text" class="form-control" id="editPositionName" name="Name"
+                       required maxlength="30"
+                       pattern="^[А-Яа-яЁё\-\s]+$"
+                       oninput="this.value = this.value.replace(/[^А-Яа-яЁё\-\s]/g, '')"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Русские буквы, пробелы и дефисы (макс. 30)">
+                <div class="invalid-feedback">Русские буквы, пробелы, дефисы</div>
+            </div>
+            <div class="form-group">
+                <label for="editPositionDescription" class="form-label">Описание</label>
+                <textarea class="form-control" id="editPositionDescription" name="Description"
+                          rows="3" maxlength="100"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="Краткое описание (макс. 100 символов)"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editPositionModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Модальное окно подтверждения удаления -->
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('deleteConfirmModal')">&times;</button>
+        <div class="modal-header mb-3">
+            <h3>Подтвердите удаление</h3>
+        </div>
+        <form method="post" asp-page-handler="Delete">
+            <input type="hidden" id="deletePositionId" name="Id" />
+            <p>Вы уверены, что хотите удалить эту должность? Это действие нельзя будет отменить.</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Отмена</button>
+                <button type="submit" class="btn btn-danger">Удалить</button>
+            </div>
+        </form>
+    </div>
+</div>

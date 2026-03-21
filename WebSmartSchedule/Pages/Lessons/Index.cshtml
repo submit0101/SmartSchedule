@@ -1,0 +1,266 @@
+﻿@page
+@model WebSmartSchedule.Pages.Lessons.IndexModel
+@{
+    ViewData["Title"] = "Расписание";
+}
+
+<link rel="stylesheet" href="~/css/LessonStyle.css" />
+
+
+<div id="alert-container" class="alert-container"></div>
+@if (TempData["AlertMessage"] != null)
+{
+    <input type="hidden" id="temp-alert-message" value="@TempData["AlertMessage"]" />
+    <input type="hidden" id="temp-alert-type" value="@TempData["AlertType"]" />
+}
+
+<div id="loading" class="skeleton-loader" style="display: none;">
+    <div class="skeleton-header"></div>
+    <div class="skeleton-grid">
+        <div class="skeleton-sidebar"></div>
+        <div class="skeleton-content"></div>
+    </div>
+    <div class="text-center mt-3 text-muted small">Загрузка данных...</div>
+</div>
+
+<div class="content-wrapper">
+    <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-outline-primary d-md-none w-100" type="button" onclick="toggleCustomFilters()">
+            <i class="bi bi-funnel"></i> <span class="filter-btn-text">Показать фильтры</span>
+        </button>
+        <button class="btn btn-sm btn-outline-secondary d-none d-md-inline-flex align-items-center gap-2" type="button" onclick="toggleCustomFilters()">
+            <i class="bi bi-chevron-up transition-icon"></i> <span class="filter-btn-text">Показать фильтры</span>
+        </button>
+    </div>
+
+    <div id="error-message" class="alert alert-danger d-none" role="alert" style="margin: 1rem 2rem;"></div>
+
+    <div id="customFilterWrapper" class="custom-filter-panel">
+        <div class="py-2 px-md-4 px-2">
+            <partial name="_FiltersPartial" model="Model" />
+        </div>
+    </div>
+
+    <ul class="nav nav-pills schedule-tabs mt-3 mb-3" id="scheduleTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-schedule"><i class="bi bi-calendar3 me-1"></i> Расписание</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cabinets"><i class="bi bi-door-open me-1"></i> Свободные каб.</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reports"><i class="bi bi-bar-chart me-1"></i> Загруженность</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-heatmap"><i class="bi bi-grid-3x3 me-1"></i> Занятость</button></li>
+    </ul>
+
+    <div class="tab-content" id="scheduleTabsContent">
+
+        <div class="tab-pane fade show active" id="tab-schedule" role="tabpanel"><partial name="_ScheduleTab" /></div>
+
+        <div class="tab-pane fade" id="tab-cabinets" role="tabpanel"><partial name="_CabinetsTab" /></div>
+        <div class="tab-pane fade" id="tab-reports" role="tabpanel"><partial name="_CabinetUsageReportTab" /></div>
+        <div class="tab-pane fade" id="tab-heatmap" role="tabpanel"><partial name="_CabinetHeatmapTab" /></div>
+
+        <div class="tab-pane fade" id="tab-teacher-usage" role="tabpanel">
+            <partial name="_TeacherUsage" />
+        </div>
+
+        <div class="tab-pane fade" id="tab-teacher-heatmap" role="tabpanel">
+            <partial name="_TeacherHeatmapTab" />
+        </div>
+        <div class="tab-pane fade" id="tab-group-usage" role="tabpanel">
+            <partial name="_GroupUsage" />
+        </div>
+
+    </div>
+</div>
+
+<partial name="_ModalLesson" />
+
+@section Scripts {
+    <script src="/js/html2canvas.min.js"></script>
+    <script src="/js/jspdf.umd.min.js"></script>
+
+    <script src="~/js/schedule/schedule-utils.js" asp-append-version="true"></script>
+    <script src="~/js/schedule/schedule-api.js"></script>
+    <script src="~/js/schedule/schedule-store.js"></script>
+    <script src="~/js/schedule/schedule-core.js"></script>
+    <script src="~/js/schedule/schedule-dnd.js"></script>
+    <script src="~/js/schedule/schedule-teacher.js"></script>
+    <script src="~/js/schedule/schedule-modal.js" asp-append-version="true"></script>
+    <script src="~/js/schedule/schedule-clipboard.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initAppData();
+            initInitialState();
+            bindPageEvents();
+
+            const alertMsg = document.getElementById('temp-alert-message')?.value;
+            if (alertMsg) showAlert(alertMsg, document.getElementById('temp-alert-type')?.value || 'info');
+        });
+
+        function initAppData() {
+            window.appData = {
+                groupId: @Model.SelectedGroupId,
+                subjects: @Html.Raw(Json.Serialize(Model.Subjects)),
+                groups: @Html.Raw(Json.Serialize(Model.Groups)),
+                teachers: @Html.Raw(Json.Serialize(Model.Teachers)),
+                cabinets: @Html.Raw(Json.Serialize(Model.Cabinets)),
+                timeSlots: @Html.Raw(Json.Serialize(Model.TimeSlots)),
+                weekTypes: @Html.Raw(Json.Serialize(Model.WeekTypes))
+            };
+            if (typeof initTeacherHandlers === 'function') initTeacherHandlers();
+        }
+
+        function initInitialState() {
+            const groupSelect = document.getElementById("groupId");
+            const initialGroupId = groupSelect ? parseInt(groupSelect.value) : window.appData.groupId;
+
+            if (initialGroupId > 0) {
+                window.appData.groupId = initialGroupId;
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) {
+                    loadingEl.style.display = 'block';
+                    document.querySelector('.tab-content').style.opacity = '0.5';
+                }
+                loadSchedule(initialGroupId).finally(() => {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    document.querySelector('.tab-content').style.opacity = '1';
+                });
+            }
+        }
+
+        function bindPageEvents() {
+            document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(triggerEl => {
+                triggerEl.addEventListener('show.bs.tab', function (event) {
+                    const targetSelector = event.target.getAttribute('data-bs-target');
+                    const targetPane = document.querySelector(targetSelector);
+                    const mainContainer = document.getElementById('scheduleTabsContent');
+
+                    if (!mainContainer || !targetPane || !mainContainer.contains(targetPane)) return;
+
+                    mainContainer.querySelectorAll('.tab-pane').forEach(pane => {
+                        if ('#' + pane.id !== targetSelector) pane.classList.remove('show', 'active');
+                    });
+
+                    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(btn => {
+                        const btnTarget = btn.getAttribute('data-bs-target');
+                        const btnPane = document.querySelector(btnTarget);
+                        if (mainContainer.contains(btnPane) && btn !== event.target && btnTarget !== targetSelector) {
+                            btn.classList.remove('active');
+                            btn.setAttribute('aria-selected', 'false');
+                        }
+                    });
+
+                    if (targetSelector === '#tab-schedule' && window.appData.groupId) {
+                        loadSchedule(window.appData.groupId);
+                    }
+                });
+            });
+
+            document.querySelectorAll(".week-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".week-btn").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    if (typeof selectedWeekType !== 'undefined') {
+                        selectedWeekType = btn.getAttribute("data-weektype");
+                        applyWeekTypeFilter();
+                    }
+                });
+            });
+
+            const searchInput = document.getElementById('scheduleSearch');
+            document.getElementById('searchBtn')?.addEventListener('click', performSearch);
+            document.getElementById('clearSearchBtn')?.addEventListener('click', () => {
+                if(searchInput) { searchInput.value = ''; performSearch(); }
+            });
+            searchInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
+
+            document.getElementById("groupId")?.addEventListener("change", function () {
+                window.appData.groupId = parseInt(this.value);
+                window.appData.groupName = this.options[this.selectedIndex].textContent;
+            });
+
+            document.getElementById("showGroupButton")?.addEventListener("click", (e) => {
+                e.preventDefault();
+                const select = document.getElementById("groupId");
+                const currentGroupId = select ? parseInt(select.value) : window.appData.groupId;
+
+                if (!currentGroupId) return showAlert("Выберите группу", "warning");
+
+                document.querySelectorAll(".schedule-title").forEach(el => el.textContent = `Расписание группы ${window.appData.groupName}`);
+
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) loadingEl.style.display = 'block';
+
+                loadSchedule(currentGroupId).finally(() => {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                });
+
+                if (window.innerWidth < 768) {
+                    const wrapper = document.getElementById('customFilterWrapper');
+                    if(wrapper && wrapper.classList.contains('open')) toggleCustomFilters();
+                }
+            });
+
+            document.getElementById("exportPdfBtn")?.addEventListener("click", handlePdfExport);
+        }
+
+        async function handlePdfExport() {
+             const isMobile = window.innerWidth <= 768;
+             const container = isMobile ? document.getElementById("schedule-mobile") : document.getElementById("schedule-desktop");
+             if (!container || !container.innerHTML.trim()) return showAlert("Нет данных", "warning");
+             generatePdf(container, `Расписание_${window.appData.groupName || 'export'}.pdf`);
+        }
+               async function generatePdf(element, filename) {
+           
+            const tempContainer = document.createElement("div");
+            tempContainer.style.cssText = "position: absolute; left: -9999px; top: 0; width: 1800px; background-color: #ffffff; padding: 20px;";
+
+          
+            
+            const gridOriginal = element.querySelector('.schedule-grid') || element;
+            const gridClone = gridOriginal.cloneNode(true);
+            gridClone.classList.add('pdf-export-view');
+      
+            gridClone.style.maxHeight = 'none';
+            gridClone.style.overflow = 'visible';
+            gridClone.style.width = '100%';
+
+            tempContainer.appendChild(gridClone);
+            document.body.appendChild(tempContainer);
+
+            try {
+                
+                const canvas = await html2canvas(tempContainer, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+               
+                const pdf = new jspdf.jsPDF('l', 'mm', 'a4');
+
+                // Получаем ширину листа А4 в миллиметрах (297мм)
+                const pdfPageWidth = pdf.internal.pageSize.getWidth();
+                const pdfPageHeight = pdf.internal.pageSize.getHeight();
+
+                // 6. Магия математики: вписываем нашу огромную картинку в лист А4
+                const imgProps = pdf.getImageProperties(canvas.toDataURL('image/jpeg', 0.9));
+                // Вычисляем высоту картинки, сохраняя пропорции
+                const imgHeight = (imgProps.height * pdfPageWidth) / imgProps.width;
+
+                
+                pdf.addImage(imgProps.data, 'JPEG', 0, 0, pdfPageWidth, imgHeight);
+
+                pdf.save(filename);
+
+                if (typeof showAlert === 'function') showAlert("PDF успешно сохранен!", "success");
+
+            } catch (e) {
+                console.error("Ошибка экспорта:", e);
+                if (typeof showAlert === 'function') showAlert("Не удалось создать PDF", "danger");
+            } finally {
+               
+                document.body.removeChild(tempContainer);
+            }
+        }
+    </script>
+}

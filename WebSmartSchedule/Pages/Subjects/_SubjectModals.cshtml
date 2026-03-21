@@ -1,0 +1,86 @@
+﻿@model WebSmartSchedule.Pages.Subjects.IndexModel
+<div id="createSubjectModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('createSubjectModal')"></button>
+        <div class="modal-header mb-3">
+            <h3>Добавить новый предмет</h3>
+        </div>
+        <form method="post" asp-page-handler="Create" class="needs-validation" novalidate>
+            <div class="form-group">
+                <label for="createSubjectTitle" class="form-label">Название предмета</label>
+                <input type="text" class="form-control" id="createSubjectTitle" name="Title"
+                       required maxlength="50"
+                       pattern="^[а-яА-ЯёЁ0-9\s.\-]+$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ0-9\s.\-]/g, '')"
+                       placeholder="Например: Математика"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Кириллица, цифры, точка, дефис, пробел">
+                <div class="invalid-feedback">Русские буквы, цифры, точки, дефисы</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createSubjectModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editSubjectModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('editSubjectModal')"></button>
+        <div class="modal-header mb-3">
+            <h3>Редактировать предмет</h3>
+        </div>
+        <form method="post" asp-page-handler="Update" class="needs-validation" novalidate>
+            <input type="hidden" id="editSubjectId" name="Id">
+            <div class="form-group">
+                <label for="editSubjectTitle" class="form-label">Название предмета</label>
+                <input type="text" class="form-control" id="editSubjectTitle" name="Title"
+                       required maxlength="50"
+                       pattern="^[а-яА-ЯёЁ0-9\s.\-]+$"
+                       oninput="this.value = this.value.replace(/[^а-яА-ЯёЁ0-9\s.\-]/g, '')"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="Кириллица, цифры, точка, дефис, пробел">
+                <div class="invalid-feedback">Русские буквы, цифры, точки, дефисы</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editSubjectModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal('deleteConfirmModal')">&times;</button>
+        <div class="modal-header mb-3">
+            <h3>Подтверждение удаления</h3>
+        </div>
+        <form method="post" asp-page-handler="Delete">
+            <input type="hidden" id="deleteSubjectId" name="Id" />
+            <p>Вы уверены, что хотите удалить этот предмет? Это действие нельзя будет отменить.</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Отмена</button>
+                <button type="submit" class="btn btn-danger">Удалить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ids = ["createSubjectTitle", "editSubjectTitle"];
+
+        ids.forEach(function(id) {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener("input", function() {
+                    this.value = this.value.replace(/[^а-яА-ЯёЁ0-9\s.\-]/g, '');
+                });
+            }
+        });
+    });
+</script>
