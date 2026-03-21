@@ -44,5 +44,10 @@ public class UpdateLessonDto
     /// Например: 3 - Среда.
     /// </summary>
     public required int? DayOfWeekId { get; set; }
+
+    /// <summary>
+    /// Номер подгруппы (например, 1 или 2). Может быть null (вся группа).
+    /// </summary>
+    public int? Subgroup { get; set; }
 }
 

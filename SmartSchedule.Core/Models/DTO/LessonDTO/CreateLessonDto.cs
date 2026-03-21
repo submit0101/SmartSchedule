@@ -15,6 +15,11 @@ public class CreateLessonDto
     public required int? TeacherId { get; set; }
 
     /// <summary>
+    /// Номер подгруппы (например, 1 или 2). Может быть null (вся группа).
+    /// </summary>
+    public int? Subgroup { get; set; }
+
+    /// <summary>
     /// Идентификатор группы, для которой проводится занятие (может быть null).
     /// </summary>
     public required int? GroupId { get; set; }

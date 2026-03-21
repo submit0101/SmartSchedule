@@ -48,6 +48,12 @@ public class Lesson : BaseEntity<int>
     public int? WeekTypeId { get; set; }
 
     /// <summary>
+    /// Номер подгруппы (например, 1 или 2). 
+    /// Если null, значит занятие проводится для всей группы целиком.
+    /// </summary>
+    public int? Subgroup { get; set; }
+
+    /// <summary>
     /// День недели, в который проводится занятие (например: 1 - Понедельник, 5 - Пятница).
     /// </summary>
     /// <example>1</example>
@@ -86,4 +92,5 @@ public class Lesson : BaseEntity<int>
     /// Навигационное свойство: День недели, к которому относится занятие.
     /// </summary>
     public virtual WeekDay WeekDay { get; set; }
+   
 }

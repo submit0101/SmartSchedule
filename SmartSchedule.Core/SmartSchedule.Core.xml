@@ -173,6 +173,12 @@
             Может быть null, если тип недели не указан.
             </summary>
         </member>
+        <member name="P:SmartSchedule.Core.Entities.Lesson.Subgroup">
+            <summary>
+            Номер подгруппы (например, 1 или 2). 
+            Если null, значит занятие проводится для всей группы целиком.
+            </summary>
+        </member>
         <member name="P:SmartSchedule.Core.Entities.Lesson.DayOfWeekId">
             <summary>
             День недели, в который проводится занятие (например: 1 - Понедельник, 5 - Пятница).
@@ -921,6 +927,11 @@
             Идентификатор преподавателя, который проводит занятие (может быть null).
             </summary>
         </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.Subgroup">
+            <summary>
+            Номер подгруппы (например, 1 или 2). Может быть null (вся группа).
+            </summary>
+        </member>
         <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto.GroupId">
             <summary>
             Идентификатор группы, для которой проводится занятие (может быть null).
@@ -1033,6 +1044,11 @@
             День недели (например: 1 - Понедельник).
             </summary>
         </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.ResponseLessonDto.Subgroup">
+            <summary>
+            Номер подгруппы (например, 1 или 2). Может быть null (вся группа).
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Models.DTO.LessonDTO.StructuredLessonDto">
             <summary>
             модель ответа стуртурированного расписания
@@ -1092,6 +1108,11 @@
             <summary>
             Новое значение дня недели (если требуется изменить).
             Например: 3 - Среда.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto.Subgroup">
+            <summary>
+            Номер подгруппы (например, 1 или 2). Может быть null (вся группа).
             </summary>
         </member>
         <member name="T:SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto">

@@ -86,4 +86,9 @@ public class ResponseLessonDto
     /// День недели (например: 1 - Понедельник).
     /// </summary>
     public int DayOfWeekId { get; set; }
+
+    /// <summary>
+    /// Номер подгруппы (например, 1 или 2). Может быть null (вся группа).
+    /// </summary>
+    public int? Subgroup { get; set; }
 }

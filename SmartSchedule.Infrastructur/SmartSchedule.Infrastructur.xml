@@ -727,6 +727,18 @@
         <member name="M:SmartSchedule.Infrastructur.Migrations.RefactorCascadKeys.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:SmartSchedule.Infrastructur.Migrations.AddSubgroupToLesson">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.AddSubgroupToLesson.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.AddSubgroupToLesson.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.AddSubgroupToLesson.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:ComputerShop.Infrastructure.Extensions.ModelBuilderExtensions">
             <summary>
             Методы расширения для класса <see cref="T:Microsoft.EntityFrameworkCore.ModelBuilder"/>.

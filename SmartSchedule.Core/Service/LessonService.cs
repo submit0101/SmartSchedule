@@ -9,11 +9,6 @@ using SmartSchedule.Core.Models.DTO.GroupDTO;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
 using SmartSchedule.Core.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SmartSchedule.Application.Services;
 
@@ -87,8 +82,11 @@ public class LessonService : ILessonService
 
             if (isWeekClash(existWt, origWt))
             {
-                if (existingLesson.GroupId == originalLesson.GroupId) result.IsWeekConflict = true;
-                if (existingLesson.TeacherId == originalLesson.TeacherId) result.IsTeacherBusy = true;
+
+                bool isGroupConflict = existingLesson.GroupId == originalLesson.GroupId &&
+                                       (existingLesson.Subgroup == null || originalLesson.Subgroup == null || existingLesson.Subgroup == originalLesson.Subgroup);
+
+                if (isGroupConflict) result.IsWeekConflict = true;
                 if (existingLesson.CabinetId == originalLesson.CabinetId) result.IsCabinetBusy = true;
             }
 
@@ -553,19 +551,21 @@ public class LessonService : ILessonService
         var allLessons = await _repository.GetAllAsync(ct).ConfigureAwait(false);
 
         var hasConflict = allLessons.Any(existingLesson =>
-            existingLesson.Id != lesson.Id &&
-            existingLesson.TimeSlotId == lesson.TimeSlotId &&
-            existingLesson.DayOfWeekId == lesson.DayOfWeekId &&
-            (
-                existingLesson.GroupId == lesson.GroupId ||
-                existingLesson.TeacherId == lesson.TeacherId ||
-                existingLesson.CabinetId == lesson.CabinetId
-            ) &&
-            (
-                existingLesson.WeekTypeId == BothWeeksId ||
-                lesson.WeekTypeId == BothWeeksId ||
-                existingLesson.WeekTypeId == lesson.WeekTypeId
-            )
+        existingLesson.Id != lesson.Id &&
+        existingLesson.TimeSlotId == lesson.TimeSlotId &&
+        existingLesson.DayOfWeekId == lesson.DayOfWeekId &&
+        (
+
+            (existingLesson.GroupId == lesson.GroupId && (existingLesson.Subgroup == null || lesson.Subgroup == null || existingLesson.Subgroup == lesson.Subgroup)) ||
+
+            existingLesson.TeacherId == lesson.TeacherId ||
+            existingLesson.CabinetId == lesson.CabinetId
+        ) &&
+        (
+            existingLesson.WeekTypeId == BothWeeksId ||
+            lesson.WeekTypeId == BothWeeksId ||
+            existingLesson.WeekTypeId == lesson.WeekTypeId
+        )
         );
 
         if (hasConflict) throw new ScheduleConflictException();
