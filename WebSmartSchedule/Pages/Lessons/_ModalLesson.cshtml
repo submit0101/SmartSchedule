@@ -35,6 +35,7 @@
                         }
                     </select>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Подгруппа</label>
                     <select name="Subgroup" class="form-select">
@@ -44,6 +45,7 @@
                         <option value="3">3 подгруппа</option>
                     </select>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Временной слот</label>
                     <select name="TimeSlotId" class="form-select" required title="Выберите время занятия">
@@ -113,6 +115,7 @@
                     <label class="form-label">Кабинет</label>
                     <select name="CabinetId" id="editCabinetId" class="form-select" required title="Выберите кабинет"></select>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Подгруппа</label>
                     <select name="Subgroup" id="editSubgroup" class="form-select">
@@ -122,6 +125,7 @@
                         <option value="3">3 подгруппа</option>
                     </select>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Временной слот</label>
                     <select name="TimeSlotId" id="editTimeSlotId" class="form-select" required title="Выберите время занятия"></select>
@@ -169,7 +173,7 @@
 </div>
 
 <div id="createLessonGridModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <span class="btn-close" onclick="closeModal('createLessonGridModal')"></span>
             <form id="createLessonGridForm" class="needs-validation" novalidate>
@@ -178,52 +182,110 @@
                 <input type="hidden" id="gridTimeSlotId" name="TimeSlotId" />
                 <input type="hidden" id="gridDayOfWeekId" name="DayOfWeekId" />
 
-                <div class="mb-3">
-                    <label for="gridGroupId" class="form-label">Группа</label>
-                    <select id="gridGroupId" name="GroupId" class="form-select" required title="Выберите группу">
-                        <option value="">-- Выберите группу --</option>
-                    </select>
-                    <div class="invalid-feedback">Пожалуйста, выберите группу.</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="gridGroupId" class="form-label">Группа</label>
+                        <select id="gridGroupId" name="GroupId" class="form-select" required title="Выберите группу">
+                            <option value="">-- Выберите группу --</option>
+                        </select>
+                        <div class="invalid-feedback">Пожалуйста, выберите группу.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="gridWeekTypeId" class="form-label">Тип недели</label>
+                        <select id="gridWeekTypeId" name="WeekTypeId" class="form-select" required title="Выберите тип недели">
+                            <option value="">-- Выберите тип недели --</option>
+                        </select>
+                        <div class="invalid-feedback">Пожалуйста, выберите тип недели.</div>
+                    </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="gridSubjectId" class="form-label">Предмет</label>
-                    <select id="gridSubjectId" name="SubjectId" class="form-select" required title="Выберите предмет">
-                        <option value="">-- Выберите предмет --</option>
+                    <label class="form-label">Формат занятия</label>
+                    <select id="gridLessonFormat" class="form-select" onchange="toggleLessonFormat()">
+                        <option value="1">Вся группа (без деления)</option>
+                        <option value="2">Деление на 2 подгруппы</option>
                     </select>
-                    <div class="invalid-feedback">Пожалуйста, выберите предмет.</div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="gridTeacherId" class="form-label">Преподаватель</label>
-                    <select id="gridTeacherId" name="TeacherId" class="form-select" required title="Выберите преподавателя">
-                        <option value="">-- Выберите преподавателя --</option>
-                    </select>
-                    <div class="invalid-feedback">Пожалуйста, выберите преподавателя.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="gridSubgroup" class="form-label">Подгруппа</label>
-                    <select id="gridSubgroup" name="Subgroup" class="form-select">
-                        <option value="">Вся группа (без деления)</option>
-                        <option value="1">1 подгруппа</option>
-                        <option value="2">2 подгруппа</option>
-                        <option value="3">3 подгруппа</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="gridWeekTypeId" class="form-label">Тип недели</label>
-                    <select id="gridWeekTypeId" name="WeekTypeId" class="form-select" required title="Выберите тип недели">
-                        <option value="">-- Выберите тип недели --</option>
-                    </select>
-                    <div class="invalid-feedback">Пожалуйста, выберите тип недели.</div>
+                <div id="singleLessonBlock">
+                    <input type="hidden" name="Subgroup" id="gridSubgroup" value="" />
+
+                    <div class="mb-3">
+                        <label for="gridSubjectId" class="form-label">Предмет</label>
+                        <select id="gridSubjectId" name="SubjectId" class="form-select" required title="Выберите предмет">
+                            <option value="">-- Выберите предмет --</option>
+                        </select>
+                        <div class="invalid-feedback">Пожалуйста, выберите предмет.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gridTeacherId" class="form-label">Преподаватель</label>
+                        <select id="gridTeacherId" name="TeacherId" class="form-select" required title="Выберите преподавателя">
+                            <option value="">-- Выберите преподавателя --</option>
+                        </select>
+                        <div class="invalid-feedback">Пожалуйста, выберите преподавателя.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gridCabinetId" class="form-label">Кабинет</label>
+                        <select id="gridCabinetId" name="CabinetId" class="form-select" required title="Выберите кабинет">
+                            <option value="">-- Выберите кабинет --</option>
+                        </select>
+                        <div class="invalid-feedback">Пожалуйста, выберите кабинет.</div>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="gridCabinetId" class="form-label">Кабинет</label>
-                    <select id="gridCabinetId" name="CabinetId" class="form-select" required title="Выберите кабинет">
-                        <option value="">-- Выберите кабинет --</option>
-                    </select>
-                    <div class="invalid-feedback">Пожалуйста, выберите кабинет.</div>
+                <div id="doubleLessonBlock" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 10%; text-align: center;">Подгруппа</th>
+                                    <th style="width: 30%;">Предмет</th>
+                                    <th style="width: 30%;">Преподаватель</th>
+                                    <th style="width: 30%;">Кабинет</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center fw-bold">1</td>
+                                    <td>
+                                        <select id="gridSubjectId_1" class="form-select form-select-sm">
+                                            <option value="">-- Предмет --</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="gridTeacherId_1" class="form-select form-select-sm">
+                                            <option value="">-- Преподаватель --</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="gridCabinetId_1" class="form-select form-select-sm">
+                                            <option value="">-- Кабинет --</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold">2</td>
+                                    <td>
+                                        <select id="gridSubjectId_2" class="form-select form-select-sm">
+                                            <option value="">-- Предмет --</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="gridTeacherId_2" class="form-select form-select-sm">
+                                            <option value="">-- Преподаватель --</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="gridCabinetId_2" class="form-select form-select-sm">
+                                            <option value="">-- Кабинет --</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -234,5 +296,24 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleLessonFormat() {
+        const format = document.getElementById('gridLessonFormat').value;
+        const singleBlock = document.getElementById('singleLessonBlock');
+        const doubleBlock = document.getElementById('doubleLessonBlock');
+        const singleSelects = singleBlock.querySelectorAll('select');
+
+        if (format === '1') {
+            singleBlock.style.display = 'block';
+            doubleBlock.style.display = 'none';
+            singleSelects.forEach(s => s.setAttribute('required', 'required'));
+        } else {
+            singleBlock.style.display = 'none';
+            doubleBlock.style.display = 'block';
+            singleSelects.forEach(s => s.removeAttribute('required'));
+        }
+    }
+</script>
 <script src="~/js/ValidationToolTip.js"></script>
 <script src="~/js/resetFormValidation.js"></script>

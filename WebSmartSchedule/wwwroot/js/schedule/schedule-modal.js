@@ -2,46 +2,56 @@ async function autoLoadFreeCabinets() {
     const dayId = document.getElementById('gridDayOfWeekId').value;
     const timeId = document.getElementById('gridTimeSlotId').value;
     const weekId = document.getElementById('gridWeekTypeId').value;
-    const cabinetSelect = document.getElementById('gridCabinetId');
+
+    const cabinetSelects = [
+        document.getElementById('gridCabinetId'),
+        document.getElementById('gridCabinetId_1'),
+        document.getElementById('gridCabinetId_2')
+    ];
 
     if (!dayId || !timeId || !weekId) {
-        cabinetSelect.innerHTML = '<option value="">-- Заполните данные (время, тип недели) --</option>';
+        cabinetSelects.forEach(select => {
+            if (select) select.innerHTML = '<option value="">-- Заполните время --</option>';
+        });
         return;
     }
 
-    cabinetSelect.disabled = true;
+    cabinetSelects.forEach(select => { if (select) select.disabled = true; });
 
     try {
         const freeCabinets = await ScheduleAPI.getFreeCabinets(dayId, timeId, weekId);
-        cabinetSelect.innerHTML = '<option value="">-- Выберите кабинет --</option>';
 
-        if (freeCabinets.length === 0) {
-            const opt = document.createElement('option');
-            opt.disabled = true;
-            opt.textContent = "Нет свободных кабинетов";
-            cabinetSelect.appendChild(opt);
-        } else {
-            freeCabinets.forEach(cab => {
-                const option = document.createElement('option');
-                option.value = cab.id;
-                let bName = cab.buildingName;
-                if (!bName && window.appData && window.appData.cabinets) {
-                    const knownCab = window.appData.cabinets.find(c => c.id == cab.id);
-                    if (knownCab) {
-                        bName = knownCab.buildingName;
+        cabinetSelects.forEach(select => {
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Выберите кабинет --</option>';
+
+            if (freeCabinets.length === 0) {
+                const opt = document.createElement('option');
+                opt.disabled = true;
+                opt.textContent = "Нет свободных кабинетов";
+                select.appendChild(opt);
+            } else {
+                freeCabinets.forEach(cab => {
+                    const option = document.createElement('option');
+                    option.value = cab.id;
+                    let bName = cab.buildingName;
+                    if (!bName && window.appData && window.appData.cabinets) {
+                        const knownCab = window.appData.cabinets.find(c => c.id == cab.id);
+                        if (knownCab) bName = knownCab.buildingName;
                     }
-                }
-                const building = bName ? ` (${bName})` : '';
-                option.textContent = `${cab.number}${building}`;
-
-                cabinetSelect.appendChild(option);
-            });
-        }
+                    const building = bName ? ` (${bName})` : '';
+                    option.textContent = `${cab.number}${building}`;
+                    select.appendChild(option);
+                });
+            }
+        });
     } catch (err) {
-        console.error("Ошибка загрузки кабинетов:", err);
-        cabinetSelect.innerHTML = '<option value="">Ошибка связи с сервером</option>';
+        console.error(err);
+        cabinetSelects.forEach(select => {
+            if (select) select.innerHTML = '<option value="">Ошибка сервера</option>';
+        });
     } finally {
-        cabinetSelect.disabled = false;
+        cabinetSelects.forEach(select => { if (select) select.disabled = false; });
     }
 }
 
@@ -50,18 +60,36 @@ function openCreateLessonModalForSlot(timeSlotId, dayOfWeekId, existingLessonsIn
     const form = document.getElementById('createLessonGridForm');
     if (!modal || !form) return;
 
+    if (existingLessonsInSlot && existingLessonsInSlot.length > 0) {
+        const hasFullWeekWholeGroup = existingLessonsInSlot.some(l => l.weekTypeId == WeekType.FULL && !l.subgroup);
+        if (hasFullWeekWholeGroup && !pastedLessonData) {
+            showAlert('Эта ячейка полностью занята целой парой.', 'warning');
+            return;
+        }
+    }
+
     form.reset();
     form.classList.remove('was-validated');
 
-    const gridSubgroupEl = document.getElementById('gridSubgroup');
-    if (gridSubgroupEl) gridSubgroupEl.value = "";
+    const formatSelect = document.getElementById('gridLessonFormat');
+    if (formatSelect) {
+        formatSelect.value = "1";
+        if (typeof toggleLessonFormat === 'function') toggleLessonFormat();
+    }
 
     document.getElementById('gridTimeSlotId').value = timeSlotId;
     document.getElementById('gridDayOfWeekId').value = dayOfWeekId;
 
     populateGridSelect('gridSubjectId', window.appData.subjects, 'title');
+    populateGridSelect('gridSubjectId_1', window.appData.subjects, 'title');
+    populateGridSelect('gridSubjectId_2', window.appData.subjects, 'title');
+
     populateGridSelect('gridGroupId', window.appData.groups, 'name');
+
     populateGridSelect('gridTeacherId', window.appData.teachers, 'fullName');
+    populateGridSelect('gridTeacherId_1', window.appData.teachers, 'fullName');
+    populateGridSelect('gridTeacherId_2', window.appData.teachers, 'fullName');
+
     populateGridSelect('gridWeekTypeId', window.appData.weekTypes, 'name');
 
     const groupSelect = document.getElementById('gridGroupId');
@@ -103,15 +131,6 @@ function openCreateLessonModalForSlot(timeSlotId, dayOfWeekId, existingLessonsIn
         document.getElementById('gridWeekTypeId').value = suggestedWeekTypeId;
     }
 
-    if (pastedLessonData) {
-        document.getElementById('gridSubjectId').value = pastedLessonData.subjectId || '';
-        if (currentScheduleType === 'teacher') {
-            if (groupSelect) groupSelect.value = pastedLessonData.groupId || '';
-        } else {
-            if (teacherSelect) teacherSelect.value = pastedLessonData.teacherId || '';
-        }
-    }
-
     autoLoadFreeCabinets();
     openModal('createLessonGridModal');
 }
@@ -126,15 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function populateGridSelect(selectId, items, displayProp, secondaryProp = null) {
     const select = document.getElementById(selectId);
     if (!select) return;
-    const name = select.getAttribute('name');
-    const defaults = {
-        'WeekTypeId': '-- Выберите тип недели --',
-        'SubjectId': '-- Выберите предмет --',
-        'TeacherId': '-- Выберите преподавателя --',
-        'CabinetId': '-- Выберите кабинет --',
-        'GroupId': '-- Выберите группу --'
-    };
-    select.innerHTML = `<option value="">${defaults[name] || '-- Выберите --'}</option>`;
+    const name = select.getAttribute('name') || selectId;
+    select.innerHTML = `<option value="">-- Выберите --</option>`;
     items.forEach(item => {
         const option = document.createElement("option");
         option.value = item.id;
@@ -198,68 +210,111 @@ function formatShortName(fullName) {
     return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
 }
 
+function createLessonUIObject(data, serverResponse, subgroupOverride = null) {
+    const subjectObj = window.appData.subjects.find(s => s.id == data.SubjectId);
+    const teacherObj = window.appData.teachers.find(t => t.id == data.TeacherId);
+    const cabinetObj = window.appData.cabinets.find(c => c.id == data.CabinetId);
+    const groupObj = window.appData.groups.find(g => g.id == data.GroupId);
+    const teacherShortName = teacherObj ? formatShortName(teacherObj.fullName) : 'Неизвестно';
+
+    return {
+        ...serverResponse,
+        subjectTitle: subjectObj ? subjectObj.title : 'Неизвестно',
+        teacherFullName: teacherShortName,
+        cabinetNumber: cabinetObj ? cabinetObj.number : '',
+        buildingName: cabinetObj ? cabinetObj.buildingName : '',
+        groupName: groupObj ? groupObj.name : (window.appData.groupName || 'Группа'),
+        weekTypeId: parseInt(data.WeekTypeId),
+        dayOfWeekId: parseInt(data.DayOfWeekId),
+        timeSlotId: parseInt(data.TimeSlotId),
+        subgroup: subgroupOverride !== null ? subgroupOverride : (data.Subgroup ? parseInt(data.Subgroup) : null)
+    };
+}
+
 document.getElementById('createLessonGridForm')?.addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    if (!this.checkValidity()) {
-        this.classList.add('was-validated');
+    const format = document.getElementById('gridLessonFormat').value;
+    const groupEl = document.getElementById('gridGroupId');
+    const groupWasDisabled = groupEl.disabled;
+    groupEl.disabled = false;
+
+    const baseData = {
+        GroupId: document.getElementById('gridGroupId').value,
+        WeekTypeId: document.getElementById('gridWeekTypeId').value,
+        DayOfWeekId: document.getElementById('gridDayOfWeekId').value,
+        TimeSlotId: document.getElementById('gridTimeSlotId').value
+    };
+
+    if (!baseData.GroupId || !baseData.WeekTypeId) {
+        showAlert('Выберите группу и тип недели!', 'warning');
+        groupEl.disabled = groupWasDisabled;
         return;
     }
 
-    const groupEl = document.getElementById('gridGroupId');
-    const teacherEl = document.getElementById('gridTeacherId');
-
-    const groupWasDisabled = groupEl.disabled;
-    const teacherWasDisabled = teacherEl.disabled;
-
-    groupEl.disabled = false;
-    teacherEl.disabled = false;
-
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-
-    groupEl.disabled = groupWasDisabled;
-    teacherEl.disabled = teacherWasDisabled;
-
     try {
-        const serverResponse = await ScheduleAPI.createLesson(data);
-        showAlert('Создано!', 'success');
-        closeModal("createLessonGridModal");
+        if (format === '1') {
+            if (!this.checkValidity()) {
+                this.classList.add('was-validated');
+                groupEl.disabled = groupWasDisabled;
+                return;
+            }
 
-        const subjectObj = window.appData.subjects.find(s => s.id == data.SubjectId);
-        const teacherObj = window.appData.teachers.find(t => t.id == data.TeacherId);
-        const cabinetObj = window.appData.cabinets.find(c => c.id == data.CabinetId);
-        const groupObj = window.appData.groups.find(g => g.id == data.GroupId);
-        const teacherShortName = teacherObj ? formatShortName(teacherObj.fullName) : 'Неизвестно';
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
 
-        const lessonForUI = {
-            ...serverResponse,
-            subjectTitle: subjectObj ? subjectObj.title : 'Неизвестно',
-            teacherFullName: teacherShortName,
-            cabinetNumber: cabinetObj ? cabinetObj.number : '',
-            buildingName: cabinetObj ? cabinetObj.buildingName : '',
-            groupName: groupObj ? groupObj.name : (window.appData.groupName || 'Группа'),
-            weekTypeId: parseInt(data.WeekTypeId),
-            dayOfWeekId: parseInt(data.DayOfWeekId),
-            timeSlotId: parseInt(data.TimeSlotId),
-            subgroup: data.Subgroup ? parseInt(data.Subgroup) : null
-        };
+            const serverResponse = await ScheduleAPI.createLesson(data);
+            const lessonForUI = createLessonUIObject(data, serverResponse);
 
-        ScheduleStore.addLesson(lessonForUI, lessonForUI.dayOfWeekId, lessonForUI.timeSlotId);
+            ScheduleStore.addLesson(lessonForUI, lessonForUI.dayOfWeekId, lessonForUI.timeSlotId);
+            refreshSingleSlot(lessonForUI.dayOfWeekId, lessonForUI.timeSlotId);
+            showAlert('Занятие создано!', 'success');
 
-        const slot = document.querySelector(`.lesson-slot[data-day-of-week-id="${lessonForUI.dayOfWeekId}"][data-time-slot-id="${lessonForUI.timeSlotId}"]`);
-        if (slot) {
-            const lessons = ScheduleStore.getLessonsInSlot(lessonForUI.dayOfWeekId, lessonForUI.timeSlotId);
-            renderLessonsInSlot(slot, lessons, currentScheduleType);
+        } else {
+            const sub1 = document.getElementById('gridSubjectId_1').value;
+            const tch1 = document.getElementById('gridTeacherId_1').value;
+            const cab1 = document.getElementById('gridCabinetId_1').value;
+
+            const sub2 = document.getElementById('gridSubjectId_2').value;
+            const tch2 = document.getElementById('gridTeacherId_2').value;
+            const cab2 = document.getElementById('gridCabinetId_2').value;
+
+            if (!sub1 || !tch1 || !cab1 || !sub2 || !tch2 || !cab2) {
+                showAlert('Заполните предмет, преподавателя и кабинет для ОБЕИХ подгрупп!', 'warning');
+                groupEl.disabled = groupWasDisabled;
+                return;
+            }
+
+            const data1 = { ...baseData, SubjectId: sub1, TeacherId: tch1, CabinetId: cab1, Subgroup: 1 };
+            const data2 = { ...baseData, SubjectId: sub2, TeacherId: tch2, CabinetId: cab2, Subgroup: 2 };
+
+            const [resp1, resp2] = await Promise.all([
+                ScheduleAPI.createLesson(data1),
+                ScheduleAPI.createLesson(data2)
+            ]);
+
+            const lesson1UI = createLessonUIObject(data1, resp1, 1);
+            const lesson2UI = createLessonUIObject(data2, resp2, 2);
+
+            ScheduleStore.addLesson(lesson1UI, lesson1UI.dayOfWeekId, lesson1UI.timeSlotId);
+            ScheduleStore.addLesson(lesson2UI, lesson2UI.dayOfWeekId, lesson2UI.timeSlotId);
+
+            refreshSingleSlot(baseData.DayOfWeekId, baseData.TimeSlotId);
+            showAlert('Обе подгруппы успешно добавлены!', 'success');
         }
+
+        closeModal("createLessonGridModal");
 
         if (typeof pendingPasteSlot !== 'undefined' && pendingPasteSlot) {
             pendingPasteSlot.classList.remove('pending-paste');
             pendingPasteSlot = null;
         }
+
     } catch (e) {
         console.error(e);
         showAlert(`Ошибка: ${e.message}`, 'danger');
+    } finally {
+        groupEl.disabled = groupWasDisabled;
     }
 });
 
@@ -309,13 +364,7 @@ async function confirmDelete() {
         closeModal("deleteConfirmModal");
         ScheduleStore.removeLesson(lessonData.id);
 
-        const slotElement = document.querySelector(`.lesson-slot[data-day-of-week-id="${lessonData.dayOfWeekId}"][data-time-slot-id="${lessonData.timeSlotId}"]`);
-        if (slotElement) {
-            const lessons = ScheduleStore.getLessonsInSlot(lessonData.dayOfWeekId, lessonData.timeSlotId);
-            renderLessonsInSlot(slotElement, lessons, currentScheduleType);
-        } else {
-            loadSchedule(window.appData.groupId);
-        }
+        refreshSingleSlot(lessonData.dayOfWeekId, lessonData.timeSlotId);
         window.currentSelectedLessonData = null;
     } catch (error) {
         showAlert(`Ошибка: ${error.message}`, 'danger');
@@ -365,8 +414,7 @@ function mergeFormDataToLesson(oldLesson, formData) {
 
 function refreshScheduleSlots(oldLesson, newLesson) {
     refreshSingleSlot(oldLesson.dayOfWeekId, oldLesson.timeSlotId);
-    const isMoved = oldLesson.dayOfWeekId !== newLesson.dayOfWeekId ||
-        oldLesson.timeSlotId !== newLesson.timeSlotId;
+    const isMoved = oldLesson.dayOfWeekId !== newLesson.dayOfWeekId || oldLesson.timeSlotId !== newLesson.timeSlotId;
     if (isMoved) {
         refreshSingleSlot(newLesson.dayOfWeekId, newLesson.timeSlotId);
     }
@@ -376,6 +424,8 @@ function refreshSingleSlot(dayId, timeId) {
     const slotEl = document.querySelector(`.lesson-slot[data-day-of-week-id="${dayId}"][data-time-slot-id="${timeId}"]`);
     if (slotEl) {
         const lessons = ScheduleStore.getLessonsInSlot(dayId, timeId);
-        renderLessonsInSlot(slotEl, lessons, currentScheduleType);
+        if (typeof renderLessonsInSlot === 'function') {
+            renderLessonsInSlot(slotEl, lessons, typeof currentScheduleType !== 'undefined' ? currentScheduleType : 'group');
+        }
     }
 }

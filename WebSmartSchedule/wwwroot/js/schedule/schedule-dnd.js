@@ -1,5 +1,6 @@
-
 let dragOverCache = {};
+let lastDragOverCheck = 0;
+const DRAG_OVER_DEBOUNCE = 200;
 
 function handleDragStart(e) {
     if (window.dragSrcElement) window.dragSrcElement.classList.remove('dragging');
@@ -9,22 +10,25 @@ function handleDragStart(e) {
         return;
     }
     window.dragSrcElement = lessonItem;
-    const lessonId = lessonItem.dataset.lessonId;
-    if (!lessonId) {
+
+    const lessonIds = lessonItem.dataset.lessonIds || lessonItem.dataset.lessonId;
+    if (!lessonIds) {
         e.preventDefault();
         return;
     }
+
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', lessonId);
+    e.dataTransfer.setData('text/plain', lessonIds.toString());
     lessonItem.classList.add('dragging');
 }
 
 function handleDragEnd(e) {
     if (this.classList?.contains('dragging')) this.classList.remove('dragging');
-    // ЖЕСТКАЯ ОЧИСТКА ВСЕХ СТИЛЕЙ
+
     document.querySelectorAll('.lesson-slot').forEach(slot =>
         slot.classList.remove('drag-over', 'drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet', 'drag-over-loading')
     );
+
     window.dragSrcElement = null;
     dragOverCache = {};
 }
@@ -32,13 +36,9 @@ function handleDragEnd(e) {
 function handleDragEnter(e) {
     e.preventDefault();
     const targetSlot = this;
-    
     targetSlot.classList.remove('drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet');
     targetSlot.classList.add('drag-over');
 }
-
-let lastDragOverCheck = 0;
-const DRAG_OVER_DEBOUNCE = 200; 
 
 async function handleDragOver(e) {
     e.preventDefault();
@@ -48,24 +48,28 @@ async function handleDragOver(e) {
 
     const targetSlot = this;
 
-    let lessonId = null;
+    let lessonIdsStr = '';
     if (window.dragSrcElement) {
-        lessonId = parseInt(window.dragSrcElement.dataset.lessonId, 10);
+        lessonIdsStr = window.dragSrcElement.dataset.lessonIds || window.dragSrcElement.dataset.lessonId;
     } else {
-        lessonId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        lessonIdsStr = e.dataTransfer.getData('text/plain');
     }
 
+    if (!lessonIdsStr) return;
+
+    const lessonId = parseInt(lessonIdsStr.split(',')[0], 10);
     const lesson = ScheduleStore.findLesson(lessonId);
+
     if (!lesson) {
         targetSlot.classList.add('drag-over-invalid');
         return;
     }
 
-   
     if (currentScheduleType === 'group' && window.appData?.groupId && lesson.groupId !== parseInt(window.appData.groupId, 10)) {
         targetSlot.classList.add('drag-over-invalid');
         return;
     }
+
     if (currentScheduleType === 'teacher' && currentTeacherId && lesson.teacherId !== currentTeacherId) {
         targetSlot.classList.add('drag-over-invalid');
         return;
@@ -74,7 +78,6 @@ async function handleDragOver(e) {
     const targetTimeId = parseInt(targetSlot.dataset.timeSlotId, 10);
     const targetDayId = parseInt(targetSlot.dataset.dayOfWeekId, 10);
 
-    
     if (lesson.timeSlotId === targetTimeId && lesson.dayOfWeekId === targetDayId) {
         targetSlot.classList.add('drag-over-valid');
         return;
@@ -86,13 +89,9 @@ async function handleDragOver(e) {
         return;
     }
 
-    
     targetSlot.classList.add('drag-over-loading');
-
     try {
         const conflictResult = await ScheduleAPI.checkConflict(lessonId, targetDayId, targetTimeId);
-
-        
         if (!targetSlot.classList.contains('drag-over-loading')) {
             return;
         }
@@ -120,86 +119,88 @@ function applyConflictClasses(slot, conflict) {
 }
 
 function handleDragLeave(e) {
-    // При выходе курсора убираем ВСЕ классы, включая индикатор загрузки.
-    // Это сигнал для handleDragOver, что результат проверки больше не нужен.
     this.classList.remove('drag-over', 'drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet', 'drag-over-loading');
 }
 
 async function handleDrop(e) {
     e.preventDefault();
     const targetSlot = this;
-
-    // Сразу чистим стили
     targetSlot.classList.remove('drag-over', 'drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet', 'drag-over-loading');
 
-    let lessonId = null;
+    let lessonIdsStr = '';
     if (window.dragSrcElement) {
-        lessonId = parseInt(window.dragSrcElement.dataset.lessonId, 10);
+        lessonIdsStr = window.dragSrcElement.dataset.lessonIds || window.dragSrcElement.dataset.lessonId;
     } else {
-        lessonId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        lessonIdsStr = e.dataTransfer.getData('text/plain');
     }
 
-    const lesson = ScheduleStore.findLesson(lessonId);
-    if (!lesson) return;
+    if (!lessonIdsStr) return;
 
-    // ОБЯЗАТЕЛЬНО: Приводим ID целевой ячейки к числам
+    const lessonIds = lessonIdsStr.split(',').map(id => parseInt(id, 10));
     const targetTimeId = parseInt(targetSlot.dataset.timeSlotId, 10);
     const targetDayId = parseInt(targetSlot.dataset.dayOfWeekId, 10);
 
-    const oldDayId = lesson.dayOfWeekId;
-    const oldTimeId = lesson.timeSlotId;
+    const firstLesson = ScheduleStore.findLesson(lessonIds[0]);
+    if (!firstLesson) return;
+
+    const oldDayId = firstLesson.dayOfWeekId;
+    const oldTimeId = firstLesson.timeSlotId;
 
     if (oldTimeId === targetTimeId && oldDayId === targetDayId) return;
 
-    // Повторная проверка перед дропом (на всякий случай)
-    const conflictResult = await ScheduleAPI.checkConflict(lessonId, targetDayId, targetTimeId);
+    const conflictResult = await ScheduleAPI.checkConflict(lessonIds[0], targetDayId, targetTimeId);
     if (conflictResult.isWeekConflict || conflictResult.isTeacherBusy || conflictResult.isCabinetBusy) {
         showAlert('Невозможно переместить занятие из-за конфликта.', 'danger');
         return;
     }
 
     try {
-        await ScheduleAPI.moveLesson(lessonId, {
-            Id: lesson.id,
-            GroupId: lesson.groupId,
-            SubjectId: lesson.subjectId,
-            TeacherId: lesson.teacherId,
-            CabinetId: lesson.cabinetId,
-            TimeSlotId: targetTimeId,
-            DayOfWeekId: targetDayId,
-            WeekTypeId: lesson.weekTypeId
+        const updatePromises = lessonIds.map(async (id) => {
+            const lesson = ScheduleStore.findLesson(id);
+            if (!lesson) return;
+
+            const updateData = {
+                Id: lesson.id,
+                GroupId: lesson.groupId,
+                SubjectId: lesson.subjectId,
+                TeacherId: lesson.teacherId,
+                CabinetId: lesson.cabinetId,
+                TimeSlotId: targetTimeId,
+                DayOfWeekId: targetDayId,
+                WeekTypeId: lesson.weekTypeId,
+                Subgroup: lesson.subgroup
+            };
+
+            if (ScheduleAPI.moveLesson) {
+                await ScheduleAPI.moveLesson(id, updateData);
+            } else {
+                await ScheduleAPI.updateLesson(id, updateData);
+            }
+
+            ScheduleStore.removeLesson(id);
+            lesson.timeSlotId = targetTimeId;
+            lesson.dayOfWeekId = targetDayId;
+            ScheduleStore.addLesson(lesson, targetDayId, targetTimeId);
         });
 
-        // 1. Удаляем из старого места в Store
-        ScheduleStore.removeLesson(lessonId);
+        await Promise.all(updatePromises);
 
-        // 2. Обновляем объект урока
-        lesson.timeSlotId = targetTimeId;
-        lesson.dayOfWeekId = targetDayId;
-
-        // 3. Добавляем в новое место в Store (Здесь сработает обновленный addLesson)
-        ScheduleStore.addLesson(lesson, targetDayId, targetTimeId);
-
-        // 4. Перерисовка
-
-        // Перерисовываем СТАРУЮ ячейку
-        // Ищем её заново через DOM, так как ссылка oldSlot могла устареть
         const oldSlotElement = document.querySelector(`.lesson-slot[data-day-of-week-id="${oldDayId}"][data-time-slot-id="${oldTimeId}"]`);
         if (oldSlotElement) {
             const oldLessons = ScheduleStore.getLessonsInSlot(oldDayId, oldTimeId);
-            renderLessonsInSlot(oldSlotElement, oldLessons, currentScheduleType);
+            if (typeof renderLessonsInSlot === 'function') {
+                renderLessonsInSlot(oldSlotElement, oldLessons, typeof currentScheduleType !== 'undefined' ? currentScheduleType : 'group');
+            }
         }
 
-        // Перерисовываем НОВУЮ ячейку (targetSlot - это элемент DOM, на который мы бросили)
-        // Получаем ОБНОВЛЕННЫЙ список уроков (теперь там должно быть 2 урока)
         const newLessons = ScheduleStore.getLessonsInSlot(targetDayId, targetTimeId);
-        renderLessonsInSlot(targetSlot, newLessons, currentScheduleType);
+        if (typeof renderLessonsInSlot === 'function') {
+            renderLessonsInSlot(targetSlot, newLessons, typeof currentScheduleType !== 'undefined' ? currentScheduleType : 'group');
+        }
 
-        // Сброс кэша
         delete dragOverCache[`${oldDayId}-${oldTimeId}`];
         delete dragOverCache[`${targetDayId}-${targetTimeId}`];
-
-        showAlert('Урок успешно перемещён', 'success');
+        showAlert('Занятие успешно перемещено!', 'success');
 
     } catch (error) {
         console.error(error);
