@@ -1,5 +1,3 @@
-// wwwroot/js/schedule/schedule-modal.js
-
 async function autoLoadFreeCabinets() {
     const dayId = document.getElementById('gridDayOfWeekId').value;
     const timeId = document.getElementById('gridTimeSlotId').value;
@@ -15,7 +13,6 @@ async function autoLoadFreeCabinets() {
 
     try {
         const freeCabinets = await ScheduleAPI.getFreeCabinets(dayId, timeId, weekId);
-
         cabinetSelect.innerHTML = '<option value="">-- Выберите кабинет --</option>';
 
         if (freeCabinets.length === 0) {
@@ -55,6 +52,9 @@ function openCreateLessonModalForSlot(timeSlotId, dayOfWeekId, existingLessonsIn
 
     form.reset();
     form.classList.remove('was-validated');
+
+    const gridSubgroupEl = document.getElementById('gridSubgroup');
+    if (gridSubgroupEl) gridSubgroupEl.value = "";
 
     document.getElementById('gridTimeSlotId').value = timeSlotId;
     document.getElementById('gridDayOfWeekId').value = dayOfWeekId;
@@ -105,7 +105,6 @@ function openCreateLessonModalForSlot(timeSlotId, dayOfWeekId, existingLessonsIn
 
     if (pastedLessonData) {
         document.getElementById('gridSubjectId').value = pastedLessonData.subjectId || '';
-
         if (currentScheduleType === 'teacher') {
             if (groupSelect) groupSelect.value = pastedLessonData.groupId || '';
         } else {
@@ -114,7 +113,6 @@ function openCreateLessonModalForSlot(timeSlotId, dayOfWeekId, existingLessonsIn
     }
 
     autoLoadFreeCabinets();
-
     openModal('createLessonGridModal');
 }
 
@@ -153,13 +151,15 @@ function openEditLessonModal(lesson) {
     window.currentSelectedLessonData = lesson;
     document.getElementById("editLessonId").value = lesson.id;
 
+    const editSubgroupEl = document.getElementById("editSubgroup");
+    if (editSubgroupEl) editSubgroupEl.value = lesson.subgroup || "";
+
     fillSelect("editSubjectId", window.appData.subjects, lesson.subjectId);
     fillSelect("editTeacherId", window.appData.teachers, lesson.teacherId);
     fillSelect("editCabinetId", window.appData.cabinets, lesson.cabinetId);
     fillSelect("editTimeSlotId", window.appData.timeSlots, lesson.timeSlotId);
     fillSelect("editWeekTypeId", window.appData.weekTypes, lesson.weekTypeId);
     fillSelect("editGroupId", window.appData.groups, lesson.groupId);
-
     document.getElementById("editDayOfWeekId").value = lesson.dayOfWeekId;
 
     const groupSelect = document.getElementById('editGroupId');
@@ -230,7 +230,6 @@ document.getElementById('createLessonGridForm')?.addEventListener('submit', asyn
         const teacherObj = window.appData.teachers.find(t => t.id == data.TeacherId);
         const cabinetObj = window.appData.cabinets.find(c => c.id == data.CabinetId);
         const groupObj = window.appData.groups.find(g => g.id == data.GroupId);
-
         const teacherShortName = teacherObj ? formatShortName(teacherObj.fullName) : 'Неизвестно';
 
         const lessonForUI = {
@@ -242,7 +241,8 @@ document.getElementById('createLessonGridForm')?.addEventListener('submit', asyn
             groupName: groupObj ? groupObj.name : (window.appData.groupName || 'Группа'),
             weekTypeId: parseInt(data.WeekTypeId),
             dayOfWeekId: parseInt(data.DayOfWeekId),
-            timeSlotId: parseInt(data.TimeSlotId)
+            timeSlotId: parseInt(data.TimeSlotId),
+            subgroup: data.Subgroup ? parseInt(data.Subgroup) : null
         };
 
         ScheduleStore.addLesson(lessonForUI, lessonForUI.dayOfWeekId, lessonForUI.timeSlotId);
@@ -343,7 +343,6 @@ function mergeFormDataToLesson(oldLesson, formData) {
 
     const tObj = window.appData.teachers.find(x => x.id == formData.TeacherId);
     const teacherFullName = tObj ? (typeof formatShortName === 'function' ? formatShortName(tObj.fullName) : tObj.fullName) : 'Не назначен';
-
     const cabinet = window.appData.cabinets.find(c => c.id == formData.CabinetId);
 
     return {
@@ -355,7 +354,7 @@ function mergeFormDataToLesson(oldLesson, formData) {
         groupId: parseInt(formData.GroupId),
         dayOfWeekId: parseInt(formData.DayOfWeekId),
         timeSlotId: parseInt(formData.TimeSlotId),
-
+        subgroup: formData.Subgroup ? parseInt(formData.Subgroup) : null,
         subjectTitle: findName(window.appData.subjects, formData.SubjectId, 'title'),
         groupName: findName(window.appData.groups, formData.GroupId, 'name'),
         teacherFullName: teacherFullName,

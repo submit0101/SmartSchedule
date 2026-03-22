@@ -129,10 +129,10 @@ function createLessonSlot(timeSlot, day, daySchedule) {
 }
 
 function renderLessonsInSlot(slot, lessons, scheduleType = 'group') {
-    const filtered = selectedWeekType === "all" ? lessons : lessons.filter(l => l.weekTypeId == selectedWeekType);
+    const filtered = selectedWeekType === "all" ?
+        lessons : lessons.filter(l => l.weekTypeId == selectedWeekType);
 
     slot.innerHTML = '';
-
     if (filtered.length === 0) {
         slot.classList.add("empty");
         slot.textContent = "Нет занятия";
@@ -147,65 +147,102 @@ function renderLessonsInSlot(slot, lessons, scheduleType = 'group') {
         return (order[a.weekTypeId] || 99) - (order[b.weekTypeId] || 99);
     });
 
+    // === НОВАЯ ЛОГИКА ГРУППИРОВКИ ПОДГРУПП ===
+    const groupedLessons = {};
+
     sortedLessons.forEach(lesson => {
-        const item = createLessonCardElement(lesson, scheduleType, slot);
-        slot.appendChild(item);
+        let subject = lesson.subjectTitle || 'Без названия';
+
+        if (!groupedLessons[subject]) {
+            groupedLessons[subject] = {
+                baseLesson: lesson, // Сохраняем первый урок для цвета бейджа и ID
+                ids: [],
+                teachers: [],
+                cabinets: []
+            };
+        }
+
+        groupedLessons[subject].ids.push(lesson.id);
+
+        // Собираем учителей
+        let teacher = lesson.teacherFullName;
+        if (teacher && teacher !== 'Не назначен' && !groupedLessons[subject].teachers.includes(teacher)) {
+            groupedLessons[subject].teachers.push(teacher);
+        }
+
+        // Собираем кабинеты (вместе со зданием)
+        let cabText = lesson.cabinetNumber ? `Каб. ${lesson.cabinetNumber}` : '';
+        if (lesson.buildingName) cabText += ` (${lesson.buildingName})`;
+        if (cabText && !groupedLessons[subject].cabinets.includes(cabText)) {
+            groupedLessons[subject].cabinets.push(cabText);
+        }
     });
+
+    // === ОТРИСОВКА СГРУППИРОВАННЫХ КАРТОЧЕК ===
+    for (const subject in groupedLessons) {
+        const group = groupedLessons[subject];
+        // Передаем теперь всю группу в функцию создания элемента
+        const item = createLessonCardElement(group, subject, scheduleType, slot);
+        slot.appendChild(item);
+    }
 }
 
-function createLessonCardElement(lesson, scheduleType, parentSlot) {
+function createLessonCardElement(group, subjectTitle, scheduleType, parentSlot) {
     const item = document.createElement("div");
+    const lesson = group.baseLesson; // Берем свойства от первой подгруппы (например, тип недели)
+
     item.className = `lesson-item weektype-${lesson.weekTypeId}`;
     item.draggable = true;
-    item.dataset.lessonId = lesson.id;
 
+    // Сохраняем все id для истории и первый id для совместимости с drag-and-drop
+    item.dataset.lessonIds = group.ids.join(',');
+    item.dataset.lessonId = group.ids[0];
+
+    // Логика цветов бейджей (осталась ваша)
     let badgeType = '?';
     let badgeColor = 'secondary';
-
-    // === ЛОГИКА ЦВЕТОВ ===
-    // 1 - Числитель - Зеленый
     if (lesson.weekTypeId == WeekType.NUMERATOR) {
-        badgeType = 'Ч';
-        badgeColor = 'success'; // Зеленый в Bootstrap
-    }
-    // 2 - Знаменатель - Синий
-    else if (lesson.weekTypeId == WeekType.DENOMINATOR) {
-        badgeType = 'З';
-        badgeColor = 'primary'; // Синий в Bootstrap
-    }
-    // 3 - Целая - Красный
-    else if (lesson.weekTypeId == WeekType.FULL) {
-        badgeType = 'Ц';
-        badgeColor = 'danger';
+        badgeType = 'Ч'; badgeColor = 'success';
+    } else if (lesson.weekTypeId == WeekType.DENOMINATOR) {
+        badgeType = 'З'; badgeColor = 'primary';
+    } else if (lesson.weekTypeId == WeekType.FULL) {
+        badgeType = 'Ц'; badgeColor = 'danger';
     }
 
     const badgeClass = `lesson-slot-badge bg-${badgeColor}`;
 
+    // Склеиваем массивы через запятую
+    const teachersStr = group.teachers.join(', ') || 'Не назначен';
+    const cabinetsStr = group.cabinets.join(', ') || 'Каб. ?';
+
     let itemContent = `
         <span class="${badgeClass}">${badgeType}</span>
-        <strong>${lesson.subjectTitle || 'Без названия'}</strong>
+        <strong>${subjectTitle}</strong>
     `;
 
     if (scheduleType === 'teacher') {
         itemContent += `
             <small>Гр: ${lesson.groupName || '?'}</small><br/>
-            Каб. ${lesson.cabinetNumber || '?'}${lesson.buildingName ? ` (${lesson.buildingName})` : ''}
+            <small>${cabinetsStr}</small>
         `;
     } else {
         itemContent += `
-            ${lesson.teacherFullName || 'Не назначен'}<br/>
-            Каб. ${lesson.cabinetNumber || '?'}${lesson.buildingName ? ` (${lesson.buildingName})` : ''}
+            <small>${teachersStr}</small><br/>
+            <small>${cabinetsStr}</small>
         `;
     }
+
     item.innerHTML = itemContent;
 
+    // Подключаем ваши события Drag & Drop
     item.addEventListener('dragstart', handleDragStart);
     item.addEventListener('dragend', handleDragEnd);
 
+    // Подключаем клик для модального окна/всплывающих кнопок
     item.onclick = (e) => {
         e.stopPropagation();
         if (LessonClipboard.data) return;
-
+        // Передаем базовый урок (первую подгруппу), чтобы открывалось модальное окно
         showLessonActionTooltip(e, item, lesson, parentSlot);
     };
 

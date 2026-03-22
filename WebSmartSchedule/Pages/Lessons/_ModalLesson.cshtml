@@ -35,7 +35,15 @@
                         }
                     </select>
                 </div>
-
+                <div class="mb-3">
+                    <label class="form-label">Подгруппа</label>
+                    <select name="Subgroup" class="form-select">
+                        <option value="">Вся группа (без деления)</option>
+                        <option value="1">1 подгруппа</option>
+                        <option value="2">2 подгруппа</option>
+                        <option value="3">3 подгруппа</option>
+                    </select>
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Временной слот</label>
                     <select name="TimeSlotId" class="form-select" required title="Выберите время занятия">
@@ -105,7 +113,15 @@
                     <label class="form-label">Кабинет</label>
                     <select name="CabinetId" id="editCabinetId" class="form-select" required title="Выберите кабинет"></select>
                 </div>
-
+                <div class="mb-3">
+                    <label class="form-label">Подгруппа</label>
+                    <select name="Subgroup" id="editSubgroup" class="form-select">
+                        <option value="">Вся группа (без деления)</option>
+                        <option value="1">1 подгруппа</option>
+                        <option value="2">2 подгруппа</option>
+                        <option value="3">3 подгруппа</option>
+                    </select>
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Временной слот</label>
                     <select name="TimeSlotId" id="editTimeSlotId" class="form-select" required title="Выберите время занятия"></select>
@@ -185,7 +201,15 @@
                     </select>
                     <div class="invalid-feedback">Пожалуйста, выберите преподавателя.</div>
                 </div>
-
+                <div class="mb-3">
+                    <label for="gridSubgroup" class="form-label">Подгруппа</label>
+                    <select id="gridSubgroup" name="Subgroup" class="form-select">
+                        <option value="">Вся группа (без деления)</option>
+                        <option value="1">1 подгруппа</option>
+                        <option value="2">2 подгруппа</option>
+                        <option value="3">3 подгруппа</option>
+                    </select>
+                </div>
                 <div class="mb-3">
                     <label for="gridWeekTypeId" class="form-label">Тип недели</label>
                     <select id="gridWeekTypeId" name="WeekTypeId" class="form-select" required title="Выберите тип недели">
