@@ -241,9 +241,17 @@ function createLessonCardElement(group, subjectTitle, scheduleType, parentSlot) 
     // Подключаем клик для модального окна/всплывающих кнопок
     item.onclick = (e) => {
         e.stopPropagation();
-        if (LessonClipboard.data) return;
-        // Передаем базовый урок (первую подгруппу), чтобы открывалось модальное окно
-        showLessonActionTooltip(e, item, lesson, parentSlot);
+        if (typeof LessonClipboard !== 'undefined' && LessonClipboard.data) return;
+
+        if (group.ids && group.ids.length > 1) {
+            openSubgroupSelectModal(group.ids);
+        } else {
+            if (typeof showLessonActionTooltip === 'function') {
+                showLessonActionTooltip(e, item, group.baseLesson, parentSlot);
+            } else {
+                openEditLessonModal(group.baseLesson);
+            }
+        }
     };
 
     return item;

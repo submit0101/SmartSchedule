@@ -296,6 +296,21 @@
         </div>
     </div>
 </div>
+<div id="selectSubgroupModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow border-0 rounded-3" style="height: auto !important; min-height: 0;">
+            <div class="modal-header bg-light border-bottom-0 pb-2">
+                <h6 class="modal-title fw-bold">Выберите подгруппу</h6>
+                <button type="button" class="btn-close" onclick="closeModal('selectSubgroupModal')"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="text-muted mb-3" style="font-size: 0.85rem;">Какое из занятий в этой ячейке нужно изменить?</p>
+                <div id="subgroupActionButtons" class="list-group gap-2 border-0">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     function toggleLessonFormat() {

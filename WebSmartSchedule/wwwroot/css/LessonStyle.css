@@ -329,9 +329,6 @@ button.btn {
 .modal-dialog {
     width: 400px;
     max-width: 90vw;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transform: scale(0.85);
     opacity: 0;
     animation-fill-mode: forwards;

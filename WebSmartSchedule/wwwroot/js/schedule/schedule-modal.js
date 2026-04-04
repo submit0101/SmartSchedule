@@ -420,6 +420,45 @@ function refreshScheduleSlots(oldLesson, newLesson) {
     }
 }
 
+function openSubgroupSelectModal(lessonIds) {
+    const container = document.getElementById('subgroupActionButtons');
+    if (!container) return;
+    container.innerHTML = '';
+
+    lessonIds.forEach(id => {
+        const lesson = ScheduleStore.findLesson(id);
+        if (!lesson) return;
+
+        const btn = document.createElement('button');
+        // Используем стили list-group-item для создания красивых карточек
+        btn.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center rounded border';
+
+        btn.innerHTML = `
+            <div class="ms-2 me-auto text-start">
+                <div class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">
+                    ${lesson.subgroup ? lesson.subgroup + ' подгруппа' : 'Вся группа'}
+                </div>
+                <div class="text-muted" style="font-size: 0.8rem; line-height: 1.2;">
+                    ${lesson.subjectTitle}<br>
+                    ${lesson.teacherFullName}
+                </div>
+            </div>
+            <span class="text-primary fs-5">&rsaquo;</span>
+        `;
+
+        btn.onclick = () => {
+            closeModal('selectSubgroupModal');
+            if (typeof openEditLessonModal === 'function') {
+                openEditLessonModal(lesson);
+            }
+        };
+
+        container.appendChild(btn);
+    });
+
+    openModal('selectSubgroupModal');
+}
+
 function refreshSingleSlot(dayId, timeId) {
     const slotEl = document.querySelector(`.lesson-slot[data-day-of-week-id="${dayId}"][data-time-slot-id="${timeId}"]`);
     if (slotEl) {
@@ -429,3 +468,27 @@ function refreshSingleSlot(dayId, timeId) {
         }
     }
 }
+// Добавьте это в конец schedule-modal.js
+document.addEventListener('change', function(e) {
+    // Проверяем, что изменен первый предмет и выбрано деление на подгруппы
+    if (e.target && e.target.id === 'gridSubjectId_1') {
+        const format = document.getElementById('gridLessonFormat').value;
+        const subject2 = document.getElementById('gridSubjectId_2');
+        
+        if (format === '2' && subject2) {
+            subject2.value = e.target.value; // Копируем значение
+            subject2.classList.add('bg-light'); // Визуально выделяем, что поле "автоматическое"
+        }
+    }
+});
+
+// Также добавим синхронизацию при переключении самого формата
+document.getElementById('gridLessonFormat')?.addEventListener('change', function() {
+    if (this.value === '2') {
+        const sub1 = document.getElementById('gridSubjectId_1').value;
+        const sub2 = document.getElementById('gridSubjectId_2');
+        if (sub1 && sub2) {
+            sub2.value = sub1;
+        }
+    }
+});
