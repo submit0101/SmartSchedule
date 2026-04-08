@@ -6,12 +6,16 @@
 body {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden !important; /* Глобальный виндовский скролл отключен */
+    margin: 0;
 }
 
 .content-wrapper {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; /* Занимает ровно то место, которое осталось под шапкой */
+    overflow-y: auto !important; /* Включаем внутренний скролл */
+    overflow-x: hidden;
+    padding-bottom: 40px; /* Отступ снизу, чтобы таблица не прилипала к краю экрана */
 }
 
 h2 {
@@ -53,7 +57,7 @@ a {
         border-color: var(--bs-nav-tabs-link-active-border-color);
     }
 
-/* === Шапка === */
+/* === Шапка (Логотип и тд) === */
 .header-container {
     display: flex;
     justify-content: space-between;
@@ -163,7 +167,7 @@ button.btn {
     }
 
 /* ========================================================================== */
-/* === СТИЛИ ДЛЯ СЕТКИ РАСПИСАНИЯ === */
+/* === СТИЛИ ДЛЯ СЕТКИ РАСПИСАНИЯ (ЗОЛОТАЯ СЕРЕДИНА) === */
 /* ========================================================================== */
 .schedule-grid-container {
     padding: 1rem;
@@ -175,18 +179,19 @@ button.btn {
 
 .schedule-grid {
     display: grid;
-    grid-template-columns: 100px repeat(6, minmax(160px, 1fr));
-    grid-auto-rows: 150px;
+    grid-template-columns: 80px repeat(6, 1fr);
+    grid-auto-rows: minmax(110px, auto);
     gap: 1px;
     background-color: #e2e8f0;
     border-radius: 8px;
     overflow: hidden;
-    min-width: 960px;
+    min-width: 0;
+    width: 100%;
 }
 
 .time-header {
-    background-color: #4b5563;
-    color: white;
+    background-color: #1e293b;
+    color: #f8fafc;
     font-weight: 700;
     padding: 8px;
     text-align: center;
@@ -196,12 +201,12 @@ button.btn {
     justify-content: center;
     font-size: 0.85rem;
     white-space: pre-line;
-    border-right: 1px solid #6b7280;
+    border-right: 1px solid #334155;
 }
 
 .day-header-grid {
-    background-color: #6b7280;
-    color: white;
+    background-color: #1e293b;
+    color: #f8fafc;
     font-weight: 700;
     padding: 8px;
     text-align: center;
@@ -209,6 +214,7 @@ button.btn {
     align-items: center;
     justify-content: center;
     font-size: 0.9rem;
+    border-bottom: 1px solid #334155;
 }
 
 .lesson-slot {
@@ -219,6 +225,8 @@ button.btn {
     transition: all 0.2s ease;
     position: relative;
     overflow-y: hidden;
+    border-right: 1px dashed #e2e8f0;
+    border-bottom: 1px dashed #e2e8f0;
 }
 
     .lesson-slot:hover {
@@ -229,7 +237,7 @@ button.btn {
 
     .lesson-slot.empty {
         background-color: #f8fafc;
-        color: #94a3b8;
+        color: #cbd5e1;
         font-style: normal;
         font-size: 0.8rem;
         letter-spacing: 0.5px;
@@ -240,11 +248,14 @@ button.btn {
 
 .lesson-item {
     flex-shrink: 0;
-    padding: 5px;
-    margin-bottom: 3px;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 6px rgba(0, 0, 0, 0.02);
     border-left: 4px solid #ccc;
+    border-top: 1px solid rgba(0,0,0,0.02);
+    border-right: 1px solid rgba(0,0,0,0.02);
+    border-bottom: 1px solid rgba(0,0,0,0.02);
     background-color: #ffffff;
     font-size: 0.8rem;
     line-height: 1.3;
@@ -252,7 +263,22 @@ button.btn {
     word-wrap: break-word;
     word-break: break-word;
     position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+    .lesson-item strong {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 3px;
+        font-weight: 700;
+        color: #1a202c;
+    }
+
+    .lesson-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 5;
+    }
 
     .lesson-item:last-child {
         margin-bottom: 0;
@@ -273,29 +299,24 @@ button.btn {
         background-color: #fef2f2;
     }
 
-    .lesson-item strong {
-        display: block;
-        font-size: 0.9rem;
-        margin-bottom: 3px;
-        font-weight: 700;
-        color: #1a202c;
-    }
-
 .lesson-slot-badge {
     position: absolute;
     top: 2px;
     right: 2px;
     font-size: 0.6rem;
-    padding: 1px 3px;
-    border-radius: 2px;
+    padding: 1px 4px;
+    border-radius: 4px;
     color: white;
     font-weight: bold;
     z-index: 1;
     min-width: 15px;
     text-align: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* === Модальное окно === */
+/* ========================================================================== */
+/* === КОМПАКТНОЕ МОДАЛЬНОЕ ОКНО === */
+/* ========================================================================== */
 @keyframes fadeInZoom {
     0% {
         opacity: 0;
@@ -311,7 +332,7 @@ button.btn {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1050;
+    z-index: 1060 !important;
     left: 0;
     top: 0;
     width: 100%;
@@ -327,7 +348,7 @@ button.btn {
     }
 
 .modal-dialog {
-    width: 400px;
+    width: 360px !important; /* Узкое окно */
     max-width: 90vw;
     transform: scale(0.85);
     opacity: 0;
@@ -339,11 +360,69 @@ button.btn {
 }
 
 .modal-content {
-    padding: 1rem;
+    padding: 1.2rem !important; /* Внутренний отступ */
+    border-radius: 12px;
     position: relative;
 }
 
-/* === ИСПРАВЛЕНИЕ: Отступы для Input Group (кнопка Авто) === */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+/* Уменьшаем надписи над полями */
+.modal-content .form-label,
+.modal-content label {
+    font-size: 0.8rem !important;
+    font-weight: 600;
+    margin-bottom: 0.2rem !important;
+    color: #475569;
+}
+
+/* Делаем поля ввода компактными */
+.modal-content .form-select,
+.modal-content .form-control {
+    font-size: 0.85rem !important;
+    padding: 0.35rem 0.6rem !important;
+    border-radius: 6px;
+    min-height: 32px;
+    margin-bottom: 0.8rem !important;
+}
+
+.modal-content .mb-3 {
+    margin-bottom: 0.8rem !important;
+}
+
+/* Кнопка закрытия (крестик) */
+.btn-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #94a3b8;
+}
+
+    .btn-close:hover {
+        color: #475569;
+    }
+
+/* Нижняя панель с кнопками */
+.modal-footer {
+    margin-top: 0.5rem !important;
+    padding: 0.8rem 0 0 0 !important;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: end;
+    gap: 8px;
+}
+
+    .modal-footer .btn {
+        font-size: 0.85rem !important;
+        padding: 0.35rem 0.8rem !important;
+        border-radius: 6px;
+    }
+
+/* === Отступы для Input Group (кнопка Авто) === */
 .input-group {
     display: flex;
     width: 100%;
@@ -359,32 +438,12 @@ button.btn {
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
         border-left: 0;
+        margin-bottom: 0.8rem !important; /* Выравнивание с селектом */
+        height: 32px;
+        display: flex;
+        align-items: center;
+        padding: 0 0.6rem !important;
     }
-
-.btn-close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #94a3b8;
-}
-
-    .btn-close:hover {
-        color: #475569;
-    }
-
-.form-label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.modal-footer {
-    margin-top: 1rem;
-    display: flex;
-    justify-content: end;
-    gap: 8px;
-}
 
 /* === Адаптивность (Mobile/Desktop) === */
 @media (max-width: 768px) {
@@ -397,8 +456,8 @@ button.btn {
     }
 
     .schedule-grid {
-        grid-template-columns: 70px repeat(6, minmax(120px, 1fr));
-        grid-auto-rows: 150px;
+        grid-template-columns: 50px repeat(6, minmax(120px, 1fr));
+        grid-auto-rows: 100px;
         font-size: 0.7rem;
         min-width: 800px;
     }
@@ -409,18 +468,18 @@ button.btn {
     }
 
     .lesson-item {
-        font-size: 0.7rem;
-        padding: 4px;
+        font-size: 0.65rem;
+        padding: 3px;
         margin-bottom: 3px;
     }
 
         .lesson-item strong {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
 
     .time-header, .day-header-grid {
-        font-size: 0.75rem;
-        padding: 5px;
+        font-size: 0.7rem;
+        padding: 4px;
     }
 
     .btn-sm {
@@ -532,65 +591,22 @@ button.btn {
 }
 
     /* === ВИЗУАЛИЗАЦИЯ ПРИЧИН КОНФЛИКТА === */
-
-    /* 1. Если занят ПРЕПОДАВАТЕЛЬ — ячейка станет Оранжевой */
     .lesson-slot.drag-over.drag-over-invalid.conflict-teacher {
-        background-color: #fff7ed !important; /* Оранжевый фон */
-        box-shadow: inset 0 0 0 2px #f97316 !important; /* Оранжевая рамка */
+        background-color: #fff7ed !important;
+        box-shadow: inset 0 0 0 2px #f97316 !important;
     }
 
-        .lesson-slot.drag-over.drag-over-invalid.conflict-teacher::after {
-            content: "Учитель занят!";
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 10px;
-            color: #c2410c;
-            background: rgba(255,255,255,0.8);
-            padding: 1px 4px;
-            border-radius: 4px;
-            pointer-events: none;
-        }
-
-    /* 2. Если занята ГРУППА — ячейка станет Фиолетовой */
     .lesson-slot.drag-over.drag-over-invalid.conflict-week {
-        background-color: #f3e8ff !important; /* Фиолетовый фон */
+        background-color: #f3e8ff !important;
         box-shadow: inset 0 0 0 2px #a855f7 !important;
     }
 
-        .lesson-slot.drag-over.drag-over-invalid.conflict-week::after {
-            content: "Группа занята!";
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 10px;
-            color: #7e22ce;
-            background: rgba(255,255,255,0.8);
-            padding: 1px 4px;
-            border-radius: 4px;
-            pointer-events: none;
-        }
-
-    /* 3. Если занят КАБИНЕТ — ячейка станет Красной */
     .lesson-slot.drag-over.drag-over-invalid.conflict-cabinet {
-        background-color: #fee2e2 !important; /* Красный фон */
+        background-color: #fee2e2 !important;
         box-shadow: inset 0 0 0 2px #ef4444 !important;
     }
 
-        .lesson-slot.drag-over.drag-over-invalid.conflict-cabinet::after {
-            content: "Кабинет занят!";
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 10px;
-            color: #b91c1c;
-            background: rgba(255,255,255,0.8);
-            padding: 1px 4px;
-            border-radius: 4px;
-            pointer-events: none;
-        }
 /* ================================================== */
-
 .lesson-slot.pending-paste {
     outline: 2px dashed #3b82f6;
     outline-offset: -2px;
@@ -631,23 +647,19 @@ button.btn {
         opacity: 1;
     }
 
-/* Исправление внутренней панели, чтобы не ломала анимацию */
 #customFilterWrapper .filters-container-sticky {
-    margin: 0 !important; /* Убиваем внешние отступы */
+    margin: 0 !important;
     width: 100%;
-    /* Восстанавливаем внешний вид панели */
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     background: white;
     padding: 0.75rem;
-    /* Flex настройки для содержимого */
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-/* Стили вкладок внутри фильтров */
 #customFilterWrapper .nav-tabs {
     border-bottom: 1px solid #e2e8f0;
     margin-bottom: 0.5rem;
@@ -658,13 +670,11 @@ button.btn {
     font-size: 0.9rem;
 }
 
-/* Сброс лишних рамок у внутренних виджетов (Поиск, Недели) */
 .week-panel, .search-panel, .scrollable-filter-panel {
     border: none !important;
-    border-right: 1px solid #f1f5f9 !important; /* Только разделитель справа */
+    border-right: 1px solid #f1f5f9 !important;
 }
 
-/* Панель "Недели" */
 .week-panel {
     width: 120px;
     height: 120px;
@@ -699,7 +709,6 @@ button.btn {
             color: white;
         }
 
-/* Панель "Поиск" */
 .search-panel {
     width: 120px;
     height: 120px;
@@ -750,7 +759,6 @@ button.btn {
             transform: scale(1.05);
         }
 
-/* Подсветка поиска */
 .lesson-slot.search-match {
     background-color: #fef9c3 !important;
     box-shadow: 0 0 0 2px #f59e0b inset;
@@ -795,7 +803,6 @@ button.btn {
     z-index: 20;
 }
 
-/* Вертикальный текст */
 .vertical-text {
     writing-mode: vertical-rl;
     text-orientation: upright;
@@ -807,7 +814,6 @@ button.btn {
     line-height: 1.2;
 }
 
-/* Панель с прокруткой (Пары) */
 .scrollable-filter-panel {
     width: 120px;
     height: 120px;
@@ -859,7 +865,6 @@ button.btn {
         border-radius: 3px;
     }
 
-/* Виджеты (карточки) - Базовый стиль */
 .group-widget {
     display: flex;
     flex-direction: column;
@@ -893,7 +898,6 @@ button.btn {
         font-size: 0.8rem;
     }
 
-/* Анимация карточки расписания */
 .schedule-card {
     opacity: 1;
     transform: translateX(0);
@@ -921,7 +925,6 @@ button.btn {
     width: 100%;
 }
 
-/* Тултип действий */
 .lesson-action-tooltip {
     position: absolute;
     background: white;
@@ -952,7 +955,6 @@ button.btn {
             color: #2563eb;
         }
 
-/* Режим копирования */
 body.copy-mode {
     cursor: copy;
 }
@@ -970,7 +972,6 @@ body.copy-mode {
         cursor: not-allowed;
     }
 
-/* Свободное время */
 .lesson-slot.free-time {
     animation: none !important;
     background-color: #f0fdf4 !important;
@@ -1010,7 +1011,6 @@ body.copy-mode {
 /* ================================================================================== */
 /* === ГЛОБАЛЬНЫЙ ФИКС ИНТЕРФЕЙСА (Ширина, Скролл, Прыжки, Вкладки) === */
 /* ================================================================================== */
-
 .filters-container-sticky {
     background: white;
     border: 1px solid #e2e8f0;
@@ -1020,7 +1020,6 @@ body.copy-mode {
     margin-bottom: 1rem;
 }
 
-    /* Стили вкладок (Tabs) */
     .filters-container-sticky .nav-tabs {
         border-bottom: 1px solid #e2e8f0;
         padding: 0 10px;
@@ -1048,9 +1047,8 @@ body.copy-mode {
             border-bottom-color: #2563eb;
         }
 
-    /* Область контента вкладки */
     .filters-container-sticky .tab-content {
-        height: 150px; /* Фиксированная высота панели */
+        height: 150px;
         position: relative;
         background: white;
     }
@@ -1060,7 +1058,6 @@ body.copy-mode {
         width: 100%;
     }
 
-/* === КОНТЕЙНЕР ДЛЯ ГОРИЗОНТАЛЬНОГО СКРОЛЛА КАРТОЧЕК === */
 .cards-scroll-container {
     display: flex;
     flex-direction: row;
@@ -1068,13 +1065,13 @@ body.copy-mode {
     gap: 12px;
     padding: 12px;
     height: 100%;
-    overflow-x: auto; /* Горизонтальный скролл работает везде */
+    overflow-x: auto;
     overflow-y: hidden;
-    white-space: nowrap; /* Важно: карточки не переносятся */
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
 }
 
-    /* Кастомизация скроллбара */
+    /* Скроллбары для карточек */
     .cards-scroll-container::-webkit-scrollbar {
         height: 6px;
     }
@@ -1093,17 +1090,16 @@ body.copy-mode {
             background: #94a3b8;
         }
 
-/* === ЕДИНАЯ КАРТОЧКА (WIDGET) === */
 .filter-card {
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    min-width: 160px; /* Минимальная ширина карточки */
+    min-width: 160px;
     max-width: 240px;
     display: flex;
     flex-direction: column;
     padding: 10px;
-    flex-shrink: 0; /* Запрещаем карточкам сжиматься */
+    flex-shrink: 0;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -1112,7 +1108,6 @@ body.copy-mode {
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-/* Заголовок карточки */
 .filter-card-header {
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -1123,18 +1118,14 @@ body.copy-mode {
     white-space: normal;
 }
 
-/* Тело карточки */
 .filter-card-body {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    overflow: hidden; /* Чтобы контент не вылезал */
+    overflow: hidden;
 }
 
-/* === ВНУТРЕННИЕ ЭЛЕМЕНТЫ КАРТОЧКИ === */
-
-/* Сетка кнопок (например, для недель) */
 .grid-2x2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1168,7 +1159,6 @@ body.copy-mode {
         border-color: #2563eb;
     }
 
-/* Внутренний скролл для списков (пары, кнопки режимов) */
 .scrollable-list {
     overflow-y: auto;
     display: flex;
@@ -1186,7 +1176,6 @@ body.copy-mode {
         border-radius: 2px;
     }
 
-/* Кнопки внутри списка */
 .list-btn {
     text-align: left;
     font-size: 0.8rem;
@@ -1212,7 +1201,6 @@ body.copy-mode {
         font-weight: 600;
     }
 
-/* Инпуты и Селекты */
 .filter-card .form-select,
 .filter-card .form-control {
     font-size: 0.85rem;
@@ -1220,9 +1208,8 @@ body.copy-mode {
     border-color: #cbd5e1;
 }
 
-/* Нижняя панель действий в карточке */
 .card-actions {
-    margin-top: auto; /* Прижимает кнопки к низу */
+    margin-top: auto;
     display: flex;
     gap: 5px;
 }
@@ -1237,15 +1224,32 @@ body.copy-mode {
         white-space: nowrap;
     }
 
-/* Стили для широкой карточки (опционально) */
 .filter-card.wide {
     min-width: 220px;
 }
-.modal-backdrop {
-    z-index: 1040 !important;
+
+/* ================================================================================== */
+/* === НОВЫЕ КРАСИВЫЕ СКРОЛЛБАРЫ ДЛЯ ВСЕЙ СТРАНИЦЫ === */
+/* ================================================================================== */
+.content-wrapper::-webkit-scrollbar,
+.schedule-grid-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px; /* Высота горизонтального скролла */
 }
 
-/* 2. Поднимаем само модальное окно выше затемнителя */
-.modal {
-    z-index: 1060 !important;
+.content-wrapper::-webkit-scrollbar-track,
+.schedule-grid-container::-webkit-scrollbar-track {
+    background: transparent;
 }
+
+.content-wrapper::-webkit-scrollbar-thumb,
+.schedule-grid-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+    border: 2px solid white; /* Добавляет эффект отступа (белая кайма) */
+}
+
+    .content-wrapper::-webkit-scrollbar-thumb:hover,
+    .schedule-grid-container::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }

@@ -82,14 +82,19 @@ public class LessonService : ILessonService
 
             if (isWeekClash(existWt, origWt))
             {
-
+                
                 bool isGroupConflict = existingLesson.GroupId == originalLesson.GroupId &&
                                        (existingLesson.Subgroup == null || originalLesson.Subgroup == null || existingLesson.Subgroup == originalLesson.Subgroup);
-
                 if (isGroupConflict) result.IsWeekConflict = true;
+
+                
                 if (existingLesson.CabinetId == originalLesson.CabinetId) result.IsCabinetBusy = true;
+
+                
+                if (existingLesson.TeacherId == originalLesson.TeacherId) result.IsTeacherBusy = true;
             }
 
+            
             if (result.IsWeekConflict && result.IsTeacherBusy && result.IsCabinetBusy) break;
         }
 

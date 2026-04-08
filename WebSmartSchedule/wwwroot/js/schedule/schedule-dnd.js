@@ -106,14 +106,19 @@ async function handleDragOver(e) {
 }
 
 function applyConflictClasses(slot, conflict) {
+    slot.classList.remove('drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet');
+
     if (conflict.isWeekConflict || conflict.isTeacherBusy || conflict.isCabinetBusy) {
-        slot.classList.remove('drag-over-valid');
         slot.classList.add('drag-over', 'drag-over-invalid');
-        if (conflict.isWeekConflict) slot.classList.add('conflict-week');
-        if (conflict.isTeacherBusy) slot.classList.add('conflict-teacher');
-        if (conflict.isCabinetBusy) slot.classList.add('conflict-cabinet');
+
+        if (conflict.isTeacherBusy) {
+            slot.classList.add('conflict-teacher'); 
+        } else if (conflict.isCabinetBusy) {
+            slot.classList.add('conflict-cabinet'); 
+        } else if (conflict.isWeekConflict) {
+            slot.classList.add('conflict-week'); 
+        }
     } else {
-        slot.classList.remove('drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet');
         slot.classList.add('drag-over', 'drag-over-valid');
     }
 }
@@ -127,12 +132,9 @@ async function handleDrop(e) {
     const targetSlot = this;
     targetSlot.classList.remove('drag-over', 'drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet', 'drag-over-loading');
 
-    let lessonIdsStr = '';
-    if (window.dragSrcElement) {
-        lessonIdsStr = window.dragSrcElement.dataset.lessonIds || window.dragSrcElement.dataset.lessonId;
-    } else {
-        lessonIdsStr = e.dataTransfer.getData('text/plain');
-    }
+    let lessonIdsStr = window.dragSrcElement ?
+        (window.dragSrcElement.dataset.lessonIds || window.dragSrcElement.dataset.lessonId) :
+        e.dataTransfer.getData('text/plain');
 
     if (!lessonIdsStr) return;
 
@@ -148,63 +150,59 @@ async function handleDrop(e) {
 
     if (oldTimeId === targetTimeId && oldDayId === targetDayId) return;
 
-    const conflictResult = await ScheduleAPI.checkConflict(lessonIds[0], targetDayId, targetTimeId);
-    if (conflictResult.isWeekConflict || conflictResult.isTeacherBusy || conflictResult.isCabinetBusy) {
-        showAlert('Невозможно переместить занятие из-за конфликта.', 'danger');
-        return;
-    }
+    const backupLessons = lessonIds.map(id => ({ ...ScheduleStore.findLesson(id) }));
 
-    try {
-        const updatePromises = lessonIds.map(async (id) => {
-            const lesson = ScheduleStore.findLesson(id);
-            if (!lesson) return;
-
-            const updateData = {
-                Id: lesson.id,
-                GroupId: lesson.groupId,
-                SubjectId: lesson.subjectId,
-                TeacherId: lesson.teacherId,
-                CabinetId: lesson.cabinetId,
-                TimeSlotId: targetTimeId,
-                DayOfWeekId: targetDayId,
-                WeekTypeId: lesson.weekTypeId,
-                Subgroup: lesson.subgroup
-            };
-
-            if (ScheduleAPI.moveLesson) {
-                await ScheduleAPI.moveLesson(id, updateData);
-            } else {
-                await ScheduleAPI.updateLesson(id, updateData);
-            }
-
+    lessonIds.forEach(id => {
+        const lesson = ScheduleStore.findLesson(id);
+        if (lesson) {
             ScheduleStore.removeLesson(id);
             lesson.timeSlotId = targetTimeId;
             lesson.dayOfWeekId = targetDayId;
             ScheduleStore.addLesson(lesson, targetDayId, targetTimeId);
+        }
+    });
+
+    refreshSingleSlot(oldDayId, oldTimeId);
+    refreshSingleSlot(targetDayId, targetTimeId);
+
+    delete dragOverCache[`${oldDayId}-${oldTimeId}`];
+    delete dragOverCache[`${targetDayId}-${targetTimeId}`];
+
+    try {
+        const conflictResult = await ScheduleAPI.checkConflict(lessonIds[0], targetDayId, targetTimeId);
+        if (conflictResult.isWeekConflict || conflictResult.isTeacherBusy || conflictResult.isCabinetBusy) {
+            let errs = [];
+            if (conflictResult.isWeekConflict) errs.push('группа');
+            if (conflictResult.isTeacherBusy) errs.push('преподаватель');
+            if (conflictResult.isCabinetBusy) errs.push('кабинет');
+            throw new Error(`Заняты: ${errs.join(', ')}.`);
+        }
+
+        const updatePromises = lessonIds.map(async (id) => {
+            const lesson = ScheduleStore.findLesson(id);
+            if (!lesson) return;
+            const updateData = {
+                Id: lesson.id, GroupId: lesson.groupId, SubjectId: lesson.subjectId,
+                TeacherId: lesson.teacherId, CabinetId: lesson.cabinetId,
+                TimeSlotId: targetTimeId, DayOfWeekId: targetDayId,
+                WeekTypeId: lesson.weekTypeId, Subgroup: lesson.subgroup
+            };
+            if (ScheduleAPI.moveLesson) await ScheduleAPI.moveLesson(id, updateData);
+            else await ScheduleAPI.updateLesson(id, updateData);
         });
 
         await Promise.all(updatePromises);
-
-        const oldSlotElement = document.querySelector(`.lesson-slot[data-day-of-week-id="${oldDayId}"][data-time-slot-id="${oldTimeId}"]`);
-        if (oldSlotElement) {
-            const oldLessons = ScheduleStore.getLessonsInSlot(oldDayId, oldTimeId);
-            if (typeof renderLessonsInSlot === 'function') {
-                renderLessonsInSlot(oldSlotElement, oldLessons, typeof currentScheduleType !== 'undefined' ? currentScheduleType : 'group');
-            }
-        }
-
-        const newLessons = ScheduleStore.getLessonsInSlot(targetDayId, targetTimeId);
-        if (typeof renderLessonsInSlot === 'function') {
-            renderLessonsInSlot(targetSlot, newLessons, typeof currentScheduleType !== 'undefined' ? currentScheduleType : 'group');
-        }
-
-        delete dragOverCache[`${oldDayId}-${oldTimeId}`];
-        delete dragOverCache[`${targetDayId}-${targetTimeId}`];
-        showAlert('Занятие успешно перемещено!', 'success');
-
     } catch (error) {
-        console.error(error);
-        showAlert(`Ошибка: ${error.message || 'Неизвестная ошибка'}`, 'danger');
+        lessonIds.forEach((id, index) => {
+            ScheduleStore.removeLesson(id);
+            const backup = backupLessons[index];
+            ScheduleStore.addLesson(backup, backup.dayOfWeekId, backup.timeSlotId);
+        });
+
+        refreshSingleSlot(oldDayId, oldTimeId);
+        refreshSingleSlot(targetDayId, targetTimeId);
+
+        showAlert(`Отмена переноса: ${error.message}`, 'danger');
     } finally {
         window.dragSrcElement = null;
     }
