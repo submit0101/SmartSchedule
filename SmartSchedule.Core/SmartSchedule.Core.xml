@@ -1919,6 +1919,25 @@
             <param name="cancellationToken">Токен отмены операции.</param>
             <returns>Задача, представляющая асинхронную операцию удаления.</returns>
         </member>
+        <member name="T:SmartSchedule.Core.Service.Interfaces.IExcelExportService">
+            <summary>
+            Сервис для экспорта данных расписания в формат Excel (.xlsx).
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IExcelExportService.GenerateGroupScheduleAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Асинхронно генерирует файл Excel с расписанием для указанной учебной группы.
+            </summary>
+            <param name="groupId">Уникальный идентификатор группы, для которой формируется расписание.</param>
+            <param name="ct">токен отмены</param>
+            <returns>
+            Кортеж, содержащий:
+            <list type="bullet">
+            <item><description><c>FileContent</c> — массив байтов готового Excel-файла.</description></item>
+            <item><description><c>GroupName</c> — строковое название группы (удобно для формирования имени скачиваемого файла).</description></item>
+            </list>
+            </returns>
+        </member>
         <member name="T:SmartSchedule.Core.Service.Interfaces.IWeekDayService">
             <summary>
             Интрфейс сервиса для реализации пока дня недели 
@@ -3038,6 +3057,19 @@
             </summary>
             <param name="id">Идентификатор типа недели</param>
             <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Infrastructure.Services.ExcelExportService">
+            <summary>
+            Реализация сервиса экспорта расписания в Excel на основе динамических временных слотов.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Services.ExcelExportService.#ctor(SmartSchedule.Core.Repositories.ILessonRepository,SmartSchedule.Core.Repositories.IGroupRepository,SmartSchedule.Core.Repositories.ITimeSlotRepository)">
+            <summary>
+            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Services.ExcelExportService"/>.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Services.ExcelExportService.GenerateGroupScheduleAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc/>
         </member>
         <member name="T:SmartSchedul.Core.Exceptions.BusinessException">
             <summary>

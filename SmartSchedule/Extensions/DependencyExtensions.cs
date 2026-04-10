@@ -1,11 +1,12 @@
 ﻿
-using SmartSchedule.Application.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using SmartSchedule.Application.Services;
+using SmartSchedule.Application.Services.Interfaces;
 using SmartSchedule.Core.Repositories;
 using SmartSchedule.Core.Service;
-using Microsoft.Extensions.DependencyInjection;
 using SmartSchedule.Core.Service.Interfaces;
 using SmartSchedule.Infrastructure.Repositories;
+using SmartSchedule.Infrastructure.Services;
 
 namespace SmartSchedule.Extensions;
 
@@ -48,5 +49,6 @@ public static class DependencyExtensions
         services.AddTransient<IWeekTypeService, WeekTypeService>();
         services.AddTransient<IBuildingService, BuildingService>();
         services.AddTransient<IWeekDayService, WeekDayService>();
+        services.AddTransient<IExcelExportService, ExcelExportService>();
     }
 }

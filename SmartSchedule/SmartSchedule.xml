@@ -577,6 +577,23 @@
             <param name="ct">Токен отмены</param>
             <returns>Результат операции</returns>
         </member>
+        <member name="T:SmartSchedule.Api.Controllers.ExportController">
+            <summary>
+            Контроллер для формирования и выгрузки отчетов.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Api.Controllers.ExportController.#ctor(SmartSchedule.Core.Service.Interfaces.IExcelExportService)">
+            <summary>
+            Конструктор с внедрением сервиса экспорта.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Api.Controllers.ExportController.ExportGroupSchedule(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Выгружает расписание указанной группы в формате Excel.
+            </summary>
+            <param name="groupId">ID группы.</param>
+            <param name="ct">Токен отмены операции.</param>
+        </member>
         <member name="T:SmartSchedule.API.Controllers.WeekDayController">
             <summary>
             Контроллер для работы с днями недели
