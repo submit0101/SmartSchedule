@@ -192,6 +192,10 @@ async function handleDrop(e) {
         });
 
         await Promise.all(updatePromises);
+        lessonIds.forEach((id, index) => {
+            const backup = backupLessons[index]; 
+            appHistory.recordMove(id, backup);   
+        });
     } catch (error) {
         lessonIds.forEach((id, index) => {
             ScheduleStore.removeLesson(id);
