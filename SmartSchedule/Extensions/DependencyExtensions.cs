@@ -50,5 +50,6 @@ public static class DependencyExtensions
         services.AddTransient<IBuildingService, BuildingService>();
         services.AddTransient<IWeekDayService, WeekDayService>();
         services.AddTransient<IExcelExportService, ExcelExportService>();
+        services.AddTransient<IAuthService, AuthService>();
     }
 }

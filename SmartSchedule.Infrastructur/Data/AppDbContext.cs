@@ -1,4 +1,6 @@
 ﻿using ComputerShop.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SmartSchedule.Core.Entities;
 using SmartSchedule.Infrastructure.Configurations;
@@ -8,7 +10,7 @@ namespace SmartSchedule.Infrastructure.Data;
 /// Контекст базы данных для приложения "Расписание кабинетов"
 /// <seealso cref="DbContext"/>
 /// </summary>
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<IdentityUser>
 {
     #region Свойства
 
@@ -77,6 +79,7 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
+        base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new CabinetConfiguration());
         modelBuilder.ApplyConfiguration(new GroupConfiguration());
         modelBuilder.ApplyConfiguration(new LessonConfiguration());

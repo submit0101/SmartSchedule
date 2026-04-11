@@ -597,19 +597,66 @@
             Создание нового экземпляра класса
             </summary>
         </member>
-        <member name="T:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto">
+        <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.AuthResponseDto">
             <summary>
-            DTO для создания нового здания.
+            DTO ответа при успешной авторизации или регистрации.
             </summary>
         </member>
-        <member name="P:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto.Name">
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.AuthResponseDto.Token">
             <summary>
-            Название здания (например, "Старый корпус").
+            JWT токен для доступа к защищенным эндпоинтам API.
+            Передается в заголовке Authorization: Bearer {Token}.
             </summary>
         </member>
-        <member name="P:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto.Address">
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.AuthResponseDto.UserId">
             <summary>
-            Адрес здания.
+            Уникальный идентификатор пользователя в базе данных (Identity UserId).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.AuthResponseDto.Username">
+            <summary>
+            Имя авторизованного пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.AuthResponseDto.Role">
+            <summary>
+            Основная роль пользователя в системе (например: Admin, Teacher, Student).
+            Используется клиентом для скрытия или показа элементов UI.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto">
+            <summary>
+            DTO для авторизации существующего пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto.Username">
+            <summary>
+            Имя пользователя (логин).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto.Password">
+            <summary>
+            Пароль пользователя.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto">
+            <summary>
+            DTO для регистрации нового пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto.Username">
+            <summary>
+            Имя пользователя (логин) для входа в систему.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto.Email">
+            <summary>
+            Электронная почта пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto.Password">
+            <summary>
+            Пароль пользователя.
             </summary>
         </member>
         <member name="T:SmartSchedule.Core.Models.DTO.BuildingDTO.ShortBuildingDto">
@@ -1535,6 +1582,21 @@
             </summary>
             <example>Нечетная</example>
         </member>
+        <member name="T:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto">
+            <summary>
+            DTO для создания нового здания.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto.Name">
+            <summary>
+            Название здания (например, "Старый корпус").
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTOs.Building.CreateBuildingDto.Address">
+            <summary>
+            Адрес здания.
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Repositories.IBaseRepository`2">
             <summary>
             Интерфейс Ьазового репозитория
@@ -1777,6 +1839,31 @@
             Интерфейс репозитория Типа недели
             </summary>
         </member>
+        <member name="T:SmartSchedule.Core.Service.AuthService">
+            <summary>
+            Сервис для работы с авторизацией
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.#ctor(Microsoft.AspNetCore.Identity.UserManager{Microsoft.AspNetCore.Identity.IdentityUser},Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Инициализирует новый экземпляр сервиса <see cref="T:SmartSchedule.Core.Service.AuthService"/>.
+            </summary>
+            <param name="userManager">Менеджер пользователей Identity.</param>
+            <param name="configuration">Конфигурация приложения.</param>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.RegisterAsync(SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.LoginAsync(SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.GetToken(System.Collections.Generic.List{System.Security.Claims.Claim})">
+            <summary>
+            Вспомогательный метод для генерации JWT токена.
+            </summary>
+            <param name="authClaims">Список утверждений о пользователе.</param>
+            <returns>Экземпляр <see cref="T:System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/>.</returns>
+        </member>
         <member name="T:SmartSchedule.Core.Service.BuildingService">
             <summary>
             Сервис для работы со зданиями.
@@ -1886,6 +1973,27 @@
             </summary>
             <param name="id">Идентификатор группы</param>
             <param name="ct">Токен отмены</param>
+        </member>
+        <member name="T:SmartSchedule.Core.Service.Interfaces.IAuthService">
+            <summary>
+            Интерфейс сервиса для управления аутентификацией и регистрацией пользователей.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IAuthService.RegisterAsync(SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto)">
+            <summary>
+            Регистрация нового пользователя в системе.
+            </summary>
+            <param name="dto">Данные для регистрации (логин, почта, пароль).</param>
+            <returns>True, если регистрация прошла успешно.</returns>
+            <exception cref="T:SmartSchedul.Core.Exceptions.BusinessException">Выбрасывается, если логин занят или данные не валидны.</exception>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IAuthService.LoginAsync(SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto)">
+            <summary>
+            Авторизация пользователя и выдача JWT токена.
+            </summary>
+            <param name="dto">Данные для входа (логин и пароль).</param>
+            <returns>Объект с токеном и информацией о пользователе.</returns>
+            <exception cref="T:SmartSchedul.Core.Exceptions.BusinessException">Выбрасывается при неверных учетных данных.</exception>
         </member>
         <member name="T:SmartSchedule.Core.Service.Interfaces.ICachingService">
             <summary>
@@ -3067,6 +3175,9 @@
             <summary>
             Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Services.ExcelExportService"/>.
             </summary>
+            <param name="lessonRepository">Репозиторий для работы с занятиями.</param>
+            <param name="groupRepository">Репозиторий для работы с группами.</param>
+            <param name="timeSlotRepository">Репозиторий для работы с временными слотами.</param>
         </member>
         <member name="M:SmartSchedule.Infrastructure.Services.ExcelExportService.GenerateGroupScheduleAsync(System.Int32,System.Threading.CancellationToken)">
             <inheritdoc/>

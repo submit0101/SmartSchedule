@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.AspNetCore.Mvc;
 using SmartSchedule.Core.Service.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;

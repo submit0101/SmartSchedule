@@ -26,8 +26,10 @@
 	  </PackageReference>
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.12" />
 	  <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.7" />
+	  <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.25" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	  <PackageReference Include="Quartz" Version="3.14.0" />
+	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
   </ItemGroup>
 
 </Project>

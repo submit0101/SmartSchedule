@@ -4,6 +4,26 @@
         <name>SmartSchedule</name>
     </assembly>
     <members>
+        <member name="T:SmartSchedule.Controllers.AuthController">
+            <summary>
+            Контроллер для регистрации и входа пользователей.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Controllers.AuthController.#ctor(SmartSchedule.Core.Service.Interfaces.IAuthService)">
+            <summary>
+            Конструктор
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Controllers.AuthController.Register(SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto)">
+            <summary>
+            Регистрация нового пользователя.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Controllers.AuthController.Login(SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto)">
+            <summary>
+            Вход в систему и получение JWT-токена.
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Application.Controllers.BuildingController">
             <summary>
             Контроллер для работы со зданиями.
@@ -1058,45 +1078,18 @@
         </member>
         <member name="T:EduRoomLoad.API.Startup">
             <summary>
-            Класс-конфигуратор
-            </summary>
-        </member>
-        <member name="F:EduRoomLoad.API.Startup._appSettings">
-            <summary>
-            Настройки приложения.
-            </summary>
-        </member>
-        <member name="M:EduRoomLoad.API.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
-            <summary>
-            Создает новый экземпляр класса <see cref="T:EduRoomLoad.API.Startup"/>.
-            </summary>
-            <param name="configuration">Конфигурация сервиса.</param>
-            <param name="env">Окружение хостинга.</param>
-        </member>
-        <member name="P:EduRoomLoad.API.Startup.Configuration">
-            <summary>
-            Конфигурация сервиса.
-            </summary>
-        </member>
-        <member name="P:EduRoomLoad.API.Startup.HostingEnvironment">
-            <summary>
-            Окружение хостинга.
+            Класс Startup для настройки конфигурации API сервисов и конвейера.
             </summary>
         </member>
         <member name="M:EduRoomLoad.API.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Конфигурирует сервисы.
+            Регистрация системных и пользовательских сервисов.
             </summary>
-            <param name="services">Список сервисов.</param>
         </member>
         <member name="M:EduRoomLoad.API.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider,SmartSchedule.Infrastructure.Data.AppDbContext)">
             <summary>
-            Конфигурирует сервис.
+            Настройка конвейера обработки HTTP-запросов.
             </summary>
-            <param name="app">Построитель сервиса.</param>
-            <param name="env">Окружение сервиса.</param>
-            <param name="provider">Поставщик заголовков версий API.</param>
-            <param name="dbContext">Контекст базы данных.</param>
         </member>
         <member name="T:EduRoomLoad.Extensions.ProblemDetailsExtensions">
             <summary>
