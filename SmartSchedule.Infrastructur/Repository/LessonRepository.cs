@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartSchedule.Core.Constants;
 using SmartSchedule.Core.Entities;
 using SmartSchedule.Core.Repositories;
 using SmartSchedule.Core.Service.Interfaces;
 using SmartSchedule.Infrastructure.Data;
-using SmartSchedule.Core.Constants;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmartSchedule.Infrastructure.Repositories;
 
@@ -19,19 +19,20 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
 {
     private readonly DbSet<Lesson> _lessons;
     private readonly ICachingService _cache;
+    private readonly AppDbContext _context;
 
-    // ИСПРАВЛЕНИЕ 1: Заменили const на static readonly.
-    // Это убирает ошибку "Недостижимый код" (CS0162), но сохраняет функционал рубильника.
-    private static bool  UseCache = true;
+    private static bool UseCache = true;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="LessonRepository"/>.
     /// </summary>
-    /// <param name="context">Контекст базы данных.</param>
-    /// <param name="cache">Сервис кэширования.</param>
     public LessonRepository(AppDbContext context, ICachingService cache) : base(context)
     {
         ArgumentNullException.ThrowIfNull(cache, nameof(cache));
+
+        // ИСПРАВЛЕНИЕ 2: Сохраняем контекст
+        _context = context;
+
         _lessons = context.Set<Lesson>();
         _cache = cache;
     }
@@ -41,7 +42,6 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     /// <inheritdoc />
     public override async Task<List<Lesson>> GetAllAsync(CancellationToken ct = default)
     {
-        // ConfigureAwait(false) добавлен для подавления предупреждения CA2007
         return await base.GetAllAsync(ct).ConfigureAwait(false);
     }
 
@@ -90,10 +90,8 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     {
         var query = _lessons.AsQueryable();
 
-        // ИСПРАВЛЕНИЕ: Безопасное использование Nullable типов
         if (weekTypeId.HasValue && weekTypeId.Value != WeekTypeConstants.Both)
         {
-            // Сохраняем значение в локальную переменную для корректной трансляции EF
             var wt = weekTypeId.Value;
             query = query.Where(l => l.WeekTypeId == wt);
         }
@@ -113,14 +111,7 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
         return await query.ToListAsync(ct).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Получает уникальные идентификаторы кабинетов, которые заняты в указанный слот.
-    /// </summary>
-    /// <param name="dayOfWeekId">Идентификатор дня недели.</param>
-    /// <param name="timeSlotId">Идентификатор временного слота.</param>
-    /// <param name="weekTypeId">Идентификатор типа недели.</param>
-    /// <param name="ct">Токен отмены.</param>
-    /// <returns>Множество занятых ID кабинетов.</returns>
+    /// <inheritdoc />
     public async Task<HashSet<int>> GetBusyCabinetIdsAsync(
         int dayOfWeekId,
         int timeSlotId,
@@ -129,20 +120,30 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     {
         const int BothWeeksId = WeekTypeConstants.Both;
 
-        // EF Core корректно транслирует .Value внутри запроса, если есть проверка HasValue/!= null.
-        // Но для успокоения компилятора можно использовать явное приведение там, где мы уверены.
         var busyIds = await _lessons
             .AsNoTracking()
             .Where(l => l.DayOfWeekId == dayOfWeekId &&
                         l.TimeSlotId == timeSlotId &&
                         (l.WeekTypeId == weekTypeId || l.WeekTypeId == BothWeeksId) &&
-                        l.CabinetId != null) // Проверка на null
-            .Select(l => (int)l.CabinetId!) // Явное указание, что тут не null
+                        l.CabinetId != null)
+            .Select(l => (int)l.CabinetId!)
             .Distinct()
             .ToHashSetAsync(ct)
             .ConfigureAwait(false);
 
         return busyIds;
+    }
+
+    
+    /// <inheritdoc />
+    public async Task<List<Lesson>> GetLessonsBySlotAsync(int dayId, int timeId, CancellationToken ct = default)
+    {
+        return await _lessons
+            .AsNoTracking()
+            .Include(l => l.Subject)
+            .Where(l => l.DayOfWeekId == dayId && l.TimeSlotId == timeId)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 
     #endregion
@@ -179,6 +180,26 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
         if (lesson != null)
         {
             await CleanCacheForLessonAsync(lesson, ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task UpdateBatchAsync(IReadOnlyCollection<Lesson> lessons, CancellationToken ct = default)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+        try
+        {
+            _lessons.UpdateRange(lessons);
+            await _context.SaveChangesAsync(ct).ConfigureAwait(false);
+            await transaction.CommitAsync(ct).ConfigureAwait(false);
+
+            var cacheTasks = lessons.Select(lesson => CleanCacheForLessonAsync(lesson, ct));
+            await Task.WhenAll(cacheTasks).ConfigureAwait(false);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(ct).ConfigureAwait(false);
+            throw;
         }
     }
 
@@ -224,7 +245,6 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
 
         if (lesson.GroupId.HasValue)
         {
-            // Добавили ConfigureAwait(false)
             tasks.Add(_cache.RemoveAsync($"lessons:group:{lesson.GroupId.Value}", ct));
         }
         else if (lesson.Group != null)
@@ -237,7 +257,6 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
             tasks.Add(_cache.RemoveAsync($"lessons:teacher:{lesson.TeacherId.Value}", ct));
         }
 
-        // ИСПРАВЛЕНИЕ: Заменили .Any() на .Count > 0 для оптимизации
         if (tasks.Count > 0)
         {
             await Task.WhenAll(tasks).ConfigureAwait(false);
