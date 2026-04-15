@@ -575,4 +575,75 @@ public class LessonService : ILessonService
 
         if (hasConflict) throw new ScheduleConflictException();
     }
+    /// <summary>
+    /// Пакетное обновление занятий.
+    /// </summary>
+    public async Task UpdateBatchAsync(IReadOnlyCollection<UpdateLessonDto> dtos, CancellationToken ct)
+    {
+        if (dtos == null || dtos.Count == 0) return;
+
+        var lessonsToUpdate = new List<Lesson>();
+
+        // 1. Загружаем и мапим данные
+        foreach (var dto in dtos)
+        {
+            var lesson = await _repository.GetByIdAsync(dto.Id, ct).ConfigureAwait(false);
+            if (lesson == null)
+                throw new ObjectNotFoundException($"Занятие с ID {dto.Id} не найдено");
+
+            _mapper.Map(dto, lesson);
+            lessonsToUpdate.Add(lesson);
+        }
+
+        // 2. Проверяем конфликты
+        var first = lessonsToUpdate.First();
+
+        // ИСПРАВЛЕНИЕ ОШИБКИ: проверяем на null TimeSlotId перед валидацией
+        if (!first.TimeSlotId.HasValue)
+            throw new BusinessException("Невозможно перенести занятие без указания временного слота.");
+
+        // Передаем .Value, чтобы преобразовать int? в int
+        await ValidateBatchConflictsAsync(
+            lessonsToUpdate,
+            first.DayOfWeekId,
+            first.TimeSlotId.Value,
+            ct).ConfigureAwait(false);
+
+        // 3. Сохраняем в одной транзакции
+        await _repository.UpdateBatchAsync(lessonsToUpdate, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Оптимизированная проверка конфликтов для пакетного обновления.
+    /// Игнорирует уроки, которые переносятся вместе в этой же пачке.
+    /// </summary>
+    private async Task ValidateBatchConflictsAsync(IReadOnlyCollection<Lesson> lessonsToMove, int targetDayId, int targetTimeId, CancellationToken ct)
+    {
+        const int BothWeeksId = WeekTypeConstants.Both;
+
+        // Получаем занятые уроки именно в этом слоте
+        var existingInSlot = await _repository.GetLessonsBySlotAsync(targetDayId, targetTimeId, ct).ConfigureAwait(false);
+
+        var movingIds = lessonsToMove.Select(l => l.Id).ToHashSet();
+
+        foreach (var lesson in lessonsToMove)
+        {
+            var conflict = existingInSlot.FirstOrDefault(existing =>
+                !movingIds.Contains(existing.Id) &&
+                (
+                    (existing.GroupId == lesson.GroupId && (existing.Subgroup == null || lesson.Subgroup == null || existing.Subgroup == lesson.Subgroup)) ||
+                    existing.TeacherId == lesson.TeacherId ||
+                    existing.CabinetId == lesson.CabinetId
+                ) &&
+                (existing.WeekTypeId == BothWeeksId || lesson.WeekTypeId == BothWeeksId || existing.WeekTypeId == lesson.WeekTypeId)
+            );
+
+            if (conflict != null)
+            {
+                var reason = conflict.TeacherId == lesson.TeacherId ? "преподаватель занят" :
+                             conflict.CabinetId == lesson.CabinetId ? "аудитория занята" : "группа занята";
+                throw new ScheduleConflictException($"Конфликт: {reason} ({conflict.Subject?.Title ?? "Другое занятие"}).");
+            }
+        }
+    }
 }

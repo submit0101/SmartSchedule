@@ -139,4 +139,10 @@ public interface ILessonService
     /// <param name="filter">Фильтр для групп</param>
     /// <returns>возращает отчет по нагрузки на аудиторию</returns>
     Task<List<GroupUsageReportDto>> GetGroupUsageReportAsync(GroupUsageFilterDto filter,CancellationToken ct);
+    /// <summary>
+    /// Пакетное обновление занятий (например, для синхронного переноса подгрупп).
+    /// </summary>
+    /// <param name="dtos">Список DTO с новыми данными уроков</param>
+    /// <param name="ct">Токен отмены</param>
+    Task UpdateBatchAsync(IReadOnlyCollection<UpdateLessonDto> dtos, CancellationToken ct);
 }

@@ -276,11 +276,37 @@ public class LessonController : ControllerBase
         [FromQuery] GroupUsageFilterDto filter,
         CancellationToken ct)
     {
-        // Если фильтр не пришел, создаем пустой, чтобы сервис не упал
+       
         filter ??= new GroupUsageFilterDto();
 
-        // InvalidOperationException (если нет слотов) теперь ловится глобально и возвращает 500 безопасно.
+        
         var report = await _lessonService.GetGroupUsageReportAsync(filter, ct);
         return Ok(report);
+    }
+    /// <summary>
+    /// Пакетное обновление занятий (используется для одновременного переноса нескольких подгрупп).
+    /// </summary>
+    [HttpPut("batch")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> UpdateBatch([FromBody] IReadOnlyCollection<UpdateLessonDto> dtos, CancellationToken ct)
+    {
+        try
+        {
+            await _lessonService.UpdateBatchAsync(dtos, ct);
+            return NoContent();
+        }
+        catch (ScheduleConflictException ex)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Schedule Conflict",
+                detail: ex.Message
+            );
+        }
+        catch (ObjectNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 }

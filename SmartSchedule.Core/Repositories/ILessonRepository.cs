@@ -29,11 +29,8 @@ public interface ILessonRepository : IBaseRepository<Lesson, int>
     /// <summary>
     /// Получает ID кабинетов, занятых в указанное время/день/неделю.
     /// </summary>
-    Task<HashSet<int>> GetBusyCabinetIdsAsync(
-        int dayOfWeekId,
-        int timeSlotId,
-        int weekTypeId,
-        CancellationToken ct);
+    Task<HashSet<int>> GetBusyCabinetIdsAsync(int dayOfWeekId, int timeSlotId,int weekTypeId,CancellationToken ct);
+
     /// <summary>
     /// Получает расписание для отдельного преподавателя по его идентификатору.
     /// </summary>
@@ -41,6 +38,16 @@ public interface ILessonRepository : IBaseRepository<Lesson, int>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Список занятий, относящихся к указанному преподавателю.</returns>
     Task<List<Lesson>> GetByTeacherIdAsync(int teacherId, CancellationToken ct = default);
-
-
+     /// <summary>
+    /// Получит информацию о слоте в расписание для каждой группы
+    /// </summary>
+       /// <param name="dayId">Идентификатор для </param>
+       /// <param name="timeId">Идентификатор пары</param>
+       /// <param name="ct">Токен отмены операции</param>
+       /// <returns></returns>
+    Task<List<Lesson>> GetLessonsBySlotAsync(int dayId, int timeId, CancellationToken ct);
+    /// <summary>
+    /// Пакетное обновление списка занятий в рамках одной транзакции
+    /// </summary>
+    Task UpdateBatchAsync(IReadOnlyCollection<Lesson> lessons, CancellationToken ct);
 }
