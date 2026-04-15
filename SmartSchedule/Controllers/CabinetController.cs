@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SmartSchedule.Application.Services.Interfaces;
-using SmartSchedule.Core.Models.DTO.CabinetDTO;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using SmartSchedule.Application.Services;
-using SmartSchedule.Core.Models.DTO.LessonDTO;
-using SmartSchedule.Core.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using SmartSchedul.Core.Exceptions;
+using SmartSchedule.Application.Services;
+using SmartSchedule.Application.Services.Interfaces;
+using SmartSchedule.Core.Exceptions;
+using SmartSchedule.Core.Models.DTO.CabinetDTO;
+using SmartSchedule.Core.Models.DTO.LessonDTO;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmartSchedule.Application.Controllers;
 
@@ -82,6 +83,7 @@ public class CabinetController : ControllerBase
     /// <param name="dto">Данные для создания кабинета</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Созданный кабинет</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPost]
     public async Task<ActionResult<ResponseCabinetDto>> Create(CreateCabinetDto dto, CancellationToken ct)
     {
@@ -112,6 +114,7 @@ public class CabinetController : ControllerBase
     /// <param name="ct">Токен отмены</param>
     /// <param name="dto">Модель</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateCabinetDto dto, CancellationToken ct)
     {
@@ -145,6 +148,7 @@ public class CabinetController : ControllerBase
     /// <param name="id">Идентификатор кабинета</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

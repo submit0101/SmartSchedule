@@ -3,6 +3,10 @@ let lastDragOverCheck = 0;
 const DRAG_OVER_DEBOUNCE = 200;
 
 function handleDragStart(e) {
+    if (!window.appData || !window.appData.isEditable) {
+        e.preventDefault();
+        return;
+    }
     if (window.dragSrcElement) window.dragSrcElement.classList.remove('dragging');
     const lessonItem = this;
     if (!lessonItem) {
@@ -23,6 +27,7 @@ function handleDragStart(e) {
 }
 
 function handleDragEnd(e) {
+
     if (this.classList?.contains('dragging')) this.classList.remove('dragging');
 
     document.querySelectorAll('.lesson-slot').forEach(slot =>
@@ -34,6 +39,7 @@ function handleDragEnd(e) {
 }
 
 function handleDragEnter(e) {
+    if (!window.appData || !window.appData.isEditable) return;
     e.preventDefault();
     const targetSlot = this;
     targetSlot.classList.remove('drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet');
@@ -41,6 +47,7 @@ function handleDragEnter(e) {
 }
 
 async function handleDragOver(e) {
+    if (!window.appData || !window.appData.isEditable) return;
     e.preventDefault();
     const now = Date.now();
     if (now - lastDragOverCheck < DRAG_OVER_DEBOUNCE) return;
@@ -128,7 +135,12 @@ function handleDragLeave(e) {
 }
 
 async function handleDrop(e) {
+
     e.preventDefault();
+    if (!window.appData || !window.appData.isEditable) {
+        showAlert("У вас нет прав для изменения расписания", "danger");
+        return;
+    }
     const targetSlot = this;
     targetSlot.classList.remove('drag-over', 'drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet', 'drag-over-loading');
 

@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartSchedule.Application.Services.Interfaces;
 using SmartSchedule.Core.Models.DTO.WeekTypeDTO;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmartSchedule.Application.Controllers;
 
@@ -66,6 +67,7 @@ public class WeekTypeController : ControllerBase
     /// <param name="dto">Данные для создания типа недели</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Созданный тип недели</returns>
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<ResponseWeekTypeDto>> Create(CreateWeekTypeDto dto, CancellationToken ct)
     {
@@ -85,6 +87,7 @@ public class WeekTypeController : ControllerBase
     /// <param name="dto">Данные для обновления</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateWeekTypeDto dto, CancellationToken ct)
     {
@@ -103,6 +106,7 @@ public class WeekTypeController : ControllerBase
     /// <param name="id">Идентификатор типа недели</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

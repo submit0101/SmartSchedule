@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 using SmartSchedule.Core.Models.DTO.AuthDTO;
+using System.Collections.Generic;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
 
 namespace WebSmartSchedule.Pages.Account;
 
@@ -28,21 +31,31 @@ public class LoginModel : PageModel
 
         if (response.IsSuccessStatusCode)
         {
-            // 2. Ура, API принял логин/пароль! Достаем токен (если он тебе нужен)
-            // var result = await response.Content.ReadFromJsonAsync<ТвояМодельОтвета>();
+            // 2. Ура, API принял логин/пароль! Достаем токен и роль из ответа
+            var apiResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
 
-            // 3. Говорим браузеру "Пользователь вошел" (создаем куку)
-            var claims = new List<Claim> { new Claim(ClaimTypes.Name, Input.Username) };
-            var identity = new ClaimsIdentity(claims, "MyCookieAuth");
-            var claimsPrincipal = new ClaimsPrincipal(identity);
+            if (apiResponse != null)
+            {
+                // 3. Собираем все данные в список (Имя, Токен, РОЛЬ)
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, apiResponse.Username),
+                    new Claim("AccessToken", apiResponse.Token), // Сохраняем токен, чтобы потом отправлять его к закрытым методам API
+                    new Claim(ClaimTypes.Role, apiResponse.Role ?? "Viewer") // Если роли нет, считаем его просто зрителем
+                };
 
-            await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
+                // 4. Говорим браузеру "Пользователь вошел" (создаем куку)
+                var identity = new ClaimsIdentity(claims, "MyCookieAuth");
+                var claimsPrincipal = new ClaimsPrincipal(identity);
 
-            return RedirectToPage("/Index");
+                await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
+
+                return RedirectToPage("/Index"); // Перекидываем на главную
+            }
         }
 
         // Если API вернул ошибку (401 Unauthorized и т.д.)
-        ModelState.AddModelError(string.Empty, "Неверный логин или пароль (ответил API).");
+        ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
         return Page();
     }
 }

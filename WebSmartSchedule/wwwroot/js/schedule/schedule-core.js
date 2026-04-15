@@ -99,7 +99,7 @@ function createLessonSlot(timeSlot, day, daySchedule) {
     slot.addEventListener('drop', handleDrop);
 
     slot.addEventListener('click', (event) => {
-       
+        if (!window.appData || !window.appData.isEditable) return;
         if (LessonClipboard.data) {
             event.stopPropagation();
             LessonClipboard.pasteToSlot(slot, day, timeSlot.id); 
@@ -192,7 +192,7 @@ function createLessonCardElement(group, subjectTitle, scheduleType, parentSlot) 
     const lesson = group.baseLesson; // Берем свойства от первой подгруппы (например, тип недели)
 
     item.className = `lesson-item weektype-${lesson.weekTypeId}`;
-    item.draggable = true;
+    item.draggable = (window.appData && window.appData.isEditable === true);
 
     // Сохраняем все id для истории и первый id для совместимости с drag-and-drop
     item.dataset.lessonIds = group.ids.join(',');
@@ -241,6 +241,9 @@ function createLessonCardElement(group, subjectTitle, scheduleType, parentSlot) 
     // Подключаем клик для модального окна/всплывающих кнопок
     item.onclick = (e) => {
         e.stopPropagation();
+        if (!window.appData.isEditable) {
+            return;
+        }
         if (typeof LessonClipboard !== 'undefined' && LessonClipboard.data) return;
 
         if (group.ids && group.ids.length > 1) {

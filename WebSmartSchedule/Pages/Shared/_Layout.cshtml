@@ -157,50 +157,56 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Кабинеты" ? "active" : "")" asp-page="/Cabinet/Index">
-                        <i class="bi bi-door-open"></i>Кабинеты
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Корпуса" ? "active" : "")" asp-page="/Building/Index">
-                        <i class="bi bi-building"></i>Корпуса
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Группы" ? "active" : "")" asp-page="/Groups/Index">
-                        <i class="bi bi-people-fill"></i>Группы
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link @(ViewData["Title"]?.ToString() == "Расписание" ? "active" : "")" asp-page="/Lessons/Index">
                         <i class="bi bi-calendar-week"></i>Расписание
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Должности" ? "active" : "")" asp-page="/Positions/Index">
-                        <i class="bi bi-person-badge"></i>Должности
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Предметы" ? "active" : "")" asp-page="/Subjects/Index">
-                        <i class="bi bi-journal-bookmark"></i>Предметы
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Преподаватели" ? "active" : "")" asp-page="/Teatchers/Index">
+                @if (User.IsInRole("Admin") || User.IsInRole("Dispatcher"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Кабинеты" ? "active" : "")" asp-page="/Cabinet/Index">
+                            <i class="bi bi-door-open"></i>Кабинеты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Корпуса" ? "active" : "")" asp-page="/Building/Index">
+                            <i class="bi bi-building"></i>Корпуса
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Группы" ? "active" : "")" asp-page="/Groups/Index">
+                            <i class="bi bi-people-fill"></i>Группы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Должности" ? "active" : "")" asp-page="/Positions/Index">
+                            <i class="bi bi-person-badge"></i>Должности
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Предметы" ? "active" : "")" asp-page="/Subjects/Index">
+                            <i class="bi bi-journal-bookmark"></i>Предметы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Преподаватели" ? "active" : "")" asp-page="/Teatchers/Index">
                         <i class="bi bi-person-video3"></i>Преподаватели
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Временные слоты" ? "active" : "")" asp-page="/TimeSlots/Index">
-                        <i class="bi bi-clock"></i>Временные слоты
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @(ViewData["Title"]?.ToString() == "Типы недель" ? "active" : "")" asp-page="/WeekTypes/Index">
+                }
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Временные слоты" ? "active" : "")" asp-page="/TimeSlots/Index">
+                            <i class="bi bi-clock"></i>Временные слоты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Типы недель" ? "active" : "")" asp-page="/WeekTypes/Index">
                         <i class="bi bi-calendar-range"></i>Типы недель
                     </a>
-                </li>
+                    </li>
+                  }
             </ul>
         </aside>
     }

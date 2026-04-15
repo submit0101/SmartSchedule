@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartSchedule.Application.Services.Interfaces;
 using SmartSchedule.Core.Models.DTO.TimeSlotDTO;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmartSchedule.Application.Controllers;
 
@@ -66,6 +67,7 @@ public class TimeSlotController : ControllerBase
     /// <param name="dto">Данные для создания временного слота</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Созданный временной слот</returns>
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<ResponseTimeSlotDto>> Create(CreateTimeSlotDto dto, CancellationToken ct)
     {
@@ -85,6 +87,7 @@ public class TimeSlotController : ControllerBase
     /// <param name="dto">Данные для обновления</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateTimeSlotDto dto, CancellationToken ct)
     {
@@ -103,6 +106,7 @@ public class TimeSlotController : ControllerBase
     /// <param name="id">Идентификатор временного слота</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

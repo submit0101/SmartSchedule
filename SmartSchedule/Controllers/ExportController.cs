@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartSchedule.Core.Service.Interfaces;
 using System.Threading;
@@ -28,6 +29,7 @@ public class ExportController : ControllerBase
     /// </summary>
     /// <param name="groupId">ID группы.</param>
     /// <param name="ct">Токен отмены операции.</param>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpGet("excel/group/{groupId}")]
     public async Task<IActionResult> ExportGroupSchedule(int groupId, CancellationToken ct)
     {

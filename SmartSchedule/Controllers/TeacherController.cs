@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartSchedule.Application.Services.Interfaces;
 using SmartSchedule.Core.Models.DTO.BuildingDTO;
@@ -80,6 +81,7 @@ public class TeacherController : ControllerBase
     /// <param name="dto">Данные для создания преподавателя</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Созданный преподаватель</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPost]
     public async Task<ActionResult<ResponseTeacherDto>> Create(CreateTeacherDto dto, CancellationToken ct)
     {
@@ -99,6 +101,7 @@ public class TeacherController : ControllerBase
     /// <param name="dto">Данные для обновления</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateTeacherDto dto, CancellationToken ct)
     {
@@ -117,6 +120,7 @@ public class TeacherController : ControllerBase
     /// <param name="id">Идентификатор преподавателя</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
@@ -129,6 +133,7 @@ public class TeacherController : ControllerBase
     /// <param name="search">Поисковая строка для поиска по ФИО.</param>
     /// <param name="positionId">Необязательный идентификатор должности для фильтрации.</param>
     /// <returns>Список преподавателей, соответствующих критериям поиска.</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpGet("search")]
     public async Task<IActionResult> SearchTeachersAsync(
         [FromQuery] string? search,

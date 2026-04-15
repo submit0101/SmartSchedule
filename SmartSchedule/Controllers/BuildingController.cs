@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SmartSchedule.Application.Services.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using SmartSchedul.Core.Exceptions;
 using SmartSchedule.Application.DTOs.Building;
+using SmartSchedule.Application.Services.Interfaces;
+using SmartSchedule.Core.Exceptions;
+using SmartSchedule.Core.Models.DTO.BuildingDTO;
+using SmartSchedule.Core.Models.DTOs.Building;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using SmartSchedule.Core.Models.DTOs.Building;
-using SmartSchedule.Core.Models.DTO.BuildingDTO;
-using Microsoft.AspNetCore.Http;
-using SmartSchedul.Core.Exceptions;
-using System;
-using SmartSchedule.Core.Exceptions;
 
 namespace SmartSchedule.Application.Controllers
 {
@@ -85,6 +86,7 @@ namespace SmartSchedule.Application.Controllers
         /// <response code="201">Здание успешно создано</response>
         /// <response code="400">Некорректные данные</response>
         /// <response code="409">Здание с таким названием уже существует</response>
+        [Authorize(Roles = "Admin, Dispatcher")]
         [HttpPost]
         [ProducesResponseType(typeof(ResponseBuildingDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -135,6 +137,7 @@ namespace SmartSchedule.Application.Controllers
         /// <response code="400">Некорректные данные</response>
         /// <response code="404">Здание не найдено</response>
         /// <response code="409">Здание с таким названием уже существует</response>
+        [Authorize(Roles = "Admin, Dispatcher")]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -192,6 +195,7 @@ namespace SmartSchedule.Application.Controllers
         /// <param name="id">Идентификатор здания.</param>
         /// <param name="ct">Токен отмены операции.</param>
         /// <returns>Результат операции.</returns>
+        [Authorize(Roles = "Admin, Dispatcher")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {

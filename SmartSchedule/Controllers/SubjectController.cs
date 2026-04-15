@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SmartSchedule.Application.Services.Interfaces;
-using SmartSchedule.Core.Models.DTO.SubjectDTO;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using SmartSchedul.Core.Exceptions;
+using SmartSchedule.Application.Services.Interfaces;
 using SmartSchedule.Core.Exceptions;
+using SmartSchedule.Core.Models.DTO.SubjectDTO;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmartSchedule.Application.Controllers;
 
@@ -73,6 +74,7 @@ public class SubjectController : ControllerBase
     /// <response code="201">Предмет успешно создан</response>
     /// <response code="400">Некорректные данные</response>
     /// <response code="409">Предмет с таким названием уже существует</response>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPost]
     [ProducesResponseType(typeof(ResponseSubjectDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -122,6 +124,7 @@ public class SubjectController : ControllerBase
     /// <response code="400">Некорректные данные</response>
     /// <response code="404">Предмет не найден</response>
     /// <response code="409">Предмет с таким названием уже существует</response>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -177,6 +180,7 @@ public class SubjectController : ControllerBase
     /// <param name="id">Идентификатор предмета</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartSchedul.Core.Exceptions;
 using SmartSchedule.Application.Services.Interfaces;
@@ -56,6 +57,7 @@ public class LessonController : ControllerBase
     /// <summary>
     /// Создать новое занятие
     /// </summary>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPost]
     public async Task<ActionResult<ResponseLessonDto>> Create(CreateLessonDto dto, CancellationToken ct)
     {
@@ -79,6 +81,7 @@ public class LessonController : ControllerBase
     /// <summary>
     /// Обновить занятие
     /// </summary>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateLessonDto dto, CancellationToken ct)
     {
@@ -100,6 +103,7 @@ public class LessonController : ControllerBase
     /// <summary>
     /// Удалить занятие
     /// </summary>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
@@ -110,6 +114,7 @@ public class LessonController : ControllerBase
     /// <summary>
     /// Получить все занятия группы
     /// </summary>
+    
     [HttpGet("group/{groupId}")]
     public async Task<ActionResult<List<ResponseLessonDto>>> GetByGroup(int groupId, CancellationToken ct)
     {
@@ -131,6 +136,7 @@ public class LessonController : ControllerBase
     /// <summary>
     /// Ищет свободные кабинеты
     /// </summary>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpGet("available")]
     public async Task<IActionResult> GetAvailableCabinets(
         [FromQuery] int day,
@@ -146,6 +152,7 @@ public class LessonController : ControllerBase
     /// <summary>
     /// Получить отчёт о загруженности аудиторий
     /// </summary>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpGet("cabinet-usage")]
     public async Task<IActionResult> GetCabinetUsageReport(
         [FromQuery] int? buildingId,
@@ -188,6 +195,7 @@ public class LessonController : ControllerBase
     /// <summary>
     /// Предварительная проверка конфликтов (для DnD).
     /// </summary>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpGet("check-conflict")]
     [ProducesResponseType(typeof(ConflictCheckResultDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> CheckConflict(

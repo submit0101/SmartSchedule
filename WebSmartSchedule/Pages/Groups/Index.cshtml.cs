@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SmartSchedule.Application.DTOs.Building;
@@ -8,6 +9,7 @@ using System.Text.Json;
 
 namespace WebSmartSchedule.Pages.Groups
 {
+    [Authorize(Roles = "Admin, Dispatcher")]
     public class IndexModel : PageModel
     {
         private readonly HttpClient _httpClient;

@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SmartSchedule.Application.Services.Interfaces;
-using SmartSchedule.Core.Models.DTO.GroupDTO;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using System;
-using SmartSchedule.Core.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using SmartSchedul.Core.Exceptions;
+using SmartSchedule.Application.Services.Interfaces;
+using SmartSchedule.Core.Exceptions;
+using SmartSchedule.Core.Models.DTO.GroupDTO;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmartSchedule.Application.Controllers;
 
@@ -44,6 +45,8 @@ public class GroupController : ControllerBase
     /// </summary>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Список групп</returns>
+    
+
     [HttpGet("all")]
     public async Task<ActionResult<List<ResponseGroupDto>>> GetAll(CancellationToken ct)
     {
@@ -73,6 +76,7 @@ public class GroupController : ControllerBase
     /// <response code="201">Группа успешно создана</response>
     /// <response code="400">Некорректные данные</response>
     /// <response code="409">Группа с таким именем уже существует</response>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPost]
     [ProducesResponseType(typeof(ResponseGroupDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -123,6 +127,7 @@ public class GroupController : ControllerBase
     /// <response code="400">Некорректные данные</response>
     /// <response code="404">Группа не найдена</response>
     /// <response code="409">Группа с таким именем уже существует</response>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -180,6 +185,7 @@ public class GroupController : ControllerBase
     /// <param name="id">Идентификатор группы</param>
     /// <param name="ct">Токен отмены</param>
     /// <returns>Результат операции</returns>
+    [Authorize(Roles = "Admin, Dispatcher")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
