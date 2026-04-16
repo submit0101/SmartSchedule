@@ -1768,6 +1768,20 @@
             <param name="ct">Токен отмены операции.</param>
             <returns>Список занятий, относящихся к указанному преподавателю.</returns>
         </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.GetLessonsBySlotAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получит информацию о слоте в расписание для каждой группы
+            </summary>
+            <param name="dayId">Идентификатор для </param>
+            <param name="timeId">Идентификатор пары</param>
+            <param name="ct">Токен отмены операции</param>
+            <returns></returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.UpdateBatchAsync(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Entities.Lesson},System.Threading.CancellationToken)">
+            <summary>
+            Пакетное обновление списка занятий в рамках одной транзакции
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Repositories.IPositionRepository">
             <summary>
             Интерфейс репозитория Должности
@@ -2490,6 +2504,13 @@
             <param name="filter">Фильтр для групп</param>
             <returns>возращает отчет по нагрузки на аудиторию</returns>
         </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.UpdateBatchAsync(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto},System.Threading.CancellationToken)">
+            <summary>
+            Пакетное обновление занятий (например, для синхронного переноса подгрупп).
+            </summary>
+            <param name="dtos">Список DTO с новыми данными уроков</param>
+            <param name="ct">Токен отмены</param>
+        </member>
         <member name="T:SmartSchedule.Application.Services.Interfaces.IPositionService">
             <summary>
             Сервис для работы с должностями преподавателей.
@@ -2881,6 +2902,17 @@
             <param name="lesson">Проверяемое занятие.</param>
             <param name="ct">Токен отмены операции.</param>
             <exception cref="T:SmartSchedule.Core.Exceptions.ScheduleConflictException">Если конфликт найден.</exception>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.UpdateBatchAsync(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto},System.Threading.CancellationToken)">
+            <summary>
+            Пакетное обновление занятий.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.ValidateBatchConflictsAsync(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Entities.Lesson},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Оптимизированная проверка конфликтов для пакетного обновления.
+            Игнорирует уроки, которые переносятся вместе в этой же пачке.
+            </summary>
         </member>
         <member name="T:SmartSchedule.Application.Services.PositionService">
             <summary>
