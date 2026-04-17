@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -21,11 +22,6 @@ namespace SmartSchedule.Infrastructure.Repositories
         /// <summary>
         /// Инициализирует новый экземпляр класса <see cref="SubjectRepository"/>.
         /// </summary>
-        /// <param name="context">Контекст базы данных.</param>
-        /// <param name="cache">Сервис кэширования.</param>
-        /// <exception cref="ArgumentNullException">
-        /// Выбрасывается, если <paramref name="context"/> или <paramref name="cache"/> равны <see langword="null"/>.
-        /// </exception>
         public SubjectRepository(AppDbContext context, ICachingService cache) : base(context)
         {
             ArgumentNullException.ThrowIfNull(cache, nameof(cache));
@@ -36,16 +32,13 @@ namespace SmartSchedule.Infrastructure.Repositories
         /// <summary>
         /// Проверяет, существует ли предмет с указанным названием.
         /// </summary>
-        /// <param name="name">Название предмета.</param>
-        /// <param name="excludeId">Идентификатор предмета, который следует исключить из проверки.</param>
-        /// <param name="ct">Токен отмены операции.</param>
-        /// <returns><see langword="true"/>, если предмет с таким названием уже существует; иначе — <see langword="false"/>.</returns>
-        /// <exception cref="ArgumentNullException">Выбрасывается, если <paramref name="name"/> равен <see langword="null"/> или пуст.</exception>
         public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null, CancellationToken ct = default)
         {
             ArgumentNullException.ThrowIfNull(name, nameof(name));
 
+            
             return await _subjects
+                .AsNoTracking()
                 .AnyAsync(e => e.Title == name && (excludeId == null || e.Id != excludeId), ct)
                 .ConfigureAwait(false);
         }
@@ -55,7 +48,8 @@ namespace SmartSchedule.Infrastructure.Repositories
         {
             return await _cache.GetOrSetAsync(
                 "subject:all",
-                () => base.GetAllAsync(ct),
+                // ПРЯМОЙ ВЫЗОВ: Берем данные без отслеживания, чтобы не захламлять кэш и логи
+                () => _subjects.AsNoTracking().ToListAsync(ct),
                 TimeSpan.FromMinutes(5),
                 ct).ConfigureAwait(false);
         }

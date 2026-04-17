@@ -54,7 +54,7 @@ public abstract class BaseRepository<TEntity, TId, TDbContext> : IBaseRepository
     /// <param name="ct">Токен отмены асинхронной операции.</param>
     /// <returns>Список всех сущностей типа <typeparamref name="TEntity"/>.</returns>
     public virtual async Task<List<TEntity>> GetAllShorts(CancellationToken ct) =>
-        await _dbSet.ToListAsync(ct).ConfigureAwait(false);
+        await _dbSet.AsNoTracking().ToListAsync(ct).ConfigureAwait(false);
 
     /// <summary>
     /// Получает сущности в полном формате.
@@ -62,7 +62,7 @@ public abstract class BaseRepository<TEntity, TId, TDbContext> : IBaseRepository
     /// <param name="ct">Токен отмены асинхронной операции.</param>
     /// <returns>Список всех сущностей типа <typeparamref name="TEntity"/>.</returns>
     public virtual async Task<List<TEntity>> GetAllAsync(CancellationToken ct) =>
-        await _dbSet.ToListAsync(ct).ConfigureAwait(false);
+        await _dbSet.AsNoTracking().ToListAsync(ct).ConfigureAwait(false);
     /// <summary>
     /// Получает список сущностей, соответствующих заданному условию.
     /// </summary>

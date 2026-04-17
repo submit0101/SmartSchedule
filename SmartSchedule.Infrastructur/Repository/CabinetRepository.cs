@@ -1,10 +1,10 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartSchedule.Core.Entities;
 using SmartSchedule.Core.Repositories;
 using SmartSchedule.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.Globalization; // ДОБАВЛЕНО для CultureInfo
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +38,8 @@ namespace SmartSchedule.Infrastructure.Repositories
         /// <returns>Список кабинетов с загруженными строениями</returns>
         public async Task<List<Cabinet>> GetAllWithBuldingAsync(CancellationToken ct)
         {
-            return await _cabinet.Include(c => c.Building).ToListAsync(ct).ConfigureAwait(false);
+            // ДОБАВЛЕНО: AsNoTracking()
+            return await _cabinet.AsNoTracking().Include(c => c.Building).ToListAsync(ct).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -55,7 +56,8 @@ namespace SmartSchedule.Infrastructure.Repositories
             string? sortBy,
             bool descending)
         {
-            IQueryable<Cabinet> query = _cabinet.Include(b=>b.Building);
+            // ДОБАВЛЕНО: AsNoTracking()
+            IQueryable<Cabinet> query = _cabinet.AsNoTracking().Include(b => b.Building);
 
             // Фильтрация по номеру кабинета
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -63,14 +65,14 @@ namespace SmartSchedule.Infrastructure.Repositories
                 query = query.Where(c => EF.Functions.Like(c.Number, $"%{searchTerm}%"));
             }
 
-            // Фильтрация по зданию
+        
             if (buildingNumber.HasValue)
             {
                 query = query.Where(c => c.BuildingId == buildingNumber.Value);
             }
 
-            // Сортировка
-            IOrderedQueryable<Cabinet> orderedQuery = sortBy?.ToLower() switch
+            
+            IOrderedQueryable<Cabinet> orderedQuery = sortBy?.ToLower(CultureInfo.InvariantCulture) switch
             {
                 "building" => descending
                     ? query.OrderByDescending(c => c.BuildingId)
@@ -80,9 +82,11 @@ namespace SmartSchedule.Infrastructure.Repositories
                     ? query.OrderByDescending(c => c.Number)
                     : query.OrderBy(c => c.Number)
             };
-            ArgumentNullException.ThrowIfNull(orderedQuery);
+
+            // ArgumentNullException.ThrowIfNull(orderedQuery); // Эта строка не нужна, orderedQuery никогда не будет null из-за switch
             return await orderedQuery.ToListAsync().ConfigureAwait(false);
         }
+
         /// <summary>
         /// фильтер кабинетов
         /// </summary>
@@ -91,7 +95,8 @@ namespace SmartSchedule.Infrastructure.Repositories
         /// <returns></returns>
         public async Task<List<Cabinet>> GetAllFilteredAsync(int? buildingId, CancellationToken ct)
         {
-            var query = _cabinet.AsQueryable();
+            // ДОБАВЛЕНО: AsNoTracking()
+            var query = _cabinet.AsNoTracking().AsQueryable();
 
             if (buildingId.HasValue)
             {
@@ -100,22 +105,26 @@ namespace SmartSchedule.Infrastructure.Repositories
 
             return await query.Include(c => c.Building).ToListAsync(ct).ConfigureAwait(false);
         }
+
         /// <summary>
         /// получить кабинеты с расписанием
         /// </summary>
         /// <param name="cabinetId"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<Cabinet> GetWithLessonsByIdAsync(int cabinetId, CancellationToken ct)
+        public async Task<Cabinet?> GetWithLessonsByIdAsync(int cabinetId, CancellationToken ct)
         {
-            
+            // ДОБАВЛЕНО: AsNoTracking() и знак вопроса у возвращаемого типа (Task<Cabinet?>),
+            // так как FirstOrDefaultAsync может вернуть null
             return await _cabinet
+                .AsNoTracking()
                 .Include(c => c.Lessons)
-                    .ThenInclude(l => l.TimeSlot) 
+                    .ThenInclude(l => l.TimeSlot)
                 .Include(c => c.Lessons)
-                    .ThenInclude(l => l.WeekDay) 
+                    .ThenInclude(l => l.WeekDay)
                 .FirstOrDefaultAsync(c => c.Id == cabinetId, ct).ConfigureAwait(false);
         }
+
         /// <summary>
         /// Проверка уникальности кабинета
         /// </summary>
@@ -126,7 +135,9 @@ namespace SmartSchedule.Infrastructure.Repositories
         /// <returns></returns>
         public async Task<bool> ExistsAsync(string number, int buildingId, int? excludeId = null, CancellationToken ct = default)
         {
+            // ДОБАВЛЕНО: AsNoTracking()
             return await _cabinet
+                .AsNoTracking()
                 .AnyAsync(c => c.Number == number
                             && c.BuildingId == buildingId
                             && (excludeId == null || c.Id != excludeId), ct).ConfigureAwait(false);
