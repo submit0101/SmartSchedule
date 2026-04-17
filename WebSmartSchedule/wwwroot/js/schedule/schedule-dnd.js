@@ -135,12 +135,12 @@ function handleDragLeave(e) {
 }
 
 async function handleDrop(e) {
-
     e.preventDefault();
     if (!window.appData || !window.appData.isEditable) {
         showAlert("У вас нет прав для изменения расписания", "danger");
         return;
     }
+
     const targetSlot = this;
     targetSlot.classList.remove('drag-over', 'drag-over-valid', 'drag-over-invalid', 'conflict-week', 'conflict-teacher', 'conflict-cabinet', 'drag-over-loading');
 
@@ -190,25 +190,35 @@ async function handleDrop(e) {
             throw new Error(`Заняты: ${errs.join(', ')}.`);
         }
 
-        const updatePromises = lessonIds.map(async (id) => {
+        const batchData = [];
+        lessonIds.forEach(id => {
             const lesson = ScheduleStore.findLesson(id);
-            if (!lesson) return;
-            const updateData = {
-                Id: lesson.id, GroupId: lesson.groupId, SubjectId: lesson.subjectId,
-                TeacherId: lesson.teacherId, CabinetId: lesson.cabinetId,
-                TimeSlotId: targetTimeId, DayOfWeekId: targetDayId,
-                WeekTypeId: lesson.weekTypeId, Subgroup: lesson.subgroup
-            };
-            if (ScheduleAPI.moveLesson) await ScheduleAPI.moveLesson(id, updateData);
-            else await ScheduleAPI.updateLesson(id, updateData);
+            if (lesson) {
+                batchData.push({
+                    Id: lesson.id,
+                    GroupId: lesson.groupId,
+                    SubjectId: lesson.subjectId,
+                    TeacherId: lesson.teacherId,
+                    CabinetId: lesson.cabinetId,
+                    TimeSlotId: targetTimeId,
+                    DayOfWeekId: targetDayId,
+                    WeekTypeId: lesson.weekTypeId,
+                    Subgroup: lesson.subgroup
+                });
+            }
         });
 
-        await Promise.all(updatePromises);
+        if (batchData.length > 0) {
+            await ScheduleAPI.updateLessonsBatch(batchData);
+        }
+
         lessonIds.forEach((id, index) => {
-            const backup = backupLessons[index]; 
-            appHistory.recordMove(id, backup);   
+            const backup = backupLessons[index];
+            appHistory.recordMove(id, backup);
         });
-    } catch (error) {
+
+    }
+    catch (error) {
         lessonIds.forEach((id, index) => {
             ScheduleStore.removeLesson(id);
             const backup = backupLessons[index];

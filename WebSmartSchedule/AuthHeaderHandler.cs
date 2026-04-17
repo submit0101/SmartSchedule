@@ -13,7 +13,7 @@ public class AuthHeaderHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // Вытаскиваем AccessToken из Claims текущего юзера
+       
         var token = _httpContextAccessor.HttpContext?.User.FindFirst("AccessToken")?.Value;
 
         if (!string.IsNullOrEmpty(token))

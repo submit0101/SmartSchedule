@@ -45,6 +45,7 @@ public class BuildingRepository : BaseRepository<Building, int, AppDbContext>, I
     {
         ArgumentNullException.ThrowIfNull(name, nameof(name));
         return await _buildings
+            .AsNoTracking()
             .AnyAsync(e => e.Name == name && (excludeId == null || e.Id != excludeId), ct)
             .ConfigureAwait(false);
     }

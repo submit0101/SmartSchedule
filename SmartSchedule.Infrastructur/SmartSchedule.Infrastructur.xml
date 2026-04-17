@@ -525,21 +525,11 @@
             <summary>
             Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.SubjectRepository"/>.
             </summary>
-            <param name="context">Контекст базы данных.</param>
-            <param name="cache">Сервис кэширования.</param>
-            <exception cref="T:System.ArgumentNullException">
-            Выбрасывается, если <paramref name="context"/> или <paramref name="cache"/> равны <see langword="null"/>.
-            </exception>
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Проверяет, существует ли предмет с указанным названием.
             </summary>
-            <param name="name">Название предмета.</param>
-            <param name="excludeId">Идентификатор предмета, который следует исключить из проверки.</param>
-            <param name="ct">Токен отмены операции.</param>
-            <returns><see langword="true"/>, если предмет с таким названием уже существует; иначе — <see langword="false"/>.</returns>
-            <exception cref="T:System.ArgumentNullException">Выбрасывается, если <paramref name="name"/> равен <see langword="null"/> или пуст.</exception>
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.SubjectRepository.GetAllAsync(System.Threading.CancellationToken)">
             <inheritdoc />
