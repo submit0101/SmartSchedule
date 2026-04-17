@@ -597,6 +597,21 @@
             Создание нового экземпляра класса
             </summary>
         </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.AssignRoleDto">
+            <summary>
+            Принимать запрос на смену роли
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.AssignRoleDto.UserId">
+            <summary>
+            Идентификатор Пользователя
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.AssignRoleDto.RoleName">
+            <summary>
+            Имя роли
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.AuthResponseDto">
             <summary>
             DTO ответа при успешной авторизации или регистрации.
@@ -622,6 +637,31 @@
             <summary>
             Основная роль пользователя в системе (например: Admin, Teacher, Student).
             Используется клиентом для скрытия или показа элементов UI.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto">
+            <summary>
+            DTO для создания нового пользователя администратором.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto.Username">
+            <summary>
+            Логин нового пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto.Email">
+            <summary>
+            Email нового пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto.Password">
+            <summary>
+            Пароль нового пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto.Role">
+            <summary>
+            Роль, которая будет назначена пользователю при создании.
             </summary>
         </member>
         <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto">
@@ -657,6 +697,51 @@
         <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto.Password">
             <summary>
             Пароль пользователя.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.UpdateUserDto">
+            <summary>
+            DTO для обновления данных существующего пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.UpdateUserDto.UserId">
+            <summary>
+            Идентификатор пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.UpdateUserDto.Username">
+            <summary>
+            Новый логин пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.UpdateUserDto.Email">
+            <summary>
+            Новый Email пользователя.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.AuthDTO.UserDto">
+            <summary>
+            DTO для отображения информации о пользователе в списке администратора.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.UserDto.Id">
+            <summary>
+            Уникальный идентификатор пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.UserDto.Username">
+            <summary>
+            Логин пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.UserDto.Email">
+            <summary>
+            Электронная почта пользователя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.AuthDTO.UserDto.Roles">
+            <summary>
+            Список ролей, назначенных пользователю.
             </summary>
         </member>
         <member name="T:SmartSchedule.Core.Models.DTO.BuildingDTO.ShortBuildingDto">
@@ -1855,20 +1940,33 @@
         </member>
         <member name="T:SmartSchedule.Core.Service.AuthService">
             <summary>
-            Сервис для работы с авторизацией
+            Сервис для работы с авторизацией и управлением пользователями.
             </summary>
         </member>
-        <member name="M:SmartSchedule.Core.Service.AuthService.#ctor(Microsoft.AspNetCore.Identity.UserManager{Microsoft.AspNetCore.Identity.IdentityUser},Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:SmartSchedule.Core.Service.AuthService.#ctor(Microsoft.AspNetCore.Identity.UserManager{Microsoft.AspNetCore.Identity.IdentityUser},Microsoft.AspNetCore.Identity.RoleManager{Microsoft.AspNetCore.Identity.IdentityRole},Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Инициализирует новый экземпляр сервиса <see cref="T:SmartSchedule.Core.Service.AuthService"/>.
             </summary>
             <param name="userManager">Менеджер пользователей Identity.</param>
+            <param name="roleManager">Менеджер ролей Identity.</param>
             <param name="configuration">Конфигурация приложения.</param>
         </member>
         <member name="M:SmartSchedule.Core.Service.AuthService.RegisterAsync(SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto)">
             <inheritdoc/>
         </member>
         <member name="M:SmartSchedule.Core.Service.AuthService.LoginAsync(SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.GetAllUsersAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.AssignRoleAsync(SmartSchedule.Core.Models.DTO.AuthDTO.AssignRoleDto)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.CreateUserAsync(SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.AuthService.UpdateUserAsync(SmartSchedule.Core.Models.DTO.AuthDTO.UpdateUserDto)">
             <inheritdoc/>
         </member>
         <member name="M:SmartSchedule.Core.Service.AuthService.GetToken(System.Collections.Generic.List{System.Security.Claims.Claim})">
@@ -2008,6 +2106,30 @@
             <param name="dto">Данные для входа (логин и пароль).</param>
             <returns>Объект с токеном и информацией о пользователе.</returns>
             <exception cref="T:SmartSchedul.Core.Exceptions.BusinessException">Выбрасывается при неверных учетных данных.</exception>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IAuthService.GetAllUsersAsync">
+            <summary>
+            Получение списка всех пользователей в системе.
+            </summary>
+            <returns>Список пользователей с их ролями.</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IAuthService.AssignRoleAsync(SmartSchedule.Core.Models.DTO.AuthDTO.AssignRoleDto)">
+            <summary>
+            Назначение новой роли пользователю.
+            </summary>
+            <param name="dto">Данные для назначения роли (ID пользователя и название роли).</param>
+            <returns>True, если роль успешно назначена.</returns>
+            <exception cref="T:SmartSchedul.Core.Exceptions.BusinessException">Выбрасывается, если пользователь или роль не найдены, либо при ошибке назначения.</exception>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IAuthService.CreateUserAsync(SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto)">
+            <summary>
+            Создание нового пользователя администратором с назначением роли.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Service.Interfaces.IAuthService.UpdateUserAsync(SmartSchedule.Core.Models.DTO.AuthDTO.UpdateUserDto)">
+            <summary>
+            Обновление основных данных пользователя (логин, email).
+            </summary>
         </member>
         <member name="T:SmartSchedule.Core.Service.Interfaces.ICachingService">
             <summary>

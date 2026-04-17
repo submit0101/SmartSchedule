@@ -6,22 +6,50 @@
     <members>
         <member name="T:SmartSchedule.Controllers.AuthController">
             <summary>
-            Контроллер для регистрации и входа пользователей.
+            Контроллер для регистрации, входа и управления пользователями.
             </summary>
         </member>
         <member name="M:SmartSchedule.Controllers.AuthController.#ctor(SmartSchedule.Core.Service.Interfaces.IAuthService)">
             <summary>
-            Конструктор
+            Инициализирует новый экземпляр контроллера <see cref="T:SmartSchedule.Controllers.AuthController"/>.
             </summary>
+            <param name="authService">Сервис аутентификации.</param>
         </member>
         <member name="M:SmartSchedule.Controllers.AuthController.Register(SmartSchedule.Core.Models.DTO.AuthDTO.RegisterDto)">
             <summary>
-            Регистрация нового пользователя.
+            Регистрация нового пользователя. Доступно только администраторам.
             </summary>
+            <param name="dto">Данные для регистрации.</param>
+            <returns>Сообщение об успешной регистрации.</returns>
         </member>
         <member name="M:SmartSchedule.Controllers.AuthController.Login(SmartSchedule.Core.Models.DTO.AuthDTO.LoginDto)">
             <summary>
             Вход в систему и получение JWT-токена.
+            </summary>
+            <param name="dto">Данные для входа.</param>
+            <returns>JWT-токен и данные пользователя.</returns>
+        </member>
+        <member name="M:SmartSchedule.Controllers.AuthController.GetAllUsers">
+            <summary>
+            Получение списка всех пользователей. Доступно только администраторам.
+            </summary>
+            <returns>Список пользователей с их ролями.</returns>
+        </member>
+        <member name="M:SmartSchedule.Controllers.AuthController.AssignRole(SmartSchedule.Core.Models.DTO.AuthDTO.AssignRoleDto)">
+            <summary>
+            Назначение роли пользователю. Доступно только администраторам.
+            </summary>
+            <param name="dto">Данные для назначения роли.</param>
+            <returns>Сообщение об успешном назначении роли.</returns>
+        </member>
+        <member name="M:SmartSchedule.Controllers.AuthController.CreateUser(SmartSchedule.Core.Models.DTO.AuthDTO.CreateUserDto)">
+            <summary>
+            Создание нового пользователя. Доступно только администраторам.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Controllers.AuthController.UpdateUser(SmartSchedule.Core.Models.DTO.AuthDTO.UpdateUserDto)">
+            <summary>
+            Обновление данных пользователя. Доступно только администраторам.
             </summary>
         </member>
         <member name="T:SmartSchedule.Application.Controllers.BuildingController">

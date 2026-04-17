@@ -197,10 +197,17 @@
                 @if (User.IsInRole("Admin"))
                 {
                     <li class="nav-item">
+                        <a class="nav-link @(ViewData["Title"]?.ToString() == "Администрирование" ? "active" : "")" asp-page="/Admin/Index">
+                        <i class="bi bi-person-video3"></i>Преподаватели
+                    </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link @(ViewData["Title"]?.ToString() == "Временные слоты" ? "active" : "")" asp-page="/TimeSlots/Index">
                             <i class="bi bi-clock"></i>Временные слоты
                         </a>
                     </li>
+
+
                     <li class="nav-item">
                         <a class="nav-link @(ViewData["Title"]?.ToString() == "Типы недель" ? "active" : "")" asp-page="/WeekTypes/Index">
                         <i class="bi bi-calendar-range"></i>Типы недель
