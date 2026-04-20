@@ -1,0 +1,188 @@
+﻿@using System.Globalization
+@{
+    DateTime today = DateTime.Now;
+    CultureInfo myCI = new CultureInfo("ru-RU");
+    int isoWeek = myCI.Calendar.GetWeekOfYear(today, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+    int weekNumber = isoWeek - 1;
+    bool isEvenWeek = weekNumber % 2 == 0;
+    string weekType = isEvenWeek ? "Знаменатель" : "Числитель";
+    string badgeClass = isEvenWeek ? "bg-indigo-soft text-indigo" : "bg-orange-soft text-orange";
+}
+
+<style>
+    /* Твои стили для дашборда */
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .bg-indigo-soft {
+        background-color: #e0e7ff;
+    }
+
+    .text-indigo {
+        color: #4338ca;
+    }
+
+    .bg-orange-soft {
+        background-color: #ffedd5;
+    }
+
+    .text-orange {
+        color: #c2410c;
+    }
+
+    .dashboard-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+        .nav-grid .btn-wide {
+            grid-column: span 2;
+        }
+
+    .nav-btn {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem 2rem;
+        text-decoration: none;
+        color: #1f2937;
+        transition: all 0.2s ease;
+        background: rgba(255,255,255,0.5);
+        border-radius: 20px;
+        border: 1px solid transparent;
+    }
+
+        .nav-btn:hover {
+            transform: translateY(-5px);
+            background: #ffffff;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: rgba(0,0,0,0.05);
+        }
+
+        .nav-btn i {
+            position: absolute;
+            bottom: -10px;
+            right: 15px;
+            font-size: 4rem;
+            opacity: 0.1;
+            color: currentColor;
+        }
+
+    #digital-clock {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800;
+        font-size: clamp(2.5rem, 5vw, 5.5rem);
+        color: #1f2937;
+    }
+
+    .day-progress-container {
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 1rem auto;
+        width: 70%;
+    }
+
+    .day-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        width: 0%;
+        transition: width 1s linear;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="glass-card p-5 text-center h-100">
+                    <h6 class="text-uppercase text-secondary fw-bold mb-3">@DateTime.Now.ToString("dd MMMM yyyy")</h6>
+                    <div class="mb-4">
+                        <span class="badge rounded-pill @badgeClass px-3 py-2">№ @weekNumber @weekType</span>
+                    </div>
+                    <div id="digital-clock">@DateTime.Now.ToString("HH:mm:ss")</div>
+                    <div class="day-progress-container"><div id="day-progress" class="day-progress-bar"></div></div>
+                    <div class="card border-0 bg-light p-3 mt-4 rounded-4">
+                        <div id="current-lesson"><span class="spinner-border spinner-border-sm text-primary"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="nav-grid">
+                    <a asp-page="/Lessons/Index" class="nav-btn btn-schedule text-primary">
+                        <h5>Расписание</h5><span>Управление занятиями</span><i class="bi bi-calendar-event"></i>
+                    </a>
+                    <a asp-page="/Teatchers/Index" class="nav-btn btn-teachers text-info">
+                        <h5>Преподаватели</h5><span>Состав кафедр</span><i class="bi bi-person-video3"></i>
+                    </a>
+                    <a asp-page="/Groups/Index" class="nav-btn btn-groups text-success">
+                        <h5>Группы</h5><span>Студенты</span><i class="bi bi-people"></i>
+                    </a>
+                    <a asp-page="/Cabinet/Index" class="nav-btn btn-cabinets text-secondary">
+                        <h5>Кабинеты</h5><span>Фонд аудиторий</span><i class="bi bi-door-open"></i>
+                    </a>
+                    <a asp-page="/Subjects/Index" class="nav-btn btn-subjects btn-wide text-warning">
+                        <h5>Предметы и учебные планы</h5><span>Дисциплины</span><i class="bi bi-journal-bookmark"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateDashboard() {
+        const now = new Date();
+        const clockEl = document.getElementById('digital-clock');
+        if(clockEl) clockEl.textContent = now.toLocaleTimeString('ru-RU');
+
+        const currentMin = now.getHours() * 60 + now.getMinutes();
+        const startDay = 8 * 60, endDay = 18 * 60;
+        let percent = Math.min(100, Math.max(0, ((currentMin - startDay) / (endDay - startDay)) * 100));
+        document.getElementById('day-progress').style.width = percent + '%';
+
+        const lessons = [
+            { start: 540, end: 635, name: '1-я пара' },
+            { start: 650, end: 745, name: '2-я пара' },
+            { start: 765, end: 860, name: '3-я пара' },
+            { start: 870, end: 965, name: '4-я пара' }
+        ];
+        let msg = "Учебный день окончен ";
+        for (let l of lessons) {
+            if (currentMin >= l.start && currentMin <= l.end) {
+                msg = `Идет ${l.name} (осталось ${l.end - currentMin} мин)`; break;
+            } else if (currentMin < l.start) {
+                msg = `Перерыв. Далее: ${l.name} через ${l.start - currentMin} мин`; break;
+            }
+        }
+        document.getElementById('current-lesson').innerHTML = msg;
+    }
+    setInterval(updateDashboard, 1000); updateDashboard();
+</script>

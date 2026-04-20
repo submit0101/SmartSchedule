@@ -3067,6 +3067,9 @@
             <summary>
             Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Services.ExcelExportService"/>.
             </summary>
+            <param name="lessonRepository">Репозиторий для работы с занятиями.</param>
+            <param name="groupRepository">Репозиторий для работы с группами.</param>
+            <param name="timeSlotRepository">Репозиторий для работы с временными слотами.</param>
         </member>
         <member name="M:SmartSchedule.Infrastructure.Services.ExcelExportService.GenerateGroupScheduleAsync(System.Int32,System.Threading.CancellationToken)">
             <inheritdoc/>
