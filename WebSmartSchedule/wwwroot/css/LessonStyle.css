@@ -12,10 +12,10 @@ body {
 }
 
 .content-wrapper {
-    flex: 1; /* Занимает ровно то место, которое осталось под шапкой */
-    overflow-y: auto !important; /* Включаем внутренний скролл */
+    flex: 1; 
+    overflow-y: auto !important;
     overflow-x: hidden;
-    padding-bottom: 40px; /* Отступ снизу, чтобы таблица не прилипала к краю экрана */
+    padding-bottom: 40px; 
 }
 
 h2 {

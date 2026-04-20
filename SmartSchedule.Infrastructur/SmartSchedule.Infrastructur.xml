@@ -446,8 +446,6 @@
             <summary>
             Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.LessonRepository"/>.
             </summary>
-            <param name="context">Контекст базы данных.</param>
-            <param name="cache">Сервис кэширования.</param>
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetAllAsync(System.Threading.CancellationToken)">
             <inheritdoc />
@@ -462,14 +460,10 @@
             <inheritdoc />
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetBusyCabinetIdsAsync(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Получает уникальные идентификаторы кабинетов, которые заняты в указанный слот.
-            </summary>
-            <param name="dayOfWeekId">Идентификатор дня недели.</param>
-            <param name="timeSlotId">Идентификатор временного слота.</param>
-            <param name="weekTypeId">Идентификатор типа недели.</param>
-            <param name="ct">Токен отмены.</param>
-            <returns>Множество занятых ID кабинетов.</returns>
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetLessonsBySlotAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.CreateAsync(SmartSchedule.Core.Entities.Lesson,System.Threading.CancellationToken)">
             <inheritdoc />
@@ -478,6 +472,9 @@
             <inheritdoc />
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.UpdateBatchAsync(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Entities.Lesson},System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
         <member name="T:SmartSchedule.Infrastructure.Repositories.PositionRepository">

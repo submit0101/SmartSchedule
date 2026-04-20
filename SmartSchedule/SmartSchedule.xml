@@ -286,6 +286,11 @@
             Получает отчет о загруженности учебных групп.
             </summary>
         </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.UpdateBatch(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto},System.Threading.CancellationToken)">
+            <summary>
+            Пакетное обновление занятий (используется для одновременного переноса нескольких подгрупп).
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Application.Controllers.PositionController">
             <summary>
             Контроллер для работы с должностями
