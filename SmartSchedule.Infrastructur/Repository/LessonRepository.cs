@@ -30,7 +30,6 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     {
         ArgumentNullException.ThrowIfNull(cache, nameof(cache));
 
-        // ИСПРАВЛЕНИЕ 2: Сохраняем контекст
         _context = context;
 
         _lessons = context.Set<Lesson>();
@@ -261,6 +260,22 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
         {
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
+    }
+    /// <summary>
+    /// Получает полный список занятий со всеми связанными сущностями для построения аналитических отчетов.
+    /// </summary>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Список занятий со связанными данными.</returns>
+    public async Task<List<Lesson>> GetLessonsForReportAsync(CancellationToken ct = default)
+    {
+        return await _context.Lessons
+            .AsNoTracking()
+            .Include(l => l.Teacher)
+            .Include(l => l.Group)
+            .Include(l => l.Subject)
+            .Include(l => l.Cabinet)
+                .ThenInclude(c => c.Building)
+            .ToListAsync(ct).ConfigureAwait(false);
     }
 
     #endregion

@@ -1,0 +1,205 @@
+﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
+
+<style>
+    .crosstab-scroll-wrapper {
+        max-height: 70vh;
+        overflow: auto;
+        scrollbar-width: thin;
+    }
+
+        .crosstab-scroll-wrapper thead th {
+            position: sticky;
+            top: 0;
+            background-color: #F7F7F9;
+            z-index: 2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            vertical-align: middle;
+        }
+
+            .crosstab-scroll-wrapper tbody td.sticky-col,
+            .crosstab-scroll-wrapper thead th.sticky-col {
+                position: sticky;
+                left: 0;
+                background-color: #ffffff;
+                z-index: 3;
+                border-right: 2px solid #dee2e6;
+            }
+
+            .crosstab-scroll-wrapper thead th.sticky-col {
+                z-index: 4;
+                background-color: #F7F7F9;
+            }
+
+    .cell-filled {
+        background-color: rgba(13, 110, 253, 0.08);
+        color: #0d6efd;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid px-0">
+    <div class="material-card mb-4">
+        <h5 class="mb-3" style="color: var(--md-sys-color-primary); font-weight: 600;">Универсальный матричный отчет</h5>
+        <form id="crossTabFilterForm" class="row g-3 align-items-end" onsubmit="return false;">
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Строки (Ось Y)</label>
+                <select id="crossTabRowGrouping" class="form-select">
+                    <option value="Teacher" selected>Преподаватели</option>
+                    <option value="Group">Группы</option>
+                    <option value="Cabinet">Кабинеты</option>
+                    <option value="Building">Корпуса</option>
+                    <option value="Subject">Предметы</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Колонки (Ось X)</label>
+                <select id="crossTabColGrouping" class="form-select">
+                    <option value="Subject" selected>Предметы</option>
+                    <option value="Group">Группы</option>
+                    <option value="Teacher">Преподаватели</option>
+                    <option value="Building">Корпуса</option>
+                    <option value="Cabinet">Кабинеты</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="button" id="GenerateCrossTabBtn" class="btn btn-primary w-100">
+                    <i class="bi bi-table me-2"></i>Построить матрицу
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="material-card p-0 overflow-hidden">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+            <span class="fw-bold fs-5 text-dark">Результаты матрицы</span>
+            <button id="ExportCrossTabPdfBtn" class="btn btn-sm btn-outline-danger d-none align-items-center gap-2 px-3 rounded-pill">
+                <i class="bi bi-filetype-pdf"></i>
+                <span class="d-none d-sm-inline fw-medium">Скачать PDF</span>
+            </button>
+        </div>
+
+        <div class="crosstab-scroll-wrapper">
+            <table class="table table-bordered table-hover mb-0 text-center" id="crossTabTable">
+                <thead id="crossTabThead">
+                </thead>
+                <tbody id="crossTabTbody">
+                    <tr>
+                        <td class="text-center text-muted py-5">
+                            <i class="bi bi-layout-three-columns fs-1 d-block mb-2 text-secondary opacity-25"></i>
+                            Выберите оси и нажмите «Построить матрицу»
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const generateBtn = document.getElementById("GenerateCrossTabBtn");
+        const exportPdfBtn = document.getElementById("ExportCrossTabPdfBtn");
+        let hasData = false;
+
+        generateBtn.addEventListener("click", async function () {
+            const rowGrouping = document.getElementById("crossTabRowGrouping").value;
+            const colGrouping = document.getElementById("crossTabColGrouping").value;
+
+            const originalText = generateBtn.innerHTML;
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Загрузка...';
+            exportPdfBtn.classList.add("d-none"); // Прячем кнопку при загрузке
+
+            try {
+                const response = await fetch('http://localhost:5062/api/lesson/crosstab', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rowGrouping: rowGrouping, colGrouping: colGrouping })
+                });
+
+                if (!response.ok) throw new Error('Сетевая ошибка при получении данных');
+
+                const data = await response.json();
+                renderCrossTabTable(data, rowGrouping, colGrouping);
+
+                // Показываем кнопку PDF, если есть данные
+                if (data && data.columns && data.columns.length > 0) {
+                    exportPdfBtn.classList.remove("d-none");
+                    exportPdfBtn.classList.add("d-flex");
+                    hasData = true;
+                } else {
+                    hasData = false;
+                }
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                if (typeof showAlert === 'function') showAlert("Не удалось сформировать отчет.", "danger");
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = originalText;
+            }
+        });
+
+        // --- ЛОГИКА ЭКСПОРТА В PDF ---
+        exportPdfBtn.addEventListener("click", function() {
+            if (!hasData) return;
+
+            // Берем красивые названия из селектов для имени файла
+            const rowSelect = document.getElementById("crossTabRowGrouping");
+            const colSelect = document.getElementById("crossTabColGrouping");
+            const rowText = rowSelect.options[rowSelect.selectedIndex].text.replace(/\s+/g, '');
+            const colText = colSelect.options[colSelect.selectedIndex].text.replace(/\s+/g, '');
+
+            const tableElement = document.getElementById("crossTabTable");
+
+            // Вызываем твою функцию generatePdf из Index.cshtml
+            if (typeof generatePdf === 'function') {
+                // Передаем саму таблицу, чтобы в PDF не попали ползунки скролла от wrapper'а
+                generatePdf(tableElement, `Матрица_${rowText}_${colText}.pdf`);
+            } else {
+                alert("Ошибка: Функция генерации PDF не найдена.");
+            }
+        });
+
+        function renderCrossTabTable(data, rowLabel, colLabel) {
+            const thead = document.getElementById("crossTabThead");
+            const tbody = document.getElementById("crossTabTbody");
+
+            thead.innerHTML = "";
+            tbody.innerHTML = "";
+
+            if (!data || !data.columns || data.columns.length === 0) {
+                tbody.innerHTML = `<tr><td class="text-center text-muted py-5">Нет данных для отображения.</td></tr>`;
+                return;
+            }
+
+            const namesMap = {
+                "Teacher": "Преподаватель", "Group": "Группа",
+                "Cabinet": "Кабинет", "Building": "Корпус", "Subject": "Предмет"
+            };
+            const cornerLabel = `${namesMap[rowLabel]} \\ ${namesMap[colLabel]}`;
+
+            let theadHtml = `<tr><th class="text-start sticky-col text-uppercase small text-muted" style="min-width: 250px;">${cornerLabel}</th>`;
+            data.columns.forEach(col => {
+                theadHtml += `<th class="text-wrap" style="min-width: 120px;">${col}</th>`;
+            });
+            theadHtml += `<th class="bg-light fw-bold" style="min-width: 100px;">ИТОГО</th></tr>`;
+            thead.innerHTML = theadHtml;
+
+            let tbodyHtml = "";
+            data.rows.forEach(row => {
+                tbodyHtml += `<tr><td class="text-start sticky-col fw-bold text-dark">${row.rowName}</td>`;
+                data.columns.forEach(col => {
+                    const val = row.values[col] || 0;
+                    if (val > 0) {
+                        tbodyHtml += `<td class="cell-filled">${val}</td>`;
+                    } else {
+                        tbodyHtml += `<td class="text-muted opacity-25">—</td>`;
+                    }
+                });
+                tbodyHtml += `<td class="bg-light fw-bold text-dark">${row.totalHours}</td></tr>`;
+            });
+
+            tbody.innerHTML = tbodyHtml;
+        }
+    });
+</script>

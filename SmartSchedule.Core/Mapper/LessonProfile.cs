@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SmartSchedule.Core.Entities;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
+using SmartSchedule.Core.Models.DTO.ReportDTO;
 
 namespace SmartSchedule.Core.Mapper;
 /// <summary>
@@ -40,6 +41,16 @@ public class LessonProfile : Profile
 
         CreateMap<CreateLessonDto, Lesson>();
         CreateMap<UpdateLessonDto, Lesson>();
+        CreateMap<Lesson, LessonReportFlatDto>()
+            .ForMember(d => d.Teacher, opt => opt.MapFrom(s => s.Teacher != null
+                ? $"{s.Teacher.LastName} {s.Teacher.FirstName} {s.Teacher.MiddleName}".Trim()
+                : "Не назначено"))
+            .ForMember(d => d.Group, opt => opt.MapFrom(s => s.Group != null ? s.Group.Name : "Не назначено"))
+            .ForMember(d => d.Subject, opt => opt.MapFrom(s => s.Subject != null ? s.Subject.Title : "Не назначено"))
+            .ForMember(d => d.Cabinet, opt => opt.MapFrom(s => s.Cabinet != null ? s.Cabinet.Number : "Не назначено"))
+            .ForMember(d => d.Building, opt => opt.MapFrom(s => s.Cabinet != null && s.Cabinet.Building != null
+                ? s.Cabinet.Building.Name
+                : "Не указано"));
     }
 
     private static string FormatName(string lastName, string firstName, string middleName)
@@ -55,4 +66,5 @@ public class LessonProfile : Profile
 
         return string.Join(" ", parts);
     }
+    
 }

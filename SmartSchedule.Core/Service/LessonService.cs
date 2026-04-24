@@ -7,6 +7,7 @@ using SmartSchedule.Core.Exceptions;
 using SmartSchedule.Core.Models.DTO.CabinetDTO;
 using SmartSchedule.Core.Models.DTO.GroupDTO;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
+using SmartSchedule.Core.Models.DTO.ReportDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
 using SmartSchedule.Core.Repositories;
 
@@ -499,5 +500,71 @@ public class LessonService : ILessonService
                 throw new ScheduleConflictException($"Конфликт: {reason} ({conflict.Subject?.Title ?? "Другое занятие"}).");
             }
         }
+    }
+    /// <summary>
+    /// Генерирует динамический отчет (Cross-tab) на основе заданных параметров группировки.
+    /// </summary>
+    /// <param name="filter">Настройки группировки для строк и колонок.</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Объект с заголовками колонок и строками данных.</returns>
+    public async Task<DynamicReportResultDto> GenerateDynamicReportAsync(DynamicReportFilterDto filter, CancellationToken ct = default)
+    {
+        var rawLessons = await _repository.GetLessonsForReportAsync(ct).ConfigureAwait(false);
+
+        var flatLessons = _mapper.Map<List<LessonReportFlatDto>>(rawLessons);
+
+        string GetGroupingValue(LessonReportFlatDto flatDto, string groupingType)
+        {
+            return groupingType switch
+            {
+                "Teacher" => flatDto.Teacher,
+                "Group" => flatDto.Group,
+                "Subject" => flatDto.Subject,
+                "Cabinet" => flatDto.Cabinet,
+                "Building" => flatDto.Building,
+                _ => "Неизвестно"
+            };
+        }
+
+        var groupedData = flatLessons
+            .GroupBy(l => new
+            {
+                Row = GetGroupingValue(l, filter.RowGrouping),
+                Col = GetGroupingValue(l, filter.ColGrouping)
+            })
+            .Select(g => new
+            {
+                RowName = g.Key.Row,
+                ColName = g.Key.Col,
+                Hours = g.Count() * 2
+            })
+            .ToList();
+
+        var result = new DynamicReportResultDto();
+
+        var uniqueColumns = groupedData.Select(x => x.ColName).Distinct().OrderBy(x => x).ToList();
+        foreach (var col in uniqueColumns)
+        {
+            result.Columns.Add(col);
+        }
+
+        // Заполняем строки
+        var rowNames = groupedData.Select(x => x.RowName).Distinct().OrderBy(x => x).ToList();
+        foreach (var rowName in rowNames)
+        {
+            var reportRow = new ReportRowDto { RowName = rowName };
+
+            foreach (var col in result.Columns)
+            {
+                var cell = groupedData.FirstOrDefault(x => x.RowName == rowName && x.ColName == col);
+                // Используем .Add для словаря (ReadOnly Values)
+                reportRow.Values.Add(col, cell != null ? cell.Hours : 0);
+            }
+
+            reportRow.TotalHours = reportRow.Values.Values.Sum();
+            result.Rows.Add(reportRow);
+        }
+
+        return result;
     }
 }

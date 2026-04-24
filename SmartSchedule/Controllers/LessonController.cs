@@ -6,7 +6,9 @@ using SmartSchedule.Core.Exceptions;
 using SmartSchedule.Core.Models.DTO.CabinetDTO;
 using SmartSchedule.Core.Models.DTO.GroupDTO;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
+using SmartSchedule.Core.Models.DTO.ReportDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -299,6 +301,42 @@ public class LessonController : ControllerBase
         catch (ObjectNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+    }
+    /// <summary>
+    /// Формирует динамический сводный отчет (Cross-tab) на основе выбранных параметров группировки.
+    /// </summary>
+    /// <param name="filter">DTO с параметрами группировки для строк и колонок отчета.</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Матрица отчета с динамическими заголовками и вычисленными часами.</returns>
+    /// <response code="200">Отчет успешно сгенерирован.</response>
+    /// <response code="400">Ошибка в параметрах фильтрации или группировки.</response>
+    /// <response code="500">Внутренняя ошибка сервера при формировании данных.</response>
+    [HttpPost("crosstab")]
+    [ProducesResponseType(typeof(DynamicReportResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<DynamicReportResultDto>> GetCrossTabReport(
+        [FromBody] DynamicReportFilterDto filter,
+        CancellationToken ct)
+    {
+        if (filter == null)
+        {
+            return BadRequest("Параметры фильтрации не могут быть пустыми.");
+        }
+
+        try
+        {
+            var result = await _lessonService.GenerateDynamicReportAsync(filter, ct).ConfigureAwait(false);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Произошла ошибка при формировании аналитического отчета.");
         }
     }
 }

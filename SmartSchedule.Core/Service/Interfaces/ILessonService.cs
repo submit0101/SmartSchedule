@@ -2,6 +2,7 @@
 using SmartSchedule.Core.Models.DTO.CabinetDTO;
 using SmartSchedule.Core.Models.DTO.GroupDTO;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
+using SmartSchedule.Core.Models.DTO.ReportDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
 
 namespace SmartSchedule.Application.Services.Interfaces;
@@ -138,11 +139,18 @@ public interface ILessonService
     /// <param name="ct">Токен отмены</param>
     /// <param name="filter">Фильтр для групп</param>
     /// <returns>возращает отчет по нагрузки на аудиторию</returns>
-    Task<List<GroupUsageReportDto>> GetGroupUsageReportAsync(GroupUsageFilterDto filter,CancellationToken ct);
+    Task<List<GroupUsageReportDto>> GetGroupUsageReportAsync(GroupUsageFilterDto filter, CancellationToken ct);
     /// <summary>
     /// Пакетное обновление занятий (например, для синхронного переноса подгрупп).
     /// </summary>
     /// <param name="dtos">Список DTO с новыми данными уроков</param>
     /// <param name="ct">Токен отмены</param>
     Task UpdateBatchAsync(IReadOnlyCollection<UpdateLessonDto> dtos, CancellationToken ct);
+    /// <summary>
+    /// Генерирует динамический отчет (Cross-tab) на основе заданных параметров группировки.
+    /// </summary>
+    /// <param name="filter">Настройки группировки для строк и колонок.</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Объект с заголовками колонок и строками данных.</returns>
+    Task<DynamicReportResultDto> GenerateDynamicReportAsync(DynamicReportFilterDto filter, CancellationToken ct = default);
 }

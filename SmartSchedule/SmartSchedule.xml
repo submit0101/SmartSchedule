@@ -291,6 +291,17 @@
             Пакетное обновление занятий (используется для одновременного переноса нескольких подгрупп).
             </summary>
         </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetCrossTabReport(SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Формирует динамический сводный отчет (Cross-tab) на основе выбранных параметров группировки.
+            </summary>
+            <param name="filter">DTO с параметрами группировки для строк и колонок отчета.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Матрица отчета с динамическими заголовками и вычисленными часами.</returns>
+            <response code="200">Отчет успешно сгенерирован.</response>
+            <response code="400">Ошибка в параметрах фильтрации или группировки.</response>
+            <response code="500">Внутренняя ошибка сервера при формировании данных.</response>
+        </member>
         <member name="T:SmartSchedule.Application.Controllers.PositionController">
             <summary>
             Контроллер для работы с должностями

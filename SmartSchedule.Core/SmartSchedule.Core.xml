@@ -1189,6 +1189,91 @@
             </summary>
             <example>Ведущий преподаватель</example>
         </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto">
+            <summary>
+            DTO для фильтрации и настройки динамического отчета (Cross-tab).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto.RowGrouping">
+            <summary>
+            Поле, по которому будет происходить группировка в строках (Ось Y).
+            По умолчанию - "Teacher" (Преподаватель).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto.ColGrouping">
+            <summary>
+            Поле, по которому будет происходить группировка в колонках (Ось X).
+            По умолчанию - "Subject" (Предмет).
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportResultDto">
+            <summary>
+            DTO, представляющий готовый результат динамического отчета для отрисовки на клиенте.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportResultDto.Columns">
+            <summary>
+            Уникальный список заголовков колонок (Ось X).
+            Свойство доступно только для чтения.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportResultDto.Rows">
+            <summary>
+            Список строк отчета (Ось Y) с вычисленными значениями для каждой ячейки.
+            Свойство доступно только для чтения.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto">
+            <summary>
+            Вспомогательный DTO для промежуточного представления данных занятия в отчетах.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto.Teacher">
+            <summary>
+            Полное имя преподавателя.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto.Group">
+            <summary>
+            Название группы.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto.Subject">
+            <summary>
+            Название предмета (Title).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto.Cabinet">
+            <summary>
+            Номер кабинета.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto.Building">
+            <summary>
+            Название корпуса.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.ReportRowDto">
+            <summary>
+            DTO, представляющий одну строку (объект группировки) в динамическом отчете.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.ReportRowDto.RowName">
+            <summary>
+            Название строки (например, ФИО преподавателя, название группы или номер кабинета).
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.ReportRowDto.Values">
+            <summary>
+            Словарь значений для ячеек строки, где ключ — это название колонки, а значение — количество часов.
+            Свойство доступно только для чтения.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.ReportRowDto.TotalHours">
+            <summary>
+            Суммарное количество часов по всем ячейкам данной строки (итоговая нагрузка).
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Models.DTO.SubjectDTO.CreateSubjectDto">
             <summary>
             DTO для создания нового предмета.
@@ -1719,6 +1804,14 @@
             <summary>
             Пакетное обновление списка занятий в рамках одной транзакции
             </summary>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.GetLessonsForReportAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получает полный список занятий со всеми связанными сущностями для построения аналитических отчетов.
+            Выполняется без отслеживания изменений (AsNoTracking) для повышения производительности.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список занятий со связанными данными (Преподаватель, Предмет, Кабинет и т.д.).</returns>
         </member>
         <member name="T:SmartSchedule.Core.Repositories.IPositionRepository">
             <summary>
@@ -2403,6 +2496,14 @@
             <param name="dtos">Список DTO с новыми данными уроков</param>
             <param name="ct">Токен отмены</param>
         </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GenerateDynamicReportAsync(SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Генерирует динамический отчет (Cross-tab) на основе заданных параметров группировки.
+            </summary>
+            <param name="filter">Настройки группировки для строк и колонок.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Объект с заголовками колонок и строками данных.</returns>
+        </member>
         <member name="T:SmartSchedule.Application.Services.Interfaces.IPositionService">
             <summary>
             Сервис для работы с должностями преподавателей.
@@ -2749,6 +2850,14 @@
             <summary>
             Оптимизированная проверка конфликтов для пакета занятий.
             </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GenerateDynamicReportAsync(SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Генерирует динамический отчет (Cross-tab) на основе заданных параметров группировки.
+            </summary>
+            <param name="filter">Настройки группировки для строк и колонок.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Объект с заголовками колонок и строками данных.</returns>
         </member>
         <member name="T:SmartSchedule.Application.Services.PositionService">
             <summary>

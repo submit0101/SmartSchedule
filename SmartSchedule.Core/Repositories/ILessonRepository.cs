@@ -50,4 +50,11 @@ public interface ILessonRepository : IBaseRepository<Lesson, int>
     /// Пакетное обновление списка занятий в рамках одной транзакции
     /// </summary>
     Task UpdateBatchAsync(IReadOnlyCollection<Lesson> lessons, CancellationToken ct);
+    /// <summary>
+    /// Получает полный список занятий со всеми связанными сущностями для построения аналитических отчетов.
+    /// Выполняется без отслеживания изменений (AsNoTracking) для повышения производительности.
+    /// </summary>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Список занятий со связанными данными (Преподаватель, Предмет, Кабинет и т.д.).</returns>
+    Task<List<Lesson>> GetLessonsForReportAsync(CancellationToken ct = default);
 }

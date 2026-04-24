@@ -80,7 +80,7 @@ const ScheduleAPI = {
     async updateLessonsBatch(lessonsArray) {
         const res = await fetch(`${this.baseUrl}/lesson/batch`, {
             method: 'PUT',
-            headers: this.getHeaders(),
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(lessonsArray)
         });
         if (!res.ok) throw new Error(await res.text());

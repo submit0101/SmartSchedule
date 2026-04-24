@@ -477,6 +477,13 @@
         <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.UpdateBatchAsync(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Entities.Lesson},System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetLessonsForReportAsync(System.Threading.CancellationToken)">
+            <summary>
+            Получает полный список занятий со всеми связанными сущностями для построения аналитических отчетов.
+            </summary>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список занятий со связанными данными.</returns>
+        </member>
         <member name="T:SmartSchedule.Infrastructure.Repositories.PositionRepository">
             <summary>
             Репозиторий для работы с должностями преподавателей.

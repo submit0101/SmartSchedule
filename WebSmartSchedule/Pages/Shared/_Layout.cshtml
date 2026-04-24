@@ -189,11 +189,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link @(ViewData["Title"]?.ToString() == "Администрирование" ? "active" : "")" asp-page="/Admin/Index">
-                    <i class="bi bi-gear"></i>Администрирование
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link @(ViewData["Title"]?.ToString() == "Временные слоты" ? "active" : "")" asp-page="/TimeSlots/Index">
                     <i class="bi bi-clock"></i>Временные слоты
                 </a>
@@ -215,15 +210,6 @@
                             <i class="bi bi-list fs-5"></i>
                         </button>
                         <h4 class="mb-0">@ViewData["Title"]</h4>
-                    </div>
-
-                    <div class="d-flex align-items-center">
-                        <span class="me-3 text-muted d-none d-md-block">
-                            <i class="bi bi-person-circle"></i> Пользователь
-                        </span>
-                        <form method="post" class="m-0">
-                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3">Выйти</button>
-                        </form>
                     </div>
                 </div>
             </nav>
