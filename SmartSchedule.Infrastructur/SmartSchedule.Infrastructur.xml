@@ -484,6 +484,16 @@
             <param name="ct">Токен отмены операции.</param>
             <returns>Список занятий со связанными данными.</returns>
         </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.GetBusyMatrixAsync(System.Collections.ObjectModel.ReadOnlyCollection{System.Int32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Извлекает матрицу занятости (идентификаторы преподавателей, дней и слотов) для заданных преподавателей и типа недели.
+            Учитывает пары, которые проводятся на обеих неделях (числитель и знаменатель).
+            </summary>
+            <param name="teacherIds">Коллекция идентификаторов преподавателей (только для чтения).</param>
+            <param name="weekTypeId">Идентификатор типа недели (числитель, знаменатель и т.д.).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список кортежей, представляющих занятые временные слоты преподавателей.</returns>
+        </member>
         <member name="T:SmartSchedule.Infrastructure.Repositories.PositionRepository">
             <summary>
             Репозиторий для работы с должностями преподавателей.

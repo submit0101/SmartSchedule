@@ -4,6 +4,7 @@ using SmartSchedule.Core.Models.DTO.GroupDTO;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
 using SmartSchedule.Core.Models.DTO.ReportDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
+using System.Collections.ObjectModel;
 
 namespace SmartSchedule.Application.Services.Interfaces;
 
@@ -153,4 +154,16 @@ public interface ILessonService
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Объект с заголовками колонок и строками данных.</returns>
     Task<DynamicReportResultDto> GenerateDynamicReportAsync(DynamicReportFilterDto filter, CancellationToken ct = default);
+    /// <summary>
+    /// Генерирует сводную ведомость методических окон для планирования совещаний.
+    /// Использует коллекцию только для чтения для обеспечения безопасности данных.
+    /// </summary>
+    /// <param name="teacherIds">Коллекция идентификаторов преподавателей (ReadOnly).</param>
+    /// <param name="weekTypeId">Идентификатор типа недели (числитель/знаменатель).</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Бланк отчета с результатами анализа окон.</returns>
+    Task<MethodicalWindowReportDto> GenerateMethodicalWindowsReportAsync(
+        ReadOnlyCollection<int> teacherIds,
+        int weekTypeId,
+        CancellationToken ct = default);
 }

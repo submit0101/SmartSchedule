@@ -10,6 +10,7 @@ using SmartSchedule.Core.Models.DTO.LessonDTO;
 using SmartSchedule.Core.Models.DTO.ReportDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
 using SmartSchedule.Core.Repositories;
+using System.Collections.ObjectModel;
 
 namespace SmartSchedule.Application.Services;
 
@@ -566,5 +567,64 @@ public class LessonService : ILessonService
         }
 
         return result;
+
+    }
+    /// <summary>
+    /// Генерирует сводную ведомость методических окон для планирования совещаний.
+    /// Реализация оптимизирована с использованием хэш-таблиц для быстрого поиска пересечений.
+    /// </summary>
+    /// <param name="teacherIds">Коллекция идентификаторов преподавателей (ReadOnly).</param>
+    /// <param name="weekTypeId">Тип недели.</param>
+    /// <param name="ct">Токен отмены.</param>
+    public async Task<MethodicalWindowReportDto> GenerateMethodicalWindowsReportAsync(
+        ReadOnlyCollection<int> teacherIds,
+        int weekTypeId,
+        CancellationToken ct = default)
+    {
+        if (teacherIds == null || teacherIds.Count < 2)
+            throw new BusinessException("Для формирования ведомости необходимо выбрать как минимум двух преподавателей.");
+
+        var days = await _weekDayRepository.GetAllAsync(ct).ConfigureAwait(false);
+        var slots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
+
+        var busyMatrix = await _repository.GetBusyMatrixAsync(teacherIds, weekTypeId, ct).ConfigureAwait(false);
+
+        var allTeachers = await _teacherRepository.GetAllAsync(ct).ConfigureAwait(false);
+        var selectedTeachers = allTeachers.Where(t => teacherIds.Contains(t.Id)).ToList();
+
+        var busyHashSets = teacherIds.ToDictionary(
+            id => id,
+            id => busyMatrix
+                .Where(x => x.TeacherId == id)
+                .Select(x => (x.DayId, x.SlotId))
+                .ToHashSet()
+        );
+
+        var report = new MethodicalWindowReportDto();
+
+        foreach (var day in days.OrderBy(d => d.Id))
+        {
+            foreach (var slot in slots.OrderBy(s => s.SlotNumber))
+            {
+                var freeTeachers = selectedTeachers
+                    .Where(t => !busyHashSets[t.Id].Contains((day.Id, slot.Id)))
+                    .Select(t => $"{t.LastName} {t.FirstName?[0]}.")
+                    .ToList();
+
+                if (freeTeachers.Count >= 2)
+                {
+                    report.Rows.Add(new MethodicalWindowRowDto
+                    {
+                        DayName = day.Name,
+                        TimeDisplay = $"{slot.StartTime:hh\\:mm} - {slot.EndTime:hh\\:mm}",
+                        FreeTeachersCount = freeTeachers.Count,
+                        FreeTeachersNames = string.Join(", ", freeTeachers)
+                    });
+                }
+            }
+        }
+
+        report.TotalWindowsFound = report.Rows.Count;
+        return report;
     }
 }

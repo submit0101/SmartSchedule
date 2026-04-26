@@ -339,4 +339,33 @@ public class LessonController : ControllerBase
             return StatusCode(500, "Произошла ошибка при формировании аналитического отчета.");
         }
     }
+    /// <summary>
+    /// Генерирует официальный бланк «Сводная ведомость методических окон» для группы преподавателей.
+    /// </summary>
+    /// <remarks>
+    /// Отчет анализирует расписание выбранных сотрудников и находит временные слоты, 
+    /// в которых одновременно свободны как минимум двое из них. 
+    /// Учитывается тип недели (числитель/знаменатель) и занятия, идущие «целой парой».
+    /// </remarks>
+    /// <param name="teacherIds">Список идентификаторов преподавателей для сравнения.</param>
+    /// <param name="weekTypeId">Идентификатор типа недели (1 - числитель, 2 - знаменатель, 3 - обе недели).</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Возвращает объект <see cref="MethodicalWindowReportDto"/>, содержащий таблицу окон и итоговые показатели.</returns>
+    /// <response code="200">Бланк отчета успешно сформирован.</response>
+    /// <response code="400">Ошибка валидации (например, передано менее двух идентификаторов преподавателей).</response>
+    [HttpGet("report/methodical-windows")]
+    [ProducesResponseType(typeof(MethodicalWindowReportDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<MethodicalWindowReportDto>> GetMethodicalWindowsReport(
+        [FromQuery] List<int> teacherIds,
+        [FromQuery] int weekTypeId,
+        CancellationToken ct)
+    {
+        var report = await _lessonService.GenerateMethodicalWindowsReportAsync(
+            teacherIds.AsReadOnly(),
+            weekTypeId,
+            ct).ConfigureAwait(false);
+
+        return Ok(report);
+    }
 }

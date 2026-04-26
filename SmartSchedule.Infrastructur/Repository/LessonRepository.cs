@@ -6,6 +6,7 @@ using SmartSchedule.Core.Service.Interfaces;
 using SmartSchedule.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -276,6 +277,36 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
             .Include(l => l.Cabinet)
                 .ThenInclude(c => c.Building)
             .ToListAsync(ct).ConfigureAwait(false);
+    }
+    /// <summary>
+    /// Извлекает матрицу занятости (идентификаторы преподавателей, дней и слотов) для заданных преподавателей и типа недели.
+    /// Учитывает пары, которые проводятся на обеих неделях (числитель и знаменатель).
+    /// </summary>
+    /// <param name="teacherIds">Коллекция идентификаторов преподавателей (только для чтения).</param>
+    /// <param name="weekTypeId">Идентификатор типа недели (числитель, знаменатель и т.д.).</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Список кортежей, представляющих занятые временные слоты преподавателей.</returns>
+    public async Task<List<(int TeacherId, int DayId, int SlotId)>> GetBusyMatrixAsync(ReadOnlyCollection<int> teacherIds, int weekTypeId, CancellationToken ct = default)
+    {
+        const int BothWeeksId = WeekTypeConstants.Both;
+        var data = await _context.Lessons
+            .AsNoTracking()
+            .Where(l => l.TeacherId.HasValue &&
+                        teacherIds.Contains(l.TeacherId.Value) &&
+                        l.TimeSlotId.HasValue &&
+                        (l.WeekTypeId == weekTypeId || l.WeekTypeId == BothWeeksId))
+            .Select(l => new
+            {
+                TeacherId = l.TeacherId!.Value,
+                DayId = l.DayOfWeekId,
+                SlotId = l.TimeSlotId!.Value
+            })
+            .Distinct()
+            .ToListAsync(ct) 
+            .ConfigureAwait(false);
+        return data
+            .Select(d => (d.TeacherId, d.DayId, d.SlotId))
+            .ToList();
     }
 
     #endregion

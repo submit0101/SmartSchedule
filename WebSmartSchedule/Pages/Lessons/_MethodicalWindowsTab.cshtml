@@ -1,0 +1,194 @@
+﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
+
+<style>
+    .methodical-scroll-wrapper {
+        max-height: 70vh;
+        overflow: auto;
+        scrollbar-width: thin;
+    }
+
+        .methodical-scroll-wrapper thead th {
+            position: sticky;
+            top: 0;
+            background-color: #F7F7F9;
+            z-index: 2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            vertical-align: middle;
+        }
+</style>
+
+<div class="container-fluid px-0">
+    <div class="material-card mb-4">
+        <h5 class="mb-3" style="color: var(--md-sys-color-primary); font-weight: 600;">Сводная ведомость методических окон</h5>
+        <form id="methodicalFilterForm" class="row g-3 align-items-end" onsubmit="return false;">
+            <div class="col-md-5">
+                <label class="form-label text-muted small text-uppercase fw-bold">Преподаватели (Ctrl для множ. выбора)</label>
+                <select id="methodicalTeachers" class="form-select" multiple size="3" required></select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Тип недели</label>
+                <select id="methodicalWeekType" class="form-select">
+                    <option value="3" selected>Обе недели</option>
+                    <option value="1">Числитель</option>
+                    <option value="2">Знаменатель</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="button" id="GenerateMethodicalBtn" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-2"></i>Найти окна
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="material-card p-0 overflow-hidden">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+            <span class="fw-bold fs-5 text-dark" id="methodicalSummary">Результаты</span>
+            <button id="ExportMethodicalExcelBtn" class="btn btn-sm btn-outline-success d-none align-items-center gap-2 px-3 rounded-pill">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span class="d-none d-sm-inline fw-medium">Скачать Excel</span>
+            </button>
+        </div>
+
+        <div class="methodical-scroll-wrapper">
+            <table class="table table-bordered table-hover mb-0" id="methodicalTable">
+                <thead id="methodicalThead">
+                    <tr>
+                        <th style="min-width: 150px;">День недели</th>
+                        <th style="min-width: 150px;">Время</th>
+                        <th class="text-center" style="min-width: 120px;">Кол-во свободных</th>
+                        <th>Свободные преподаватели</th>
+                    </tr>
+                </thead>
+                <tbody id="methodicalTbody">
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-5">
+                            <i class="bi bi-people fs-1 d-block mb-2 text-secondary opacity-25"></i>
+                            Выберите преподавателей и нажмите «Найти окна»
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const generateBtn = document.getElementById("GenerateMethodicalBtn");
+        const exportExcelBtn = document.getElementById("ExportMethodicalExcelBtn");
+        const teachersSelect = document.getElementById("methodicalTeachers");
+        let hasData = false;
+        let currentReportTitle = "Методические_окна";
+
+        const checkTeachersInterval = setInterval(() => {
+            if (window.appData && window.appData.teachers) {
+                clearInterval(checkTeachersInterval);
+                window.appData.teachers.forEach(t => {
+                    const opt = document.createElement("option");
+                    opt.value = t.id;
+
+                    // ИСПРАВЛЕНИЕ ОШИБКИ UNDEFINED
+                    let displayName = t.fullName || t.name || t.Name;
+                    if (!displayName) {
+                        const last = t.lastName || t.LastName || '';
+                        const first = t.firstName || t.FirstName || '';
+                        const middle = t.middleName || t.MiddleName || '';
+                        displayName = `${last} ${first} ${middle}`.trim();
+                    }
+
+                    opt.textContent = displayName || 'Без имени';
+                    teachersSelect.appendChild(opt);
+                });
+            }
+        }, 100);
+
+        generateBtn.addEventListener("click", async function () {
+            const selectedOptions = Array.from(teachersSelect.selectedOptions);
+            if (selectedOptions.length < 2) {
+                if (typeof showAlert === 'function') showAlert("Выберите как минимум двух преподавателей", "warning");
+                return;
+            }
+
+            const weekTypeId = document.getElementById("methodicalWeekType").value;
+            const queryParams = new URLSearchParams();
+            queryParams.append("weekTypeId", weekTypeId);
+            selectedOptions.forEach(opt => queryParams.append("teacherIds", opt.value));
+
+            const originalText = generateBtn.innerHTML;
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Загрузка...';
+            exportExcelBtn.classList.add("d-none");
+
+            try {
+                // ИСПРАВЛЕНИЕ: Используем относительный путь
+                const response = await fetch(`http://localhost:5062/api/lesson/report/methodical-windows?${queryParams.toString()}`);
+                if (!response.ok) throw new Error();
+
+                const data = await response.json();
+                renderMethodicalTable(data);
+
+                if (data && data.rows && data.rows.length > 0) {
+                    exportExcelBtn.classList.remove("d-none");
+                    exportExcelBtn.classList.add("d-flex");
+                    hasData = true;
+                } else {
+                    hasData = false;
+                }
+            } catch (error) {
+                if (typeof showAlert === 'function') showAlert("Не удалось сформировать отчет.", "danger");
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = originalText;
+            }
+        });
+
+        exportExcelBtn.addEventListener("click", function() {
+            if (!hasData) return;
+
+            const table = document.getElementById("methodicalTable");
+            let csvContent = "\uFEFF";
+            const rows = table.querySelectorAll("tr");
+
+            rows.forEach(row => {
+                const cols = row.querySelectorAll("th, td");
+                const rowData = Array.from(cols).map(c => `"${c.innerText.replace(/"/g, '""')}"`).join(";");
+                csvContent += rowData + "\r\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `${currentReportTitle}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        function renderMethodicalTable(data) {
+            const tbody = document.getElementById("methodicalTbody");
+            const summary = document.getElementById("methodicalSummary");
+            tbody.innerHTML = "";
+
+            if (!data || !data.rows || data.rows.length === 0) {
+                summary.textContent = "Результаты (окон не найдено)";
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">Окон не найдено.</td></tr>`;
+                return;
+            }
+
+            summary.textContent = `Результаты (Найдено окон: ${data.totalWindowsFound})`;
+
+            let tbodyHtml = "";
+            data.rows.forEach(row => {
+                tbodyHtml += `<tr>
+                    <td class="fw-bold">${row.dayName}</td>
+                    <td>${row.timeDisplay}</td>
+                    <td class="text-center fw-bold text-primary">${row.freeTeachersCount}</td>
+                    <td>${row.freeTeachersNames}</td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = tbodyHtml;
+        }
+    });
+</script>

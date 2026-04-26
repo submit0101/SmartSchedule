@@ -1253,6 +1253,43 @@
             Название корпуса.
             </summary>
         </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto">
+            <summary>
+            Официальный бланк ведомости методических окон для планирования совещаний.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto.ReportTitle">
+            <summary> Заголовок отчета. </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto.GeneratedDate">
+            <summary> Дата формирования. </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto.TotalWindowsFound">
+            <summary> Итоговое количество найденных окон (Суммирование). </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto.Rows">
+            <summary> 
+            Список строк отчета. 
+            Свойство доступно только для чтения (get-only), что защищает коллекцию от случайной перезаписи.
+            </summary>
+        </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowRowDto">
+            <summary>
+            Представляет строку ведомости методических окон с информацией о свободном времени.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowRowDto.DayName">
+            <summary> Название дня недели. </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowRowDto.TimeDisplay">
+            <summary> Отображение времени (например, "08:00 - 09:30"). </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowRowDto.FreeTeachersCount">
+            <summary> Количество свободных преподавателей в этом слоте (Агрегация). </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowRowDto.FreeTeachersNames">
+            <summary> Список имен свободных преподавателей. </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.ReportRowDto">
             <summary>
             DTO, представляющий одну строку (объект группировки) в динамическом отчете.
@@ -1812,6 +1849,15 @@
             </summary>
             <param name="ct">Токен отмены операции.</param>
             <returns>Список занятий со связанными данными (Преподаватель, Предмет, Кабинет и т.д.).</returns>
+        </member>
+        <member name="M:SmartSchedule.Core.Repositories.ILessonRepository.GetBusyMatrixAsync(System.Collections.ObjectModel.ReadOnlyCollection{System.Int32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Извлекает матрицу занятости (идентификаторы преподавателей, дней и слотов) для заданных преподавателей и типа недели.
+            </summary>
+            <param name="teacherIds">Коллекция идентификаторов преподавателей (только для чтения).</param>
+            <param name="weekTypeId">Идентификатор типа недели (числитель, знаменатель и т.д.).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Список кортежей, представляющих занятые временные слоты преподавателей.</returns>
         </member>
         <member name="T:SmartSchedule.Core.Repositories.IPositionRepository">
             <summary>
@@ -2504,6 +2550,16 @@
             <param name="ct">Токен отмены операции.</param>
             <returns>Объект с заголовками колонок и строками данных.</returns>
         </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ILessonService.GenerateMethodicalWindowsReportAsync(System.Collections.ObjectModel.ReadOnlyCollection{System.Int32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Генерирует сводную ведомость методических окон для планирования совещаний.
+            Использует коллекцию только для чтения для обеспечения безопасности данных.
+            </summary>
+            <param name="teacherIds">Коллекция идентификаторов преподавателей (ReadOnly).</param>
+            <param name="weekTypeId">Идентификатор типа недели (числитель/знаменатель).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Бланк отчета с результатами анализа окон.</returns>
+        </member>
         <member name="T:SmartSchedule.Application.Services.Interfaces.IPositionService">
             <summary>
             Сервис для работы с должностями преподавателей.
@@ -2858,6 +2914,15 @@
             <param name="filter">Настройки группировки для строк и колонок.</param>
             <param name="ct">Токен отмены операции.</param>
             <returns>Объект с заголовками колонок и строками данных.</returns>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.LessonService.GenerateMethodicalWindowsReportAsync(System.Collections.ObjectModel.ReadOnlyCollection{System.Int32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Генерирует сводную ведомость методических окон для планирования совещаний.
+            Реализация оптимизирована с использованием хэш-таблиц для быстрого поиска пересечений.
+            </summary>
+            <param name="teacherIds">Коллекция идентификаторов преподавателей (ReadOnly).</param>
+            <param name="weekTypeId">Тип недели.</param>
+            <param name="ct">Токен отмены.</param>
         </member>
         <member name="T:SmartSchedule.Application.Services.PositionService">
             <summary>

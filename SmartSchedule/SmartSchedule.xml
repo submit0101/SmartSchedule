@@ -302,6 +302,22 @@
             <response code="400">Ошибка в параметрах фильтрации или группировки.</response>
             <response code="500">Внутренняя ошибка сервера при формировании данных.</response>
         </member>
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetMethodicalWindowsReport(System.Collections.Generic.List{System.Int32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Генерирует официальный бланк «Сводная ведомость методических окон» для группы преподавателей.
+            </summary>
+            <remarks>
+            Отчет анализирует расписание выбранных сотрудников и находит временные слоты, 
+            в которых одновременно свободны как минимум двое из них. 
+            Учитывается тип недели (числитель/знаменатель) и занятия, идущие «целой парой».
+            </remarks>
+            <param name="teacherIds">Список идентификаторов преподавателей для сравнения.</param>
+            <param name="weekTypeId">Идентификатор типа недели (1 - числитель, 2 - знаменатель, 3 - обе недели).</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Возвращает объект <see cref="T:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto"/>, содержащий таблицу окон и итоговые показатели.</returns>
+            <response code="200">Бланк отчета успешно сформирован.</response>
+            <response code="400">Ошибка валидации (например, передано менее двух идентификаторов преподавателей).</response>
+        </member>
         <member name="T:SmartSchedule.Application.Controllers.PositionController">
             <summary>
             Контроллер для работы с должностями
