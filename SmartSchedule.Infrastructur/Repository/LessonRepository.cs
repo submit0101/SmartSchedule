@@ -6,7 +6,6 @@ using SmartSchedule.Core.Service.Interfaces;
 using SmartSchedule.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,10 +28,10 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     /// </summary>
     public LessonRepository(AppDbContext context, ICachingService cache) : base(context)
     {
+        ArgumentNullException.ThrowIfNull(context, nameof(context));
         ArgumentNullException.ThrowIfNull(cache, nameof(cache));
 
         _context = context;
-
         _lessons = context.Set<Lesson>();
         _cache = cache;
     }
@@ -126,7 +125,7 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
                         l.TimeSlotId == timeSlotId &&
                         (l.WeekTypeId == weekTypeId || l.WeekTypeId == BothWeeksId) &&
                         l.CabinetId != null)
-            .Select(l => (int)l.CabinetId!)
+            .Select(l => l.CabinetId!.Value)
             .Distinct()
             .ToHashSetAsync(ct)
             .ConfigureAwait(false);
@@ -134,7 +133,6 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
         return busyIds;
     }
 
-    
     /// <inheritdoc />
     public async Task<List<Lesson>> GetLessonsBySlotAsync(int dayId, int timeId, CancellationToken ct = default)
     {
@@ -186,6 +184,8 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     /// <inheritdoc />
     public async Task UpdateBatchAsync(IReadOnlyCollection<Lesson> lessons, CancellationToken ct = default)
     {
+        ArgumentNullException.ThrowIfNull(lessons, nameof(lessons));
+
         using var transaction = await _context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
         try
         {
@@ -211,7 +211,7 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     {
         return await _lessons
             .AsNoTracking()
-            .Include(l => l.Cabinet).ThenInclude(c => c.Building)
+            .Include(l => l.Cabinet).ThenInclude(c => c!.Building)
             .Include(l => l.Teacher)
             .Include(l => l.Group)
             .Include(l => l.Subject)
@@ -226,7 +226,7 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
     {
         return await _lessons
             .AsNoTracking()
-            .Include(l => l.Cabinet).ThenInclude(c => c.Building)
+            .Include(l => l.Cabinet).ThenInclude(c => c!.Building)
             .Include(l => l.Teacher)
             .Include(l => l.Group)
             .Include(l => l.Subject)
@@ -261,52 +261,6 @@ public class LessonRepository : BaseRepository<Lesson, int, AppDbContext>, ILess
         {
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
-    }
-    /// <summary>
-    /// Получает полный список занятий со всеми связанными сущностями для построения аналитических отчетов.
-    /// </summary>
-    /// <param name="ct">Токен отмены операции.</param>
-    /// <returns>Список занятий со связанными данными.</returns>
-    public async Task<List<Lesson>> GetLessonsForReportAsync(CancellationToken ct = default)
-    {
-        return await _context.Lessons
-            .AsNoTracking()
-            .Include(l => l.Teacher)
-            .Include(l => l.Group)
-            .Include(l => l.Subject)
-            .Include(l => l.Cabinet)
-                .ThenInclude(c => c.Building)
-            .ToListAsync(ct).ConfigureAwait(false);
-    }
-    /// <summary>
-    /// Извлекает матрицу занятости (идентификаторы преподавателей, дней и слотов) для заданных преподавателей и типа недели.
-    /// Учитывает пары, которые проводятся на обеих неделях (числитель и знаменатель).
-    /// </summary>
-    /// <param name="teacherIds">Коллекция идентификаторов преподавателей (только для чтения).</param>
-    /// <param name="weekTypeId">Идентификатор типа недели (числитель, знаменатель и т.д.).</param>
-    /// <param name="ct">Токен отмены операции.</param>
-    /// <returns>Список кортежей, представляющих занятые временные слоты преподавателей.</returns>
-    public async Task<List<(int TeacherId, int DayId, int SlotId)>> GetBusyMatrixAsync(ReadOnlyCollection<int> teacherIds, int weekTypeId, CancellationToken ct = default)
-    {
-        const int BothWeeksId = WeekTypeConstants.Both;
-        var data = await _context.Lessons
-            .AsNoTracking()
-            .Where(l => l.TeacherId.HasValue &&
-                        teacherIds.Contains(l.TeacherId.Value) &&
-                        l.TimeSlotId.HasValue &&
-                        (l.WeekTypeId == weekTypeId || l.WeekTypeId == BothWeeksId))
-            .Select(l => new
-            {
-                TeacherId = l.TeacherId!.Value,
-                DayId = l.DayOfWeekId,
-                SlotId = l.TimeSlotId!.Value
-            })
-            .Distinct()
-            .ToListAsync(ct) 
-            .ConfigureAwait(false);
-        return data
-            .Select(d => (d.TeacherId, d.DayId, d.SlotId))
-            .ToList();
     }
 
     #endregion

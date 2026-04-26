@@ -197,126 +197,73 @@
         </member>
         <member name="T:SmartSchedule.Application.Controllers.LessonController">
             <summary>
-            Контроллер для работы с занятиями
+            Контроллер для работы с занятиями (CRUD и базовое расписание).
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.#ctor(SmartSchedule.Application.Services.Interfaces.ILessonService)">
             <summary>
-            конструктор 
+            Конструктор контроллера занятий.
             </summary>
-            <param name="lessonService">интерфейс сервиса </param>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.GetAll(System.Threading.CancellationToken)">
             <summary>
-            Получить список всех занятий
+            Получить список всех занятий.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.GetById(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Получить занятие по идентификатору
+            Получить занятие по идентификатору.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.Create(SmartSchedule.Core.Models.DTO.LessonDTO.CreateLessonDto,System.Threading.CancellationToken)">
             <summary>
-            Создать новое занятие
+            Создать новое занятие.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.Update(System.Int32,SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto,System.Threading.CancellationToken)">
             <summary>
-            Обновить занятие
+            Обновить занятие.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.Delete(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Удалить занятие
+            Удалить занятие.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.GetByGroup(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Получить все занятия группы
+            Получить все занятия группы.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.GetStructuredSchedule(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Получить структурированное расписание группы
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetAvailableCabinets(System.Int32,System.Int32,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
-            <summary>
-            Ищет свободные кабинеты
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetCabinetUsageReport(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
-            <summary>
-            Получить отчёт о загруженности аудиторий
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetCabinetScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Получить расписание кабинета по ID с возможностью фильтрации по типу недели.
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.CheckConflict(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Предварительная проверка конфликтов (для DnD).
+            Получить структурированное расписание группы.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.GetByTeacher(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Получение плоского расписания преподавателя
+            Получить все занятия преподавателя.
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.GetStructuredScheduleByTeacher(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Получить структурированное расписание преподавателя
+            Получить структурированное расписание преподавателя.
             </summary>
         </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetTeacherUsageReport(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetAvailableCabinets(System.Int32,System.Int32,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
-            Получить отчёт о загруженности преподавателей
+            Ищет свободные кабинеты на слот.
             </summary>
         </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetTeacherScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+        <member name="M:SmartSchedule.Application.Controllers.LessonController.CheckConflict(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Получить тепловую карту расписания преподавателя
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetGroupUsageReport(SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto,System.Threading.CancellationToken)">
-            <summary>
-            Получает отчет о загруженности учебных групп.
+            Предварительная проверка конфликтов (DnD).
             </summary>
         </member>
         <member name="M:SmartSchedule.Application.Controllers.LessonController.UpdateBatch(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Models.DTO.LessonDTO.UpdateLessonDto},System.Threading.CancellationToken)">
             <summary>
-            Пакетное обновление занятий (используется для одновременного переноса нескольких подгрупп).
+            Пакетное обновление занятий.
             </summary>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetCrossTabReport(SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto,System.Threading.CancellationToken)">
-            <summary>
-            Формирует динамический сводный отчет (Cross-tab) на основе выбранных параметров группировки.
-            </summary>
-            <param name="filter">DTO с параметрами группировки для строк и колонок отчета.</param>
-            <param name="ct">Токен отмены операции.</param>
-            <returns>Матрица отчета с динамическими заголовками и вычисленными часами.</returns>
-            <response code="200">Отчет успешно сгенерирован.</response>
-            <response code="400">Ошибка в параметрах фильтрации или группировки.</response>
-            <response code="500">Внутренняя ошибка сервера при формировании данных.</response>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.LessonController.GetMethodicalWindowsReport(System.Collections.Generic.List{System.Int32},System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Генерирует официальный бланк «Сводная ведомость методических окон» для группы преподавателей.
-            </summary>
-            <remarks>
-            Отчет анализирует расписание выбранных сотрудников и находит временные слоты, 
-            в которых одновременно свободны как минимум двое из них. 
-            Учитывается тип недели (числитель/знаменатель) и занятия, идущие «целой парой».
-            </remarks>
-            <param name="teacherIds">Список идентификаторов преподавателей для сравнения.</param>
-            <param name="weekTypeId">Идентификатор типа недели (1 - числитель, 2 - знаменатель, 3 - обе недели).</param>
-            <param name="ct">Токен отмены операции.</param>
-            <returns>Возвращает объект <see cref="T:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto"/>, содержащий таблицу окон и итоговые показатели.</returns>
-            <response code="200">Бланк отчета успешно сформирован.</response>
-            <response code="400">Ошибка валидации (например, передано менее двух идентификаторов преподавателей).</response>
         </member>
         <member name="T:SmartSchedule.Application.Controllers.PositionController">
             <summary>
@@ -382,6 +329,51 @@
             <param name="id">Идентификатор должности</param>
             <param name="ct">Токен отмены</param>
             <returns>Результат операции</returns>
+        </member>
+        <member name="T:SmartSchedule.Application.Controllers.ReportController">
+            <summary>
+            Контроллер для формирования аналитической отчетности.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.#ctor(SmartSchedule.Core.Service.Interfaces.IReportService)">
+            <summary>
+            Конструктор контроллера отчетов.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.GetCabinetUsageReport(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Получить отчёт о загруженности аудиторий.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.GetCabinetScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить тепловую карту расписания кабинета.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.GetTeacherUsageReport(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Получить отчёт о загруженности преподавателей.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.GetTeacherScheduleAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Получить тепловую карту расписания преподавателя.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.GetGroupUsageReport(SmartSchedule.Core.Models.DTO.GroupDTO.GroupUsageFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Получить отчет о загруженности учебных групп.
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.GetCrossTabReport(SmartSchedule.Core.Models.DTO.ReportDTO.DynamicReportFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Формирует динамический сводный отчет (Cross-tab).
+            </summary>
+        </member>
+        <member name="M:SmartSchedule.Application.Controllers.ReportController.GetMethodicalWindowsReport(System.Collections.Generic.List{System.Int32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Генерирует ведомость методических окон для планирования совещаний.
+            </summary>
         </member>
         <member name="T:SmartSchedule.Application.Controllers.SubjectController">
             <summary>

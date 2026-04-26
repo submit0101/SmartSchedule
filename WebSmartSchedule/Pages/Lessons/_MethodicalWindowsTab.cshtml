@@ -1,70 +1,140 @@
 ﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
 
 <style>
-    .methodical-scroll-wrapper {
-        max-height: 70vh;
-        overflow: auto;
+    /* Плавный скролл */
+    .custom-scrollbar {
         scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
     }
 
-        .methodical-scroll-wrapper thead th {
-            position: sticky;
-            top: 0;
-            background-color: #F7F7F9;
-            z-index: 2;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            vertical-align: middle;
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+
+    /* Облако тегов преподавателей */
+    .teacher-tags-container {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        background: #f8fafc;
+        max-height: 250px;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    /* Красивая шапка таблицы */
+    .table-modern thead th {
+        background-color: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 1rem;
+    }
+
+    .table-modern tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .empty-state {
+        border: 2px dashed #cbd5e1;
+        border-radius: 1rem;
+        background-color: #f8fafc;
+        padding: 4rem 2rem;
+    }
 </style>
 
-<div class="container-fluid px-0">
-    <div class="material-card mb-4">
-        <h5 class="mb-3" style="color: var(--md-sys-color-primary); font-weight: 600;">Сводная ведомость методических окон</h5>
-        <form id="methodicalFilterForm" class="row g-3 align-items-end" onsubmit="return false;">
-            <div class="col-md-5">
-                <label class="form-label text-muted small text-uppercase fw-bold">Преподаватели (Ctrl для множ. выбора)</label>
-                <select id="methodicalTeachers" class="form-select" multiple size="3" required></select>
+<div class="container-fluid px-0 py-2">
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary me-3 shadow-sm">
+                    <i class="bi bi-intersect fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">Анализ методических окон</h5>
+                    <small class="text-muted">Поиск свободного времени для собраний и кафедр</small>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label text-muted small text-uppercase fw-bold">Тип недели</label>
-                <select id="methodicalWeekType" class="form-select">
-                    <option value="3" selected>Обе недели</option>
-                    <option value="1">Числитель</option>
-                    <option value="2">Знаменатель</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <button type="button" id="GenerateMethodicalBtn" class="btn btn-primary w-100">
-                    <i class="bi bi-search me-2"></i>Найти окна
-                </button>
-            </div>
-        </form>
+
+            <form id="methodicalFilterForm" class="row g-4" onsubmit="return false;">
+
+                <div class="col-lg-8">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label text-muted small text-uppercase fw-bold mb-0">Участники (выберите от 2-х)</label>
+                        <div class="input-group input-group-sm w-50">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" id="teacherSearch" class="form-control border-start-0 ps-0" placeholder="Быстрый поиск...">
+                        </div>
+                    </div>
+
+                    <div id="methodicalTeachersContainer" class="teacher-tags-container custom-scrollbar d-flex flex-wrap gap-2">
+                        <div class="w-100 text-center py-4 text-muted" id="teachersLoader">
+                            <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                            <div class="small">Загрузка базы преподавателей...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="bg-light p-4 rounded-4 border h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <label class="form-label text-muted small text-uppercase fw-bold mb-2">Диапазон поиска</label>
+                            <select id="methodicalWeekType" class="form-select form-select-lg mb-3 shadow-sm" style="font-size: 0.95rem;">
+                                <option value="3" selected>Обе недели (Строгое окно)</option>
+                                <option value="1">Только Числитель</option>
+                                <option value="2">Только Знаменатель</option>
+                            </select>
+                        </div>
+
+                        <button type="button" id="GenerateMethodicalBtn" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold mt-auto" style="border-radius: 0.75rem;">
+                            <i class="bi bi-magic me-2"></i>Сгенерировать сводку
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="material-card p-0 overflow-hidden">
-        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
-            <span class="fw-bold fs-5 text-dark" id="methodicalSummary">Результаты</span>
-            <button id="ExportMethodicalExcelBtn" class="btn btn-sm btn-outline-success d-none align-items-center gap-2 px-3 rounded-pill">
-                <i class="bi bi-file-earmark-excel"></i>
-                <span class="d-none d-sm-inline fw-medium">Скачать Excel</span>
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark" id="methodicalSummary">
+                <i class="bi bi-table me-2 text-primary"></i>Таблица результатов
+            </h5>
+            <button id="ExportMethodicalExcelBtn" class="btn btn-sm btn-success d-none align-items-center gap-2 px-3 fw-bold rounded-pill shadow-sm">
+                <i class="bi bi-file-earmark-excel"></i> Выгрузить в Excel
             </button>
         </div>
 
-        <div class="methodical-scroll-wrapper">
-            <table class="table table-bordered table-hover mb-0" id="methodicalTable">
-                <thead id="methodicalThead">
+        <div class="table-responsive custom-scrollbar" style="max-height: 60vh;">
+            <table class="table table-modern table-hover mb-0 w-100" id="methodicalTable">
+                <thead>
                     <tr>
-                        <th style="min-width: 150px;">День недели</th>
-                        <th style="min-width: 150px;">Время</th>
-                        <th class="text-center" style="min-width: 120px;">Кол-во свободных</th>
-                        <th>Свободные преподаватели</th>
+                        <th class="ps-4" style="width: 15%;">День</th>
+                        <th style="width: 15%;">Время</th>
+                        <th class="text-center" style="width: 15%;">Свободно</th>
+                        <th style="width: 55%;">Имена преподавателей</th>
                     </tr>
                 </thead>
                 <tbody id="methodicalTbody">
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-5">
-                            <i class="bi bi-people fs-1 d-block mb-2 text-secondary opacity-25"></i>
-                            Выберите преподавателей и нажмите «Найти окна»
+                        <td colspan="4" class="p-4">
+                            <div class="empty-state text-center">
+                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-4 mb-3 text-primary">
+                                    <i class="bi bi-inboxes fs-1"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark">Нет данных для отображения</h5>
+                                <p class="text-muted mb-0">Выберите нужных преподавателей выше и нажмите кнопку генерации.</p>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -75,20 +145,18 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const teachersContainer = document.getElementById("methodicalTeachersContainer");
+        const searchInput = document.getElementById("teacherSearch");
         const generateBtn = document.getElementById("GenerateMethodicalBtn");
         const exportExcelBtn = document.getElementById("ExportMethodicalExcelBtn");
-        const teachersSelect = document.getElementById("methodicalTeachers");
-        let hasData = false;
-        let currentReportTitle = "Методические_окна";
 
+        // 1. Загрузка преподавателей в виде кнопок (тегов)
         const checkTeachersInterval = setInterval(() => {
             if (window.appData && window.appData.teachers) {
                 clearInterval(checkTeachersInterval);
-                window.appData.teachers.forEach(t => {
-                    const opt = document.createElement("option");
-                    opt.value = t.id;
+                teachersContainer.innerHTML = "";
 
-                    // ИСПРАВЛЕНИЕ ОШИБКИ UNDEFINED
+                window.appData.teachers.forEach(t => {
                     let displayName = t.fullName || t.name || t.Name;
                     if (!displayName) {
                         const last = t.lastName || t.LastName || '';
@@ -96,99 +164,126 @@
                         const middle = t.middleName || t.MiddleName || '';
                         displayName = `${last} ${first} ${middle}`.trim();
                     }
+                    displayName = displayName || 'Без имени';
 
-                    opt.textContent = displayName || 'Без имени';
-                    teachersSelect.appendChild(opt);
+                    // Используем Bootstrap btn-check для красивых тегов
+                    const div = document.createElement("div");
+                    div.className = "teacher-item-wrapper";
+                    div.innerHTML = `
+                        <input type="checkbox" class="btn-check teacher-cb" id="t_${t.id}" value="${t.id}" autocomplete="off">
+                        <label class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 shadow-sm" for="t_${t.id}">
+                            ${displayName}
+                        </label>
+                    `;
+                    teachersContainer.appendChild(div);
                 });
             }
         }, 100);
 
+        // 2. Живой поиск по тегам
+        searchInput.addEventListener("input", function() {
+            const val = this.value.toLowerCase();
+            document.querySelectorAll(".teacher-item-wrapper").forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(val) ? "block" : "none";
+            });
+        });
+
+        // 3. Запрос к API
         generateBtn.addEventListener("click", async function () {
-            const selectedOptions = Array.from(teachersSelect.selectedOptions);
-            if (selectedOptions.length < 2) {
-                if (typeof showAlert === 'function') showAlert("Выберите как минимум двух преподавателей", "warning");
+            const selectedIds = Array.from(document.querySelectorAll(".teacher-cb:checked")).map(cb => cb.value);
+
+            if (selectedIds.length < 2) {
+                alert("Нужно выбрать хотя бы 2-х преподавателей!");
                 return;
             }
 
             const weekTypeId = document.getElementById("methodicalWeekType").value;
-            const queryParams = new URLSearchParams();
-            queryParams.append("weekTypeId", weekTypeId);
-            selectedOptions.forEach(opt => queryParams.append("teacherIds", opt.value));
+            const params = new URLSearchParams();
+            params.append("weekTypeId", weekTypeId);
+            selectedIds.forEach(id => params.append("teacherIds", id));
 
-            const originalText = generateBtn.innerHTML;
+            const origText = generateBtn.innerHTML;
             generateBtn.disabled = true;
-            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Загрузка...';
-            exportExcelBtn.classList.add("d-none");
+            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Идет анализ...';
 
             try {
-                // ИСПРАВЛЕНИЕ: Используем относительный путь
-                const response = await fetch(`http://localhost:5062/api/lesson/report/methodical-windows?${queryParams.toString()}`);
+                // Путь к нашему новому Report контроллеру
+                const response = await fetch(`http://localhost:5062/api/report/methodical-windows?${params.toString()}`);
                 if (!response.ok) throw new Error();
 
                 const data = await response.json();
-                renderMethodicalTable(data);
-
-                if (data && data.rows && data.rows.length > 0) {
-                    exportExcelBtn.classList.remove("d-none");
-                    exportExcelBtn.classList.add("d-flex");
-                    hasData = true;
-                } else {
-                    hasData = false;
-                }
-            } catch (error) {
-                if (typeof showAlert === 'function') showAlert("Не удалось сформировать отчет.", "danger");
+                renderTable(data);
+                exportExcelBtn.classList.toggle("d-none", !data.rows.length);
+            } catch (e) {
+                alert("Ошибка сервера при расчете расписания.");
             } finally {
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = originalText;
+                generateBtn.innerHTML = origText;
             }
         });
 
+        // 4. Экспорт
         exportExcelBtn.addEventListener("click", function() {
-            if (!hasData) return;
-
             const table = document.getElementById("methodicalTable");
             let csvContent = "\uFEFF";
             const rows = table.querySelectorAll("tr");
 
             rows.forEach(row => {
                 const cols = row.querySelectorAll("th, td");
-                const rowData = Array.from(cols).map(c => `"${c.innerText.replace(/"/g, '""')}"`).join(";");
+                const rowData = Array.from(cols).map(c => `"${c.innerText.replace(/"/g, '""').trim()}"`).join(";");
                 csvContent += rowData + "\r\n";
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", `${currentReportTitle}.csv`);
+            link.setAttribute("download", `Методические_окна.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         });
 
-        function renderMethodicalTable(data) {
+        // 5. Отрисовка таблицы
+        function renderTable(data) {
             const tbody = document.getElementById("methodicalTbody");
             const summary = document.getElementById("methodicalSummary");
             tbody.innerHTML = "";
 
-            if (!data || !data.rows || data.rows.length === 0) {
-                summary.textContent = "Результаты (окон не найдено)";
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">Окон не найдено.</td></tr>`;
+            if (!data.rows || !data.rows.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-4">
+                            <div class="empty-state text-center border-danger border-opacity-25 bg-danger bg-opacity-10">
+                                <i class="bi bi-emoji-frown fs-1 text-danger opacity-75 mb-3 d-block"></i>
+                                <h5 class="fw-bold text-danger">Общих окон не найдено</h5>
+                                <p class="text-danger opacity-75 mb-0">У выбранной группы преподавателей нет совпадений в расписании.</p>
+                            </div>
+                        </td>
+                    </tr>`;
+                summary.innerHTML = '<i class="bi bi-table me-2 text-primary"></i>Таблица результатов <span class="badge bg-secondary rounded-pill ms-2">0</span>';
                 return;
             }
 
-            summary.textContent = `Результаты (Найдено окон: ${data.totalWindowsFound})`;
+            summary.innerHTML = `<i class="bi bi-table me-2 text-primary"></i>Таблица результатов <span class="badge bg-success rounded-pill ms-2 shadow-sm">Найдено: ${data.totalWindowsFound}</span>`;
 
-            let tbodyHtml = "";
             data.rows.forEach(row => {
-                tbodyHtml += `<tr>
-                    <td class="fw-bold">${row.dayName}</td>
-                    <td>${row.timeDisplay}</td>
-                    <td class="text-center fw-bold text-primary">${row.freeTeachersCount}</td>
-                    <td>${row.freeTeachersNames}</td>
-                </tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold ps-4 text-dark">${row.dayName}</td>
+                        <td class="fw-medium text-secondary">
+                            <div class="d-inline-flex align-items-center bg-light px-2 py-1 rounded-2 border">
+                                <i class="bi bi-clock me-2 text-muted"></i>${row.timeDisplay}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fs-6 border border-primary border-opacity-25">
+                                ${row.freeTeachersCount}
+                            </span>
+                        </td>
+                        <td class="text-muted" style="line-height: 1.6;">${row.freeTeachersNames}</td>
+                    </tr>`;
             });
-
-            tbody.innerHTML = tbodyHtml;
         }
     });
 </script>

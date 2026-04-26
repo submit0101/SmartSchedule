@@ -117,7 +117,7 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Загрузка...';
 
-            const response = await fetch(`http://localhost:5062/api/Lesson/${cabinetId}/schedule?weekTypeId=${WeekTypeId}`);
+            const response = await fetch(`http://localhost:5062/api/report/cabinet/${cabinetId}/schedule?weekTypeId=${WeekTypeId}`);
 
             if (!response.ok) {
                 throw new Error(`Ошибка HTTP: ${response.status}`);

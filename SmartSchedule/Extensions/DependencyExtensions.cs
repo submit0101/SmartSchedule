@@ -31,6 +31,7 @@ public static class DependencyExtensions
         services.AddTransient<IWeekTypeRepository, WeekTypeRepository>();
         services.AddTransient<IBuildingRepository, BuildingRepository>();
         services.AddTransient<IWeekDayRepository, WeekDayRepository>();
+        services.AddTransient<IReportRepository, ReportRepository>();
     }
 
     /// <summary>
@@ -50,5 +51,6 @@ public static class DependencyExtensions
         services.AddTransient<IBuildingService, BuildingService>();
         services.AddTransient<IWeekDayService, WeekDayService>();
         services.AddTransient<IExcelExportService, ExcelExportService>();
+        services.AddTransient<IReportService, ReportService>();
     }
 }

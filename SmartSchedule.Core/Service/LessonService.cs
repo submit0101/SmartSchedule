@@ -5,17 +5,13 @@ using SmartSchedule.Core.Constants;
 using SmartSchedule.Core.Entities;
 using SmartSchedule.Core.Exceptions;
 using SmartSchedule.Core.Models.DTO.CabinetDTO;
-using SmartSchedule.Core.Models.DTO.GroupDTO;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
-using SmartSchedule.Core.Models.DTO.ReportDTO;
-using SmartSchedule.Core.Models.DTO.TeacherDTO;
 using SmartSchedule.Core.Repositories;
-using System.Collections.ObjectModel;
 
 namespace SmartSchedule.Application.Services;
 
 /// <summary>
-/// Сервис для управления занятиями, проверки конфликтов расписания и формирования аналитических отчетов.
+/// Сервис для управления занятиями и контроля конфликтов расписания.
 /// </summary>
 public class LessonService : ILessonService
 {
@@ -23,608 +19,123 @@ public class LessonService : ILessonService
     private readonly IMapper _mapper;
     private readonly ITimeSlotRepository _timeSlotRepository;
     private readonly ICabinetRepository _cabinetRepository;
-    private readonly IWeekDayRepository _weekDayRepository;
-    private readonly ITeacherRepository _teacherRepository;
-    private readonly IGroupRepository _groupRepository;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="LessonService"/>.
     /// </summary>
-    public LessonService(
-        ILessonRepository repository,
-        IMapper mapper,
-        ITimeSlotRepository timeSlotRepository,
-        ICabinetRepository cabinetRepository,
-        IWeekDayRepository weekDayRepository,
-        ITeacherRepository teacherRepository,
-        IGroupRepository groupRepository)
+    public LessonService(ILessonRepository repository, IMapper mapper, ITimeSlotRepository timeSlotRepository, ICabinetRepository cabinetRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _timeSlotRepository = timeSlotRepository ?? throw new ArgumentNullException(nameof(timeSlotRepository));
         _cabinetRepository = cabinetRepository ?? throw new ArgumentNullException(nameof(cabinetRepository));
-        _weekDayRepository = weekDayRepository ?? throw new ArgumentNullException(nameof(weekDayRepository));
-        _teacherRepository = teacherRepository ?? throw new ArgumentNullException(nameof(teacherRepository));
-        _groupRepository = groupRepository ?? throw new ArgumentNullException(nameof(groupRepository));
     }
 
-    /// <summary>
-    /// Проверяет наличие конфликтов (пересечений по времени, аудитории, преподавателю или группе) для занятия.
-    /// </summary>
-    /// <param name="lessonId">Идентификатор проверяемого занятия.</param>
-    /// <param name="targetDayId">Идентификатор дня недели.</param>
-    /// <param name="targetTimeId">Идентификатор временного слота.</param>
-    /// <param name="ct">Токен отмены операции.</param>
-    /// <returns>DTO с флагами обнаруженных конфликтов.</returns>
-    public async Task<ConflictCheckResultDto> CheckConflictAsync(int lessonId, int targetDayId, int targetTimeId, CancellationToken ct)
-    {
-        var result = new ConflictCheckResultDto();
-        var originalLesson = await _repository.GetByIdAsync(lessonId, ct).ConfigureAwait(false);
-        if (originalLesson == null) return result;
+    /// <inheritdoc />
+    public async Task<List<ResponseLessonDto>> GetAllAsync(CancellationToken ct) =>
+        _mapper.Map<List<ResponseLessonDto>>(await _repository.GetAllAsync(ct).ConfigureAwait(false));
 
-        const int BothWeeksId = WeekTypeConstants.Both;
+    /// <inheritdoc />
+    public async Task<ResponseLessonDto> GetByIdAsync(int id, CancellationToken ct) =>
+        _mapper.Map<ResponseLessonDto>(await _repository.GetByIdAsync(id, ct).ConfigureAwait(false));
 
-        var lessonsInTargetSlot = await _repository.GetLessonsBySlotAsync(targetDayId, targetTimeId, ct).ConfigureAwait(false);
-        var otherLessons = lessonsInTargetSlot.Where(x => x.Id != lessonId).ToList();
+    /// <inheritdoc />
+    public async Task<List<ResponseLessonDto>> GetByGroupIdAsync(int groupId, CancellationToken ct) =>
+        _mapper.Map<List<ResponseLessonDto>>(await _repository.GetByGroupIdAsync(groupId, ct).ConfigureAwait(false));
 
-        Func<int, int, bool> isWeekClash = (existingWeekTypeId, newWeekTypeId) =>
-            existingWeekTypeId == BothWeeksId ||
-            newWeekTypeId == BothWeeksId ||
-            existingWeekTypeId == newWeekTypeId;
+    /// <inheritdoc />
+    public async Task<List<ResponseLessonDto>> GetByTeacherIdAsync(int teacherId, CancellationToken ct) =>
+        _mapper.Map<List<ResponseLessonDto>>(await _repository.GetByTeacherIdAsync(teacherId, ct).ConfigureAwait(false));
 
-        foreach (var existingLesson in otherLessons)
-        {
-            int existWt = existingLesson.WeekTypeId.GetValueOrDefault(0);
-            int origWt = originalLesson.WeekTypeId.GetValueOrDefault(0);
-
-            if (isWeekClash(existWt, origWt))
-            {
-                bool isGroupConflict = existingLesson.GroupId == originalLesson.GroupId &&
-                                       (existingLesson.Subgroup == null || originalLesson.Subgroup == null || existingLesson.Subgroup == originalLesson.Subgroup);
-                if (isGroupConflict) result.IsWeekConflict = true;
-
-                if (existingLesson.CabinetId == originalLesson.CabinetId) result.IsCabinetBusy = true;
-
-                if (existingLesson.TeacherId == originalLesson.TeacherId) result.IsTeacherBusy = true;
-            }
-
-            if (result.IsWeekConflict && result.IsTeacherBusy && result.IsCabinetBusy) break;
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Формирует отчет по загруженности преподавателей на основе заданных фильтров.
-    /// </summary>
-    public async Task<List<TeacherUsageReportDto>> GetTeacherUsageReportAsync(TeacherUsageFilterDto filter, CancellationToken ct)
-    {
-        ArgumentNullException.ThrowIfNull(filter);
-        const int WorkingDaysPerWeek = 6;
-
-        var timeSlots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-        int maxSlotsPerDay = timeSlots.Count;
-        if (maxSlotsPerDay == 0) throw new InvalidOperationException("Ошибка: Не настроены тайм-слоты.");
-
-        var allLessons = await _repository.GetFilteredLessonsAsync(null, filter.DayOfWeekId, null, ct).ConfigureAwait(false);
-        var teachers = await _teacherRepository.GetAllAsync(ct).ConfigureAwait(false);
-
-        var allowedDays = filter.DayOfWeekId.HasValue
-            ? new List<int> { filter.DayOfWeekId.Value }
-            : Enumerable.Range(1, WorkingDaysPerWeek).ToList();
-
-        int maxPossibleLessons = filter.DayOfWeekId.HasValue ? maxSlotsPerDay : WorkingDaysPerWeek * maxSlotsPerDay;
-        if (maxPossibleLessons <= 0) return new List<TeacherUsageReportDto>();
-
-        var filteredLessons = allLessons.Where(l => allowedDays.Contains(l.DayOfWeekId));
-
-        if (filter.WeekTypeId.HasValue)
-        {
-            int wt = filter.WeekTypeId.Value;
-            filteredLessons = filteredLessons.Where(l => l.WeekTypeId == wt || l.WeekTypeId == WeekTypeConstants.Both);
-        }
-
-        var lessonCounts = filteredLessons
-            .GroupBy(l => l.TeacherId.GetValueOrDefault())
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        var report = new List<TeacherUsageReportDto>();
-        foreach (var teacher in teachers)
-        {
-            int scheduled = lessonCounts.GetValueOrDefault(teacher.Id, 0);
-            decimal percentage = maxPossibleLessons > 0 ? Math.Round((decimal)scheduled / maxPossibleLessons * 100m, 2) : 0m;
-
-            report.Add(new TeacherUsageReportDto
-            {
-                TeacherFullName = $"{teacher.LastName} {teacher.FirstName} {teacher.MiddleName}",
-                TotalLessons = scheduled,
-                MaxPossibleLessons = maxPossibleLessons,
-                UsagePercentage = (double)percentage
-            });
-        }
-
-        return report.OrderByDescending(r => r.UsagePercentage).ToList();
-    }
-
-    /// <summary>
-    /// Получает расписание занятий преподавателя для визуализации.
-    /// </summary>
-    public async Task<List<TeacherScheduleReportDto>> GetTeacherScheduleAsync(int teacherId, int weekTypeId, CancellationToken ct)
-    {
-        const int ShowAllWeeksId = 0;
-        const int WholeWeekId = 3;
-
-        var teacher = await _teacherRepository.GetWithLessonsByIdAsync(teacherId, ct).ConfigureAwait(false);
-        var daysOfWeek = await _weekDayRepository.GetAllAsync(ct).ConfigureAwait(false);
-        var timeSlots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-
-        if (teacher == null) throw new ObjectNotFoundException($"Преподаватель с ID {teacherId} не найден.");
-
-        var report = new List<TeacherScheduleReportDto>();
-        var orderedSlots = timeSlots.OrderBy(ts => ts.SlotNumber).ToList();
-
-        for (int day = 1; day <= 6; day++)
-        {
-            var dayOfWeek = daysOfWeek.FirstOrDefault(d => d.Id == day);
-            var dayName = dayOfWeek?.Name ?? "День не определен";
-
-            foreach (var slot in orderedSlots)
-            {
-                var isBusy = teacher.Lessons.Any(l =>
-                        l.DayOfWeekId == day &&
-                        l.TimeSlotId == slot.Id &&
-                        (weekTypeId == ShowAllWeeksId || l.WeekTypeId == weekTypeId || ((weekTypeId == 1 || weekTypeId == 2) && l.WeekTypeId == WholeWeekId))
-                    );
-
-                report.Add(new TeacherScheduleReportDto
-                {
-                    DayOfWeekId = day,
-                    DayName = dayName,
-                    TimeSlotId = slot.Id,
-                    TimeSlotDisplay = $"{slot.StartTime:hh\\:mm} - {slot.EndTime:hh\\:mm}",
-                    IsBusy = isBusy
-                });
-            }
-        }
-        return report;
-    }
-
-    /// <summary>
-    /// Получает список всех занятий.
-    /// </summary>
-    public async Task<List<ResponseLessonDto>> GetAllAsync(CancellationToken ct)
-    {
-        var lessons = await _repository.GetAllAsync(ct).ConfigureAwait(false);
-        return _mapper.Map<List<ResponseLessonDto>>(lessons);
-    }
-
-    /// <summary>
-    /// Получает информацию о занятии по его идентификатору.
-    /// </summary>
-    public async Task<ResponseLessonDto> GetByIdAsync(int id, CancellationToken ct)
-    {
-        var lesson = await _repository.GetByIdAsync(id, ct).ConfigureAwait(false);
-        return _mapper.Map<ResponseLessonDto>(lesson);
-    }
-
-    /// <summary>
-    /// Возвращает список свободных кабинетов для указанного временного слота.
-    /// </summary>
-    public async Task<List<ResponseCabinetDto>> GetAvailableCabinetsAsync(int dayOfWeekId, int timeSlotId, int weekTypeId, int? buildingId = null, CancellationToken ct = default)
-    {
-        var filteredCabinets = await _cabinetRepository.GetAllFilteredAsync(buildingId, ct).ConfigureAwait(false);
-        const int BothWeeksId = WeekTypeConstants.Both;
-
-        var lessonsInSlot = await _repository.GetLessonsBySlotAsync(dayOfWeekId, timeSlotId, ct).ConfigureAwait(false);
-        var busyCabinetIds = new HashSet<int>();
-
-        foreach (var l in lessonsInSlot)
-        {
-            if (l.CabinetId.HasValue && (l.WeekTypeId == weekTypeId || l.WeekTypeId == BothWeeksId))
-            {
-                busyCabinetIds.Add(l.CabinetId.Value);
-            }
-        }
-
-        var availableCabinets = filteredCabinets.Where(c => !busyCabinetIds.Contains(c.Id)).ToList();
-        return _mapper.Map<List<ResponseCabinetDto>>(availableCabinets);
-    }
-
-    /// <summary>
-    /// Создает новое занятие после проверки на конфликты.
-    /// </summary>
+    /// <inheritdoc />
     public async Task<ResponseLessonDto> CreateAsync(CreateLessonDto dto, CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(dto);
         var lesson = _mapper.Map<Lesson>(dto);
         await CheckForScheduleConflict(lesson, ct).ConfigureAwait(false);
         await _repository.CreateAsync(lesson, ct).ConfigureAwait(false);
         return _mapper.Map<ResponseLessonDto>(lesson);
     }
 
-    /// <summary>
-    /// Обновляет существующее занятие после проверки на конфликты.
-    /// </summary>
+    /// <inheritdoc />
     public async Task UpdateAsync(int id, UpdateLessonDto dto, CancellationToken ct)
     {
-        var lesson = await _repository.GetByIdAsync(id, ct).ConfigureAwait(false);
-        if (lesson == null) throw new ArgumentException("Занятие не найдено");
+        ArgumentNullException.ThrowIfNull(dto);
+        var lesson = await _repository.GetByIdAsync(id, ct).ConfigureAwait(false) ?? throw new ArgumentException("Занятие не найдено");
         _mapper.Map(dto, lesson);
         await CheckForScheduleConflict(lesson, ct).ConfigureAwait(false);
         await _repository.UpdateAsync(lesson, ct).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Удаляет занятие по идентификатору.
-    /// </summary>
-    public async Task DeleteAsync(int id, CancellationToken ct)
-    {
+    /// <inheritdoc />
+    public async Task DeleteAsync(int id, CancellationToken ct) =>
         await _repository.DeleteByIdAsync(id, ct).ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public async Task<List<ResponseCabinetDto>> GetAvailableCabinetsAsync(int dayOfWeekId, int timeSlotId, int weekTypeId, int? buildingId = null, CancellationToken ct = default)
+    {
+        var filteredCabinets = await _cabinetRepository.GetAllFilteredAsync(buildingId, ct).ConfigureAwait(false);
+        var lessonsInSlot = await _repository.GetLessonsBySlotAsync(dayOfWeekId, timeSlotId, ct).ConfigureAwait(false);
+        var busyIds = lessonsInSlot.Where(l => l.CabinetId.HasValue && (l.WeekTypeId == weekTypeId || l.WeekTypeId == WeekTypeConstants.Both)).Select(l => l.CabinetId!.Value).ToHashSet();
+        return _mapper.Map<List<ResponseCabinetDto>>(filteredCabinets.Where(c => !busyIds.Contains(c.Id)));
     }
 
-    /// <summary>
-    /// Получает занятия для указанной группы.
-    /// </summary>
-    public async Task<List<ResponseLessonDto>> GetByGroupIdAsync(int groupId, CancellationToken ct)
+    /// <inheritdoc />
+    public async Task<ConflictCheckResultDto> CheckConflictAsync(int lessonId, int targetDayId, int targetTimeId, CancellationToken ct)
     {
-        var lessons = await _repository.GetByGroupIdAsync(groupId, ct).ConfigureAwait(false);
-        return _mapper.Map<List<ResponseLessonDto>>(lessons);
-    }
+        var result = new ConflictCheckResultDto();
+        var originalLesson = await _repository.GetByIdAsync(lessonId, ct).ConfigureAwait(false);
+        if (originalLesson == null) return result;
 
-    /// <summary>
-    /// Получает занятия для указанного преподавателя.
-    /// </summary>
-    public async Task<List<ResponseLessonDto>> GetByTeacherIdAsync(int teacherId, CancellationToken ct)
-    {
-        var lessons = await _repository.GetByTeacherIdAsync(teacherId, ct).ConfigureAwait(false);
-        return _mapper.Map<List<ResponseLessonDto>>(lessons);
-    }
-
-    /// <summary>
-    /// Получает структурированное расписание для группы.
-    /// </summary>
-    public async Task<Dictionary<int, List<StructuredLessonDto>>> GetStructuredScheduleByGroupIdAsync(int groupId, CancellationToken ct)
-    {
-        var lessons = await _repository.GetByGroupIdAsync(groupId, ct).ConfigureAwait(false);
-        var lessonDtos = _mapper.Map<List<ResponseLessonDto>>(lessons);
-        var timeSlots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-        var orderedTimeSlots = timeSlots.OrderBy(ts => ts.SlotNumber).ToList();
-        var schedule = new Dictionary<int, List<StructuredLessonDto>>();
-
-        for (int day = 1; day <= 6; day++)
+        var otherLessons = (await _repository.GetLessonsBySlotAsync(targetDayId, targetTimeId, ct).ConfigureAwait(false)).Where(x => x.Id != lessonId);
+        foreach (var existing in otherLessons)
         {
-            var dailyLessons = new List<StructuredLessonDto>();
-            foreach (var slot in orderedTimeSlots)
+            if (existing.WeekTypeId == WeekTypeConstants.Both || originalLesson.WeekTypeId == WeekTypeConstants.Both || existing.WeekTypeId == originalLesson.WeekTypeId)
             {
-                var lessonsForSlot = lessonDtos.Where(l => l.DayOfWeekId == day && l.TimeSlotId == slot.Id).ToList();
-                dailyLessons.Add(new StructuredLessonDto { Lessons = lessonsForSlot, TimeSlotDisplay = $"{slot.StartTime} - {slot.EndTime}" });
+                if (existing.GroupId == originalLesson.GroupId && (existing.Subgroup == null || originalLesson.Subgroup == null || existing.Subgroup == originalLesson.Subgroup)) result.IsWeekConflict = true;
+                if (existing.CabinetId == originalLesson.CabinetId) result.IsCabinetBusy = true;
+                if (existing.TeacherId == originalLesson.TeacherId) result.IsTeacherBusy = true;
             }
-            schedule[day] = dailyLessons;
         }
+        return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<Dictionary<int, List<StructuredLessonDto>>> GetStructuredScheduleByGroupIdAsync(int groupId, CancellationToken ct) =>
+        await BuildStructuredSchedule(() => _repository.GetByGroupIdAsync(groupId, ct), ct).ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public async Task<Dictionary<int, List<StructuredLessonDto>>> GetStructuredScheduleByTeacherIdAsync(int teacherId, CancellationToken ct) =>
+        await BuildStructuredSchedule(() => _repository.GetByTeacherIdAsync(teacherId, ct), ct).ConfigureAwait(false);
+
+    private async Task<Dictionary<int, List<StructuredLessonDto>>> BuildStructuredSchedule(Func<Task<List<Lesson>>> getLessons, CancellationToken ct)
+    {
+        var lessonDtos = _mapper.Map<List<ResponseLessonDto>>(await getLessons().ConfigureAwait(false));
+        var slots = (await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false)).OrderBy(ts => ts.SlotNumber).ToList();
+        var schedule = new Dictionary<int, List<StructuredLessonDto>>();
+        for (int day = 1; day <= 6; day++) schedule[day] = slots.Select(s => new StructuredLessonDto { Lessons = lessonDtos.Where(l => l.DayOfWeekId == day && l.TimeSlotId == s.Id).ToList(), TimeSlotDisplay = $"{s.StartTime} - {s.EndTime}" }).ToList();
         return schedule;
     }
 
-    /// <summary>
-    /// Получает структурированное расписание для преподавателя.
-    /// </summary>
-    public async Task<Dictionary<int, List<StructuredLessonDto>>> GetStructuredScheduleByTeacherIdAsync(int teacherId, CancellationToken ct)
-    {
-        var lessons = await _repository.GetByTeacherIdAsync(teacherId, ct).ConfigureAwait(false);
-        var lessonDtos = _mapper.Map<List<ResponseLessonDto>>(lessons);
-        var timeSlots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-        var orderedTimeSlots = timeSlots.OrderBy(ts => ts.SlotNumber).ToList();
-        var schedule = new Dictionary<int, List<StructuredLessonDto>>();
-
-        for (int day = 1; day <= 6; day++)
-        {
-            var dailyLessons = new List<StructuredLessonDto>();
-            foreach (var slot in orderedTimeSlots)
-            {
-                var lessonsForSlot = lessonDtos.Where(l => l.DayOfWeekId == day && l.TimeSlotId == slot.Id).ToList();
-                dailyLessons.Add(new StructuredLessonDto { Lessons = lessonsForSlot, TimeSlotDisplay = $"{slot.StartTime} - {slot.EndTime}" });
-            }
-            schedule[day] = dailyLessons;
-        }
-        return schedule;
-    }
-
-    /// <summary>
-    /// Формирует отчет по загруженности учебных групп.
-    /// </summary>
-    public async Task<List<GroupUsageReportDto>> GetGroupUsageReportAsync(GroupUsageFilterDto filter, CancellationToken ct)
-    {
-        ArgumentNullException.ThrowIfNull(filter);
-        const int WorkingDaysPerWeek = 6;
-        var timeSlots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-        int maxSlotsPerDay = timeSlots.Count;
-        if (maxSlotsPerDay == 0) throw new InvalidOperationException("Не настроены тайм-слоты.");
-
-        var allLessons = await _repository.GetFilteredLessonsAsync(null, filter.DayOfWeekId, null, ct).ConfigureAwait(false);
-        var groups = await _groupRepository.GetAllAsync(ct).ConfigureAwait(false);
-
-        var allowedDays = filter.DayOfWeekId.HasValue ? new List<int> { filter.DayOfWeekId.Value } : Enumerable.Range(1, WorkingDaysPerWeek).ToList();
-        int maxPossibleLessons = filter.DayOfWeekId.HasValue ? maxSlotsPerDay : WorkingDaysPerWeek * maxSlotsPerDay;
-        if (maxPossibleLessons <= 0) return new List<GroupUsageReportDto>();
-
-        var filteredLessons = allLessons.Where(l => allowedDays.Contains(l.DayOfWeekId));
-        if (filter.WeekTypeId.HasValue)
-        {
-            int wt = filter.WeekTypeId.Value;
-            filteredLessons = filteredLessons.Where(l => l.WeekTypeId == wt || l.WeekTypeId == WeekTypeConstants.Both);
-        }
-
-        var scheduledCounts = filteredLessons
-            .Where(l => l.GroupId.HasValue)
-            .GroupBy(l => l.GroupId.GetValueOrDefault())
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        var report = new List<GroupUsageReportDto>();
-        foreach (var group in groups)
-        {
-            int scheduled = scheduledCounts.GetValueOrDefault(group.Id, 0);
-            decimal percentage = maxPossibleLessons > 0 ? Math.Round((decimal)scheduled / maxPossibleLessons * 100m, 2) : 0m;
-            report.Add(new GroupUsageReportDto { GroupName = group.Name, TotalScheduledLessons = scheduled, MaxPossibleLessons = maxPossibleLessons, UsagePercentage = percentage });
-        }
-        return report.OrderByDescending(r => r.UsagePercentage).ToList();
-    }
-
-    /// <summary>
-    /// Формирует отчет по загруженности аудиторий.
-    /// </summary>
-    public async Task<List<CabinetUsageReportDto>> GetCabinetUsageReportAsync(CabinetUsageFilterDto filter, CancellationToken ct)
-    {
-        ArgumentNullException.ThrowIfNull(filter);
-        const int WorkingDaysPerWeek = 6;
-        var timeSlots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-        int maxSlotsPerDay = timeSlots.Count;
-        if (maxSlotsPerDay == 0) return new List<CabinetUsageReportDto>();
-
-        int maxPossibleLessons = filter.DayOfWeekId.HasValue ? maxSlotsPerDay : WorkingDaysPerWeek * maxSlotsPerDay;
-        var cabinets = await _cabinetRepository.GetAllFilteredAsync(filter.BuildingId, ct).ConfigureAwait(false);
-        var allLessons = await _repository.GetFilteredLessonsAsync(null, filter.DayOfWeekId, null, ct).ConfigureAwait(false);
-
-        var lessons = allLessons.Where(l =>
-        {
-            bool weekMatch = !filter.WeekTypeId.HasValue || l.WeekTypeId == filter.WeekTypeId.Value || l.WeekTypeId == WeekTypeConstants.Both;
-            bool dayMatch = !filter.DayOfWeekId.HasValue || l.DayOfWeekId == filter.DayOfWeekId.Value;
-            return weekMatch && dayMatch;
-        }).ToList();
-
-        var report = new List<CabinetUsageReportDto>();
-        foreach (var cabinet in cabinets)
-        {
-            var lessonCount = lessons.Count(l => l.CabinetId == cabinet.Id);
-            double usagePercentage = maxPossibleLessons > 0 ? (double)lessonCount / maxPossibleLessons * 100.0 : 0.0;
-            report.Add(new CabinetUsageReportDto { CabinetNumber = cabinet.Number, BuildingName = cabinet.Building?.Name ?? "Не указано", TotalLessons = lessonCount, UsagePercentage = Math.Round(usagePercentage, 2) });
-        }
-        return report.OrderByDescending(r => r.UsagePercentage).ToList();
-    }
-
-    /// <summary>
-    /// Получает расписание занятий кабинета для визуализации.
-    /// </summary>
-    public async Task<List<CabinetScheduleReportDto>> GetCabinetScheduleAsync(int cabinetId, int weekTypeId, CancellationToken ct)
-    {
-        const int ShowAllWeeksId = 0;
-        var cabinet = await _cabinetRepository.GetWithLessonsByIdAsync(cabinetId, ct).ConfigureAwait(false);
-        var daysOfWeek = await _weekDayRepository.GetAllAsync(ct).ConfigureAwait(false);
-
-        if (cabinet == null) throw new ObjectNotFoundException($"Кабинет с ID {cabinetId} не найден.");
-        var timeSlots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-        var report = new List<CabinetScheduleReportDto>();
-
-        for (int day = 1; day <= 6; day++)
-        {
-            var dayOfWeek = daysOfWeek.FirstOrDefault(d => d.Id == day);
-            var dayName = dayOfWeek?.Name ?? "Неизвестный день";
-
-            foreach (var slot in timeSlots)
-            {
-                var isBusy = cabinet.Lessons
-                    .Where(l => l.WeekTypeId == weekTypeId || weekTypeId == ShowAllWeeksId)
-                    .Any(l => l.DayOfWeekId == day && l.TimeSlotId == slot.Id);
-
-                report.Add(new CabinetScheduleReportDto { DayOfWeekId = day, DayName = dayName, TimeSlotId = slot.Id, TimeSlotDisplay = $"{slot.StartTime} - {slot.EndTime}", IsBusy = isBusy });
-            }
-        }
-        return report;
-    }
-
-    /// <summary>
-    /// Внутренний метод для проверки конфликтов перед сохранением.
-    /// </summary>
     private async Task CheckForScheduleConflict(Lesson lesson, CancellationToken ct)
     {
         if (!lesson.TimeSlotId.HasValue) return;
-        const int BothWeeksId = WeekTypeConstants.Both;
-
-        var existingInSlot = await _repository.GetLessonsBySlotAsync(lesson.DayOfWeekId, lesson.TimeSlotId.Value, ct).ConfigureAwait(false);
-
-        var hasConflict = existingInSlot.Any(existingLesson =>
-            existingLesson.Id != lesson.Id &&
-            (
-                (existingLesson.GroupId == lesson.GroupId && (existingLesson.Subgroup == null || lesson.Subgroup == null || existingLesson.Subgroup == lesson.Subgroup)) ||
-                existingLesson.TeacherId == lesson.TeacherId || existingLesson.CabinetId == lesson.CabinetId
-            ) &&
-            (existingLesson.WeekTypeId == BothWeeksId || lesson.WeekTypeId == BothWeeksId || existingLesson.WeekTypeId == lesson.WeekTypeId)
-        );
-
-        if (hasConflict) throw new ScheduleConflictException();
+        var existing = await _repository.GetLessonsBySlotAsync(lesson.DayOfWeekId, lesson.TimeSlotId.Value, ct).ConfigureAwait(false);
+        if (existing.Any(e => e.Id != lesson.Id && (e.WeekTypeId == WeekTypeConstants.Both || lesson.WeekTypeId == WeekTypeConstants.Both || e.WeekTypeId == lesson.WeekTypeId) && (e.TeacherId == lesson.TeacherId || e.CabinetId == lesson.CabinetId || (e.GroupId == lesson.GroupId && (e.Subgroup == null || lesson.Subgroup == null || e.Subgroup == lesson.Subgroup))))) throw new ScheduleConflictException();
     }
 
-    /// <summary>
-    /// Выполняет пакетное обновление группы занятий в транзакции.
-    /// </summary>
+    /// <inheritdoc />
     public async Task UpdateBatchAsync(IReadOnlyCollection<UpdateLessonDto> dtos, CancellationToken ct)
     {
-        if (dtos == null || dtos.Count == 0) return;
-        var lessonsToUpdate = new List<Lesson>();
+        ArgumentNullException.ThrowIfNull(dtos);
 
+        var lessons = new List<Lesson>();
         foreach (var dto in dtos)
         {
-            var lesson = await _repository.GetByIdAsync(dto.Id, ct).ConfigureAwait(false);
-            if (lesson == null) throw new ObjectNotFoundException($"Занятие с ID {dto.Id} не найдено");
-            _mapper.Map(dto, lesson);
-            lessonsToUpdate.Add(lesson);
+            var l = await _repository.GetByIdAsync(dto.Id, ct).ConfigureAwait(false) ?? throw new ObjectNotFoundException($"Занятие с ID {dto.Id} не найдено");
+            _mapper.Map(dto, l);
+            lessons.Add(l);
         }
-
-        var first = lessonsToUpdate.First();
-        if (!first.TimeSlotId.HasValue) throw new BusinessException("Временной слот не указан.");
-
-        await ValidateBatchConflictsAsync(lessonsToUpdate, first.DayOfWeekId, first.TimeSlotId.Value, ct).ConfigureAwait(false);
-        await _repository.UpdateBatchAsync(lessonsToUpdate, ct).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Оптимизированная проверка конфликтов для пакета занятий.
-    /// </summary>
-    private async Task ValidateBatchConflictsAsync(IReadOnlyCollection<Lesson> lessonsToMove, int targetDayId, int targetTimeId, CancellationToken ct)
-    {
-        const int BothWeeksId = WeekTypeConstants.Both;
-        var existingInSlot = await _repository.GetLessonsBySlotAsync(targetDayId, targetTimeId, ct).ConfigureAwait(false);
-        var movingIds = lessonsToMove.Select(l => l.Id).ToHashSet();
-
-        foreach (var lesson in lessonsToMove)
-        {
-            var conflict = existingInSlot.FirstOrDefault(existing =>
-                !movingIds.Contains(existing.Id) &&
-                (
-                    (existing.GroupId == lesson.GroupId && (existing.Subgroup == null || lesson.Subgroup == null || existing.Subgroup == lesson.Subgroup)) ||
-                    existing.TeacherId == lesson.TeacherId || existing.CabinetId == lesson.CabinetId
-                ) &&
-                (existing.WeekTypeId == BothWeeksId || lesson.WeekTypeId == BothWeeksId || existing.WeekTypeId == lesson.WeekTypeId)
-            );
-
-            if (conflict != null)
-            {
-                var reason = conflict.TeacherId == lesson.TeacherId ? "преподаватель занят" :
-                             conflict.CabinetId == lesson.CabinetId ? "аудитория занята" : "группа занята";
-                throw new ScheduleConflictException($"Конфликт: {reason} ({conflict.Subject?.Title ?? "Другое занятие"}).");
-            }
-        }
-    }
-    /// <summary>
-    /// Генерирует динамический отчет (Cross-tab) на основе заданных параметров группировки.
-    /// </summary>
-    /// <param name="filter">Настройки группировки для строк и колонок.</param>
-    /// <param name="ct">Токен отмены операции.</param>
-    /// <returns>Объект с заголовками колонок и строками данных.</returns>
-    public async Task<DynamicReportResultDto> GenerateDynamicReportAsync(DynamicReportFilterDto filter, CancellationToken ct = default)
-    {
-        var rawLessons = await _repository.GetLessonsForReportAsync(ct).ConfigureAwait(false);
-
-        var flatLessons = _mapper.Map<List<LessonReportFlatDto>>(rawLessons);
-
-        string GetGroupingValue(LessonReportFlatDto flatDto, string groupingType)
-        {
-            return groupingType switch
-            {
-                "Teacher" => flatDto.Teacher,
-                "Group" => flatDto.Group,
-                "Subject" => flatDto.Subject,
-                "Cabinet" => flatDto.Cabinet,
-                "Building" => flatDto.Building,
-                _ => "Неизвестно"
-            };
-        }
-
-        var groupedData = flatLessons
-            .GroupBy(l => new
-            {
-                Row = GetGroupingValue(l, filter.RowGrouping),
-                Col = GetGroupingValue(l, filter.ColGrouping)
-            })
-            .Select(g => new
-            {
-                RowName = g.Key.Row,
-                ColName = g.Key.Col,
-                Hours = g.Count() * 2
-            })
-            .ToList();
-
-        var result = new DynamicReportResultDto();
-
-        var uniqueColumns = groupedData.Select(x => x.ColName).Distinct().OrderBy(x => x).ToList();
-        foreach (var col in uniqueColumns)
-        {
-            result.Columns.Add(col);
-        }
-
-        // Заполняем строки
-        var rowNames = groupedData.Select(x => x.RowName).Distinct().OrderBy(x => x).ToList();
-        foreach (var rowName in rowNames)
-        {
-            var reportRow = new ReportRowDto { RowName = rowName };
-
-            foreach (var col in result.Columns)
-            {
-                var cell = groupedData.FirstOrDefault(x => x.RowName == rowName && x.ColName == col);
-                // Используем .Add для словаря (ReadOnly Values)
-                reportRow.Values.Add(col, cell != null ? cell.Hours : 0);
-            }
-
-            reportRow.TotalHours = reportRow.Values.Values.Sum();
-            result.Rows.Add(reportRow);
-        }
-
-        return result;
-
-    }
-    /// <summary>
-    /// Генерирует сводную ведомость методических окон для планирования совещаний.
-    /// Реализация оптимизирована с использованием хэш-таблиц для быстрого поиска пересечений.
-    /// </summary>
-    /// <param name="teacherIds">Коллекция идентификаторов преподавателей (ReadOnly).</param>
-    /// <param name="weekTypeId">Тип недели.</param>
-    /// <param name="ct">Токен отмены.</param>
-    public async Task<MethodicalWindowReportDto> GenerateMethodicalWindowsReportAsync(
-        ReadOnlyCollection<int> teacherIds,
-        int weekTypeId,
-        CancellationToken ct = default)
-    {
-        if (teacherIds == null || teacherIds.Count < 2)
-            throw new BusinessException("Для формирования ведомости необходимо выбрать как минимум двух преподавателей.");
-
-        var days = await _weekDayRepository.GetAllAsync(ct).ConfigureAwait(false);
-        var slots = await _timeSlotRepository.GetAllAsync(ct).ConfigureAwait(false);
-
-        var busyMatrix = await _repository.GetBusyMatrixAsync(teacherIds, weekTypeId, ct).ConfigureAwait(false);
-
-        var allTeachers = await _teacherRepository.GetAllAsync(ct).ConfigureAwait(false);
-        var selectedTeachers = allTeachers.Where(t => teacherIds.Contains(t.Id)).ToList();
-
-        var busyHashSets = teacherIds.ToDictionary(
-            id => id,
-            id => busyMatrix
-                .Where(x => x.TeacherId == id)
-                .Select(x => (x.DayId, x.SlotId))
-                .ToHashSet()
-        );
-
-        var report = new MethodicalWindowReportDto();
-
-        foreach (var day in days.OrderBy(d => d.Id))
-        {
-            foreach (var slot in slots.OrderBy(s => s.SlotNumber))
-            {
-                var freeTeachers = selectedTeachers
-                    .Where(t => !busyHashSets[t.Id].Contains((day.Id, slot.Id)))
-                    .Select(t => $"{t.LastName} {t.FirstName?[0]}.")
-                    .ToList();
-
-                if (freeTeachers.Count >= 2)
-                {
-                    report.Rows.Add(new MethodicalWindowRowDto
-                    {
-                        DayName = day.Name,
-                        TimeDisplay = $"{slot.StartTime:hh\\:mm} - {slot.EndTime:hh\\:mm}",
-                        FreeTeachersCount = freeTeachers.Count,
-                        FreeTeachersNames = string.Join(", ", freeTeachers)
-                    });
-                }
-            }
-        }
-
-        report.TotalWindowsFound = report.Rows.Count;
-        return report;
+        await _repository.UpdateBatchAsync(lessons, ct).ConfigureAwait(false);
     }
 }

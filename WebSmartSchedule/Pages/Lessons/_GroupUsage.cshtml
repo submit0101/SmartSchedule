@@ -245,7 +245,7 @@
                     if (weekType) params.append('weekTypeId', weekType);
                     if (day) params.append('dayOfWeekId', day);
 
-                    const url = `http://localhost:5062/api/Lesson/group-usage?${params.toString()}`;
+                    const url = `http://localhost:5062/api/report/group-usage?${params.toString()}`;
                     const res = await fetch(url);
 
                     if (!res.ok) throw new Error("Server Error");

@@ -261,7 +261,7 @@
 
             setTimeout(async () => {
                 try {
-                    const url = `http://localhost:5062/api/Lesson/cabinet-usage?buildingId=${build}&weekTypeId=${week}&dayOfWeekId=${day}`;
+                    const url = `http://localhost:5062/api/report/cabinet-usage?buildingId=${build}&weekTypeId=${week}&dayOfWeekId=${day}`;
                     const res = await fetch(url);
                     if (!res.ok) throw new Error("Server Error");
 

@@ -110,7 +110,7 @@
             exportPdfBtn.classList.add("d-none"); // Прячем кнопку при загрузке
 
             try {
-                const response = await fetch('http://localhost:5062/api/lesson/crosstab', {
+                const response = await fetch('http://localhost:5062/api/report/crosstab', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rowGrouping: rowGrouping, colGrouping: colGrouping })

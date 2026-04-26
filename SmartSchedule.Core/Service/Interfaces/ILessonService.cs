@@ -1,169 +1,70 @@
-﻿
-using SmartSchedule.Core.Models.DTO.CabinetDTO;
-using SmartSchedule.Core.Models.DTO.GroupDTO;
+﻿using SmartSchedule.Core.Models.DTO.CabinetDTO;
 using SmartSchedule.Core.Models.DTO.LessonDTO;
-using SmartSchedule.Core.Models.DTO.ReportDTO;
-using SmartSchedule.Core.Models.DTO.TeacherDTO;
-using System.Collections.ObjectModel;
 
 namespace SmartSchedule.Application.Services.Interfaces;
 
 /// <summary>
-/// Сервис для работы с занятиями.
+/// Сервис для управления занятиями и проверки конфликтов.
 /// </summary>
 public interface ILessonService
 {
     /// <summary>
-    /// Получить список всех занятий в полном формате.
+    /// Получить список всех занятий.
     /// </summary>
-    /// <param name="ct">Токен отмены</param>
-    /// <returns>Список занятий</returns>
     Task<List<ResponseLessonDto>> GetAllAsync(CancellationToken ct);
 
     /// <summary>
     /// Получить занятие по идентификатору.
     /// </summary>
-    /// <param name="id">Идентификатор занятия</param>
-    /// <param name="ct">Токен отмены</param>
-    /// <returns>Подробная информация о занятии</returns>
     Task<ResponseLessonDto> GetByIdAsync(int id, CancellationToken ct);
 
     /// <summary>
     /// Создать новое занятие.
     /// </summary>
-    /// <param name="dto">Данные для создания занятия</param>
-    /// <param name="ct">Токен отмены</param>
-    /// <returns>Созданное занятие</returns>
     Task<ResponseLessonDto> CreateAsync(CreateLessonDto dto, CancellationToken ct);
 
     /// <summary>
     /// Обновить информацию о занятии.
     /// </summary>
-    /// <param name="id">Идентификатор занятия</param>
-    /// <param name="dto">Данные для обновления</param>
-    /// <param name="ct">Токен отмены</param>
     Task UpdateAsync(int id, UpdateLessonDto dto, CancellationToken ct);
 
     /// <summary>
     /// Удалить занятие по идентификатору.
     /// </summary>
-    /// <param name="id">Идентификатор занятия</param>
-    /// <param name="ct">Токен отмены</param>
     Task DeleteAsync(int id, CancellationToken ct);
-    /// <summary>
-    /// Получить данный уроков для группы 
-    /// </summary>
-    /// <param name="groupId">групппа id</param>
-    /// <param name="ct">токен отмены</param>
-    /// <returns></returns>
-    Task<List<ResponseLessonDto>> GetByGroupIdAsync(int groupId, CancellationToken ct);
-    /// <summary>
-    /// получаем структурированное расписание для группы
-    /// </summary>
-    /// <param name="groupId">индентификатор группы</param>
-    /// <param name="ct">токен отмены</param>
-    /// <returns></returns>
-    Task<Dictionary<int, List<StructuredLessonDto>>> GetStructuredScheduleByGroupIdAsync(int groupId, CancellationToken ct);
-    /// <summary>
-    /// ищет свободные кабинеты
-    /// </summary>
-    /// <param name="dayOfWeekId">день недели</param>
-    /// <param name="timeSlotId">слот</param>
-    /// <param name="weekTypeId">какая неделя</param>
-    /// <param name="buildingId">Тип коруса</param>
-    /// <param name="ct">токен отмны</param>
-    /// <returns></returns>
-    Task<List<ResponseCabinetDto>> GetAvailableCabinetsAsync(int dayOfWeekId,
-    int timeSlotId,
-    int weekTypeId,
-    int? buildingId,
-    CancellationToken ct);
 
     /// <summary>
-    /// Формирует отчёт о загруженности аудиторий с учётом заданных фильтров.
+    /// Получить все занятия группы.
     /// </summary>
-    /// <param name="filter">Фильтр с параметрами отчёта (здание, день недели, тип недели)</param>
-    /// <param name="ct">Токен отмены</param>
-    /// <returns>Список DTO со статистикой по аудиториям</returns>
-    /// <exception cref="ArgumentNullException">Если filter равен null</exception>
-    Task<List<CabinetUsageReportDto>> GetCabinetUsageReportAsync(
-       CabinetUsageFilterDto filter,
-       CancellationToken ct);
+    Task<List<ResponseLessonDto>> GetByGroupIdAsync(int groupId, CancellationToken ct);
+
     /// <summary>
-    /// тепловое представление кабинета
+    /// Получить структурированное расписание группы.
     /// </summary>
-    /// <param name="cabinetId">Кабинет</param>
-    /// <param name="weekTypeId">тип недели</param>
-    /// <param name="ct">токен отмены</param>
-    /// <returns></returns>
-    Task<List<CabinetScheduleReportDto>> GetCabinetScheduleAsync(int cabinetId, int weekTypeId, CancellationToken ct);
+    Task<Dictionary<int, List<StructuredLessonDto>>> GetStructuredScheduleByGroupIdAsync(int groupId, CancellationToken ct);
+
     /// <summary>
-    /// Проверяет наличие конфликтов (Группа, Преподаватель, Кабинет) для занятия в целевом слоте.
+    /// Ищет свободные кабинеты на указанный слот.
+    /// </summary>
+    Task<List<ResponseCabinetDto>> GetAvailableCabinetsAsync(int dayOfWeekId, int timeSlotId, int weekTypeId, int? buildingId, CancellationToken ct);
+
+    /// <summary>
+    /// Проверяет наличие конфликтов (Группа, Преподаватель, Кабинет).
     /// </summary>
     Task<ConflictCheckResultDto> CheckConflictAsync(int lessonId, int targetDayId, int targetTimeId, CancellationToken ct);
+
     /// <summary>
-    /// Получить данные уроков для преподавателя
+    /// Получить все занятия преподавателя.
     /// </summary>
-    /// <param name="teacherId">преподаватель</param>
-    /// <param name="ct">токен отмены</param>
-    /// <returns></returns>
     Task<List<ResponseLessonDto>> GetByTeacherIdAsync(int teacherId, CancellationToken ct);
 
     /// <summary>
-    /// получить структурированное расписание для преподавателя
+    /// Получить структурированное расписание преподавателя.
     /// </summary>
-    /// <param name="teacherId">ID преподавателя</param>
-    /// <param name="ct">токен отмены</param>
-    /// <returns></returns>
     Task<Dictionary<int, List<StructuredLessonDto>>> GetStructuredScheduleByTeacherIdAsync(int teacherId, CancellationToken ct);
 
     /// <summary>
-    /// Формирует отчёт о загруженности преподавателей с учётом заданных фильтров.
+    /// Пакетное обновление занятий.
     /// </summary>
-    /// <param name="filter">Фильтр с параметрами отчёта (день недели, тип недели)</param>
-    /// <param name="ct">Токен отмены</param>
-    /// <returns>Список DTO со статистикой по преподавателям</returns>
-    Task<List<TeacherUsageReportDto>> GetTeacherUsageReportAsync(
-        TeacherUsageFilterDto filter,
-        CancellationToken ct);
-    /// <summary>
-    /// Формирует отчёт в виде тепловой карты расписания для конкретного преподавателя.
-    /// </summary>
-    /// <param name="teacherId">Уникальный идентификатор преподавателя</param>
-    /// <param name="weekTypeId">Тип недели (1, 2, или 0 для всех недель)</param>
-    /// <param name="ct">Токен отмены</param>
-    /// <returns>Список DTO со статусом занятости по каждому слоту</returns>
-    Task<List<TeacherScheduleReportDto>> GetTeacherScheduleAsync(int teacherId, int weekTypeId, CancellationToken ct);
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ct">Токен отмены</param>
-    /// <param name="filter">Фильтр для групп</param>
-    /// <returns>возращает отчет по нагрузки на аудиторию</returns>
-    Task<List<GroupUsageReportDto>> GetGroupUsageReportAsync(GroupUsageFilterDto filter, CancellationToken ct);
-    /// <summary>
-    /// Пакетное обновление занятий (например, для синхронного переноса подгрупп).
-    /// </summary>
-    /// <param name="dtos">Список DTO с новыми данными уроков</param>
-    /// <param name="ct">Токен отмены</param>
     Task UpdateBatchAsync(IReadOnlyCollection<UpdateLessonDto> dtos, CancellationToken ct);
-    /// <summary>
-    /// Генерирует динамический отчет (Cross-tab) на основе заданных параметров группировки.
-    /// </summary>
-    /// <param name="filter">Настройки группировки для строк и колонок.</param>
-    /// <param name="ct">Токен отмены операции.</param>
-    /// <returns>Объект с заголовками колонок и строками данных.</returns>
-    Task<DynamicReportResultDto> GenerateDynamicReportAsync(DynamicReportFilterDto filter, CancellationToken ct = default);
-    /// <summary>
-    /// Генерирует сводную ведомость методических окон для планирования совещаний.
-    /// Использует коллекцию только для чтения для обеспечения безопасности данных.
-    /// </summary>
-    /// <param name="teacherIds">Коллекция идентификаторов преподавателей (ReadOnly).</param>
-    /// <param name="weekTypeId">Идентификатор типа недели (числитель/знаменатель).</param>
-    /// <param name="ct">Токен отмены операции.</param>
-    /// <returns>Бланк отчета с результатами анализа окон.</returns>
-    Task<MethodicalWindowReportDto> GenerateMethodicalWindowsReportAsync(
-        ReadOnlyCollection<int> teacherIds,
-        int weekTypeId,
-        CancellationToken ct = default);
 }
