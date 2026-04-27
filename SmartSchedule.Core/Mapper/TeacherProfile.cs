@@ -18,12 +18,15 @@ public class TeacherProfile : Profile
                 dest => dest.FullName,
                 opt => opt.MapFrom(src => $"{src.LastName} {src.FirstName} {src.MiddleName}")
             );
-        CreateMap<Teacher, ResponseTeacherDto>().ForMember(dest => dest.PositionName, opt => opt.MapFrom(prt => prt.Position.Name)).ForMember(
-                dest => dest.FullName,
-                opt => opt.MapFrom(src => $"{src.LastName} {src.FirstName} {src.MiddleName}")
-            );
+        CreateMap<Teacher, ResponseTeacherDto>().ForMember(dest => dest.FullName, opt => opt.MapFrom(src => GetFormattedFullName(src)));
         CreateMap<CreateTeacherDto, Teacher>();
         CreateMap<UpdateTeacherDto, Teacher>();
+
     }
+    /// <summary>
+    /// Формирует полное имя. Trim() уберет лишний пробел в конце, если Отчество пустое.
+    /// </summary>
+    private static string GetFormattedFullName(Teacher src)
+        => $"{src.LastName} {src.FirstName} {src.MiddleName}".Trim();
 }
 

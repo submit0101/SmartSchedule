@@ -1,143 +1,135 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SmartSchedule.Core.Models.DTO.PosittonDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
 
-namespace WebSmartSchedule.Pages.Teacher
+namespace WebSmartSchedule.Pages.Teacher;
+
+/// <summary>
+/// Модель страницы управления преподавателями.
+/// </summary>
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly HttpClient _httpClient;
+
+    /// <summary>
+    /// Список преподавателей для отображения.
+    /// </summary>
+    public List<ResponseTeacherDto> Teachers { get; set; } = new();
+
+    /// <summary>
+    /// Поисковый запрос по ФИО.
+    /// </summary>
+    [BindProperty(SupportsGet = true)]
+    public string? SearchTerm { get; set; }
+
+    public IndexModel(IHttpClientFactory httpClientFactory)
     {
-        private readonly HttpClient _httpClient;
-        public List<ResponseTeacherDto> Teachers { get; set; } = new();
-        public List<ShortPositionDto> Positions { get; set; } = new();
+        _httpClient = httpClientFactory.CreateClient("ApiClient");
+    }
 
-        [BindProperty(SupportsGet = true)]
-        public string SearchTerm { get; set; }
+    /// <summary>
+    /// Загрузка данных страницы.
+    /// </summary>
+    public async Task OnGetAsync(CancellationToken ct)
+    {
+        // Базовый URL для поиска
+        var searchUrl = "api/Teacher/search";
 
-        [BindProperty(SupportsGet = true)]
-        public int? PositionId { get; set; }
-
-        public IndexModel(IHttpClientFactory httpClientFactory)
+        // Формируем параметры запроса
+        if (!string.IsNullOrEmpty(SearchTerm))
         {
-            _httpClient = httpClientFactory.CreateClient("ApiClient");
+            searchUrl += $"?search={Uri.EscapeDataString(SearchTerm)}";
         }
 
-        public async Task OnGetAsync(CancellationToken ct)
+        // Получаем преподавателей через API
+        var teacherResponse = await _httpClient.GetAsync(searchUrl, ct);
+
+        if (teacherResponse.IsSuccessStatusCode)
         {
-            // Базовый URL для поиска преподавателей
-            var searchUrl = "api/Teacher/search";
+            Teachers = await teacherResponse.Content.ReadFromJsonAsync<List<ResponseTeacherDto>>(ct)
+                       ?? new List<ResponseTeacherDto>();
+        }
+        else
+        {
+            // Здесь можно добавить логгирование ошибки
+            Teachers = new List<ResponseTeacherDto>();
+        }
+    }
 
-            var queryParams = new Dictionary<string, string>();
-
-            if (!string.IsNullOrEmpty(SearchTerm))
-                queryParams.Add("search", SearchTerm);
-
-            if (PositionId.HasValue)
-                queryParams.Add("positionId", PositionId.Value.ToString());
-
-            // Формируем URL с параметрами
-            if (queryParams.Any())
+    /// <summary>
+    /// Обработка создания нового преподавателя.
+    /// </summary>
+    public async Task<IActionResult> OnPostCreateAsync([FromForm] CreateTeacherDto dto, CancellationToken ct)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/Teacher", dto, ct);
+            if (response.IsSuccessStatusCode)
             {
-                searchUrl += "?" + string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"));
-            }
-
-            // Получаем преподавателей
-            var teacherResponse = await _httpClient.GetAsync(searchUrl, ct);
-            if (teacherResponse.IsSuccessStatusCode)
-            {
-                Teachers = await teacherResponse.Content.ReadFromJsonAsync<List<ResponseTeacherDto>>(ct)
-                           ?? new List<ResponseTeacherDto>();
+                TempData["TESuccessMessage"] = "Преподаватель успешно добавлен!";
             }
             else
             {
-                Console.WriteLine($"Ошибка при получении преподавателей: {teacherResponse.StatusCode}");
+                TempData["TEErrorMessage"] = "Ошибка при добавлении преподавателя.";
             }
+        }
+        catch (Exception ex)
+        {
+            TempData["TEErrorMessage"] = $"Ошибка: {ex.Message}";
+        }
 
-            // Получаем список должностей для фильтрации
-            var positionResponse = await _httpClient.GetAsync("api/Position/Short", ct);
-            if (positionResponse.IsSuccessStatusCode)
+        return RedirectToPage();
+    }
+
+    /// <summary>
+    /// Обработка обновления данных преподавателя.
+    /// </summary>
+    public async Task<IActionResult> OnPostUpdateAsync(int id, [FromForm] UpdateTeacherDto dto, CancellationToken ct)
+    {
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync($"api/Teacher/{id}", dto, ct);
+
+            if (response.IsSuccessStatusCode)
             {
-                Positions = await positionResponse.Content.ReadFromJsonAsync<List<ShortPositionDto>>(ct)
-                             ?? new List<ShortPositionDto>();
+                TempData["TESuccessMessage"] = "Преподаватель успешно обновлён!";
             }
             else
             {
-                Console.WriteLine($"Ошибка при получении должностей: {positionResponse.StatusCode}");
+                TempData["TEErrorMessage"] = "Ошибка при обновлении преподавателя.";
             }
         }
-
-        // === POST: Добавление преподавателя ===
-        public async Task<IActionResult> OnPostCreateAsync([FromForm] CreateTeacherDto dto, CancellationToken ct)
+        catch (Exception ex)
         {
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("api/Teacher", dto, ct);
-                if (!response.IsSuccessStatusCode)
-                {
-                    TempData["TEErrorMessage"] = "Ошибка при добавлении преподавателя.";
-                }
-                else
-                {
-                    TempData["TESuccessMessage"] = "Преподаватель успешно добавлен!";
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["TEErrorMessage"] = $"Ошибка при создании: {ex.Message}";
-            }
-
-            return RedirectToPage();
+            TempData["TEErrorMessage"] = $"Ошибка: {ex.Message}";
         }
 
-        // === POST: Обновление преподавателя ===
-        public async Task<IActionResult> OnPostUpdateAsync(
-            [FromForm] int id,
-            [FromForm] UpdateTeacherDto dto,
-            CancellationToken ct)
+        return RedirectToPage();
+    }
+
+    /// <summary>
+    /// Обработка удаления преподавателя.
+    /// </summary>
+    public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
+    {
+        try
         {
-            try
-            {
-                var response = await _httpClient.PutAsJsonAsync($"api/Teacher/{id}", dto, ct);
+            var response = await _httpClient.DeleteAsync($"api/Teacher/{id}", ct);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    TempData["TESuccessMessage"] = "Преподаватель успешно обновлён!";
-                }
-                else
-                {
-                    TempData["TEErrorMessage"] = "Ошибка при обновлении преподавателя.";
-                }
-            }
-            catch (Exception ex)
+            if (response.IsSuccessStatusCode)
             {
-                TempData["TEErrorMessage"] = $"Ошибка при обновлении: {ex.Message}";
+                TempData["TESuccessMessage"] = "Преподаватель успешно удалён!";
             }
-
-            return RedirectToPage();
+            else
+            {
+                TempData["TEErrorMessage"] = "Ошибка при удалении.";
+            }
         }
-
-        // === POST: Удаление преподавателя ===
-        public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
+        catch (Exception ex)
         {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"api/Teacher/{id}", ct);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    TempData["TESuccessMessage"] = "Преподаватель успешно удалён!";
-                }
-                else
-                {
-                    TempData["TEErrorMessage"] = "Ошибка при удалении преподавателя.";
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["TEErrorMessage"] = $"Ошибка при удалении: {ex.Message}";
-            }
-
-            return RedirectToPage();
+            TempData["TEErrorMessage"] = $"Ошибка: {ex.Message}";
         }
+
+        return RedirectToPage();
     }
 }

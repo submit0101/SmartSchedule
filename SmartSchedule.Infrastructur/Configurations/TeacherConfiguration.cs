@@ -23,36 +23,25 @@ public class TeacherConfiguration : IEntityTypeConfiguration<Teacher>
 
         builder.HasKey(e => e.Id);
 
-  
         builder.Property(e => e.FirstName)
             .IsRequired()
             .HasMaxLength(50);
 
-    
         builder.Property(e => e.MiddleName)
             .HasMaxLength(50)
             .IsRequired(false);
 
- 
         builder.Property(e => e.LastName)
             .IsRequired()
             .HasMaxLength(50);
-
-    
-        builder.Property(e => e.PositionId)
-            .IsRequired();
-
-       
-        builder.HasOne(e => e.Position)
-            .WithMany(e => e.Teachers)
-            .HasForeignKey(e => e.PositionId)
-            .OnDelete(DeleteBehavior.Restrict); 
 
         builder.HasMany(e => e.Lessons)
             .WithOne(e => e.Teacher)
             .HasForeignKey(e => e.TeacherId)
             .OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(e => new { e.FirstName, e.MiddleName, e.LastName, e.PositionId })
-              .IsUnique().HasDatabaseName("IX_UniTeatcher_Postiton");
+
+        builder.HasIndex(e => new { e.FirstName, e.MiddleName, e.LastName })
+              .IsUnique()
+              .HasDatabaseName("IX_UniqueTeacher_FullName");
     }
 }

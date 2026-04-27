@@ -30,16 +30,6 @@ public class Teacher : BaseEntity<int>
     public string LastName { get; set; }
 
     /// <summary>
-    /// Должность преподавателя.
-    /// </summary>
-    /// <example>Старший преподаватель</example>
-    public int PositionId { get; set; }
-    /// <summary>
-    /// Должность преподавателя (навигационное свойство).
-    /// </summary>
-    public Position Position { get; set; }
-
-    /// <summary>
     /// Список занятий, проводимых данным преподавателем.
     /// Инициализируется пустым списком по умолчанию.
     /// </summary>

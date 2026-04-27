@@ -265,71 +265,6 @@
             Пакетное обновление занятий.
             </summary>
         </member>
-        <member name="T:SmartSchedule.Application.Controllers.PositionController">
-            <summary>
-            Контроллер для работы с должностями
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.PositionController.#ctor(SmartSchedule.Application.Services.Interfaces.IPositionService)">
-            <summary>
-            Конструктор контроллера должностей
-            </summary>
-            <param name="positionService">Сервис для работы с должностями</param>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.PositionController.GetAll(System.Threading.CancellationToken)">
-            <summary>
-            Получить список всех должностей
-            </summary>
-            <param name="ct">Токен отмены</param>
-            <returns>Список должностей</returns>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.PositionController.GetAllShort(System.Threading.CancellationToken)">
-            <summary>
-            Получить список всех должностей в коротком варианте для выпадашек
-            </summary>
-            <param name="ct">Токен отмены</param>
-            <returns>Список должностей</returns>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.PositionController.GetById(System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Получить должность по идентификатору
-            </summary>
-            <param name="id">Идентификатор должности</param>
-            <param name="ct">Токен отмены</param>
-            <returns>Данные должности</returns>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.PositionController.Create(SmartSchedule.Core.Models.DTO.PosittonDTO.CreatePositionDto,System.Threading.CancellationToken)">
-            <summary>
-            Создать новую должность.
-            </summary>
-            <param name="dto">Данные для создания должности.</param>
-            <param name="ct">Токен отмены операции.</param>
-            <returns>Созданная должность.</returns>
-            <response code="201">Должность успешно создана</response>
-            <response code="400">Некорректные данные</response>
-            <response code="409">Должность с таким названием уже существует</response>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.PositionController.Update(System.Int32,SmartSchedule.Core.Models.DTO.PosittonDTO.UpdatePositionDto,System.Threading.CancellationToken)">
-            <summary>
-            Обновить данные должности.
-            </summary>
-            <param name="id">Идентификатор должности.</param>
-            <param name="dto">Данные для обновления должности.</param>
-            <param name="ct">Токен отмены операции.</param>
-            <returns>Результат операции.</returns>
-            <response code="204">Должность успешно обновлена</response>
-            <response code="400">Некорректные данные</response>
-            <response code="404">Должность не найдена</response>
-            <response code="409">Должность с таким названием уже существует</response>
-        </member>
-        <member name="M:SmartSchedule.Application.Controllers.PositionController.Delete(System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Удалить должность
-            </summary>
-            <param name="id">Идентификатор должности</param>
-            <param name="ct">Токен отмены</param>
-            <returns>Результат операции</returns>
-        </member>
         <member name="T:SmartSchedule.Application.Controllers.ReportController">
             <summary>
             Контроллер для формирования аналитической отчетности.
@@ -491,13 +426,12 @@
             <param name="ct">Токен отмены</param>
             <returns>Результат операции</returns>
         </member>
-        <member name="M:SmartSchedule.Application.Controllers.TeacherController.SearchTeachersAsync(System.String,System.Nullable{System.Int32})">
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.SearchTeachersAsync(System.String)">
             <summary>
-            Выполняет поиск преподавателей по ФИО и фильтрацию по должности.
+            Выполняет поиск преподавателей по ФИО.
             </summary>
-            <param name="search">Поисковая строка для поиска по ФИО.</param>
-            <param name="positionId">Необязательный идентификатор должности для фильтрации.</param>
-            <returns>Список преподавателей, соответствующих критериям поиска.</returns>
+            <param name="search">Строка для поиска по фамилии, имени или отчеству.</param>
+            <returns>Список найденных преподавателей.</returns>
         </member>
         <member name="T:SmartSchedule.Application.Controllers.TimeSlotController">
             <summary>

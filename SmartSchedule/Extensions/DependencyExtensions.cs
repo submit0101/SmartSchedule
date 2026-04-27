@@ -24,7 +24,6 @@ public static class DependencyExtensions
         services.AddTransient<ICabinetRepository, CabinetRepository>();
         services.AddTransient<IGroupRepository, GroupRepository>();
         services.AddTransient<ILessonRepository, LessonRepository>();
-        services.AddTransient<IPositionRepository, PositionRepository>();
         services.AddTransient<ISubjectRepository, SubjectRepository>();
         services.AddTransient<ITeacherRepository, TeacherRepository>();
         services.AddTransient<ITimeSlotRepository, TimeSlotRepository>();
@@ -43,7 +42,6 @@ public static class DependencyExtensions
         services.AddTransient<ICabinetService, CabinetService>();
         services.AddTransient<IGroupService, GroupService>();
         services.AddTransient<ILessonService, LessonService>();
-        services.AddTransient<IPositionService, PositionService>();
         services.AddTransient<ISubjectService, SubjectService>();
         services.AddTransient<ITeacherService, TeacherService>();
         services.AddTransient<ITimeSlotService, TimeSlotService>();

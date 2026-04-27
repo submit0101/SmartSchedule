@@ -1,14 +1,14 @@
 ﻿@page
 @model WebSmartSchedule.Pages.Teacher.IndexModel
 @{
-    ViewData["Title"] = "Учителя";
+    ViewData["Title"] = "Преподаватели";
 }
 
 <link rel="stylesheet" href="~/css/UnionStyle.css" />
+
 <div class="container-xxl py-4">
     <div class="page-section p-4 bg-white rounded shadow-sm">
-
-        <!-- Сообщения об успехе/ошибке -->
+        
         @if (TempData["TESuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -24,12 +24,8 @@
             </div>
         }
 
-        <!-- Заголовок и кнопка добавления -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h2 class="mb-0 text-primary fw-bold">🎓 Список преподавателей</h2>
-            <button type="button" class="btn btn-outline-primary d-md-none" onclick="toggleSearchForm()">
-                <i class="bi bi-search"></i> Поиск
-            </button>
+            <h2 class="mb-0 text-primary fw-bold"> Список преподавателей</h2>
             <a href="#"
                class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
                onclick="openModal('createTeacherModal')">
@@ -37,78 +33,49 @@
             </a>
         </div>
 
-        <!-- Форма поиска и фильтрации -->
-        <div id="searchForm" class="search-form collapsed">
-            <form method="get" class="mb-0">
-                <div class="row g-3">
-                    <div class="col-12 col-md-4">
-                        <label for="SearchTerm" class="form-label">ФИО преподавателя</label>
-                        <input type="text" class="form-control" id="SearchTerm" name="SearchTerm"
-                               value="@Model.SearchTerm" placeholder="Например: Иванов">
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="PositionId" class="form-label">Должность</label>
-                        <select class="form-select" id="PositionId" name="PositionId">
-                            <option value="">Все должности</option>
-                            @foreach (var position in Model.Positions)
-                            {
-                                <option value="@position.Id"
-                                        selected="@(position.Id == Model.PositionId ? "selected" : null)">
-                                    @position.Name
-                                </option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-4 d-flex flex-wrap align-end gap-2">
-                        <button type="submit" class="btn btn-primary w-100 w-md-auto">
-                            <i class="bi bi-search"></i> Поиск
-                        </button>
-                        <a href="@Url.Page("Index")" class="btn btn-secondary w-100 w-md-auto">
-                            <i class="bi bi-arrow-counterclockwise"></i> Сбросить
-                        </a>
-                    </div>
+        <div class="row mb-3">
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control border-start-0 ps-0"
+                           placeholder="Найти преподавателя...">
+                    <button class="btn btn-outline-primary"
+                            type="button"
+                            id="searchButton"
+                            onclick="performSearch()">
+                        Найти
+                    </button>
                 </div>
-            </form>
+            </div>
         </div>
 
-        <!-- Отображение результатов или сообщений -->
         @if (!Model.Teachers.Any())
         {
             <div class="text-center py-5 bg-light rounded mt-3">
-                @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.PositionId.HasValue)
-                {
-                    <p class="lead mb-2">Ничего не найдено.</p>
-                    <p class="text-muted">Измените параметры поиска или сбросьте фильтр.</p>
-                    <a href="@Url.Page("Index")" class="btn btn-outline-primary">
-                        <i class="bi bi-arrow-counterclockwise"></i> Сбросить фильтры
-                    </a>
-                }
-                else
-                {
-                    <p class="lead mb-2">Нет данных о преподавателях.</p>
-                    <p class="text-muted">Добавьте их через Swagger или миграции.</p>
-                }
+                <p class="lead mb-2">Нет данных о преподавателях.</p>
+                <p class="text-muted">Добавьте их через форму выше.</p>
             </div>
         }
         else
         {
-            <!-- Карточки для мобильных -->
             <div class="d-block d-md-none mt-3" style="max-height: 60vh; overflow-y: auto;">
                 <div class="container-fluid p-0">
                     @foreach (var teacher in Model.Teachers)
                     {
                         <div class="card mb-3 shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title">@teacher.FullName</h5>
-                                <p class="card-text mb-1">Должность: @teacher.PositionName</p>
+                                <h5 class="card-title search-item">@teacher.FullName</h5>
                                 <div class="d-flex gap-2 mt-3">
                                     <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
                                             onclick="fillEditModal(this)"
                                             data-id="@teacher.Id"
                                             data-firstname="@teacher.FirstName"
                                             data-middlename="@teacher.MiddleName"
-                                            data-lastname="@teacher.LastName"
-                                            data-positionname="@teacher.PositionName">
+                                            data-lastname="@teacher.LastName">
                                         <i class="bi bi-pencil"></i> Изменить
                                     </button>
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@teacher.Id)">
@@ -121,26 +88,23 @@
                 </div>
             </div>
 
-            <!-- Таблица для десктопа -->
             <div class="table-container border rounded overflow-auto d-none d-md-block mt-3" style="max-height: 60vh;">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light sticky-top">
                         <tr>
-                            <th class="col">Имя</th>
-                            <th class="col">Отчество</th>
-                            <th class="col">Фамилия</th>
-                            <th class="col">Должность</th>
-                            <th class="col">Действия</th>
+                            <th>Имя</th>
+                            <th>Отчество</th>
+                            <th>Фамилия</th>
+                            <th class="text-center">Действия</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var teacher in Model.Teachers)
                         {
-                            <tr class="align-middle">
-                                <td data-label="Имя">@teacher.FirstName</td>
-                                <td data-label="Отчество">@teacher.MiddleName</td>
-                                <td data-label="Фамилия">@teacher.LastName</td>
-                                <td data-label="Должность">@teacher.PositionName</td>
+                            <tr>
+                                <td data-label="Имя" class="search-item">@teacher.FirstName</td>
+                                <td data-label="Отчество" class="search-item">@teacher.MiddleName</td>
+                                <td data-label="Фамилия" class="search-item">@teacher.LastName</td>
                                 <td data-label="Действия">
                                     <div class="d-flex justify-content-center gap-2">
                                         <button class="btn btn-sm btn-outline-primary"
@@ -148,12 +112,11 @@
                                                 data-id="@teacher.Id"
                                                 data-firstname="@teacher.FirstName"
                                                 data-middlename="@teacher.MiddleName"
-                                                data-lastname="@teacher.LastName"
-                                                data-positionname="@teacher.PositionName">
-                                            <i class="bi bi-pencil"></i> Изменить
+                                                data-lastname="@teacher.LastName">
+                                            <i class="bi bi-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@teacher.Id)">
-                                            Удалить
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -165,34 +128,31 @@
         }
     </div>
 </div>
+
 <partial name="_TeatcherModals" />
+
 <script>
+    // Заполнение модалки (уже без Position)
     function fillEditModal(button) {
         const id = button.getAttribute('data-id');
         const firstName = button.getAttribute('data-firstname');
         const middleName = button.getAttribute('data-middlename');
         const lastName = button.getAttribute('data-lastname');
-        const positionId = button.getAttribute('data-positionid');
+
         document.getElementById('editTeacherId').value = id;
         document.getElementById('editTeacherFirstName').value = firstName;
         document.getElementById('editTeacherMiddleName').value = middleName;
         document.getElementById('editTeacherLastName').value = lastName;
-        const positionSelect = document.getElementById('editTeacherPositionId');
-        for (let option of positionSelect.options) {
-            if (option.value === positionId) {
-                positionSelect.value = option.value;
-                break;
-            }
-        }
+
         openModal('editTeacherModal');
     }
-      
+
     function confirmDelete(id) {
         document.getElementById('deleteTeacherId').value = id;
         openModal('deleteConfirmModal');
     }
-
 </script>
+
 <script src="/js/modal.js"></script>
-<script src="/js/searchmobail.js"></script>
 <script src="/js/ValidationModal.js"></script>
+<script src="/js/searchHandler.js"></script>

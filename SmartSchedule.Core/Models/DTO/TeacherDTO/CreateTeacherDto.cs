@@ -1,4 +1,5 @@
 ﻿namespace SmartSchedule.Core.Models.DTO.TeacherDTO;
+
 /// <summary>
 /// DTO для создания преподавателя.
 /// </summary>
@@ -21,10 +22,4 @@ public class CreateTeacherDto
     /// </summary>
     /// <example>Иванов</example>
     public required string LastName { get; set; }
-
-    /// <summary>
-    /// Идентификатор должности преподавателя.
-    /// </summary>
-    /// <example>1</example>
-    public required int PositionId { get; set; }
 }

@@ -98,19 +98,6 @@
             <param name="builder">Построитель сущности</param>
             <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
         </member>
-        <member name="T:SmartSchedule.Infrastructure.Configurations.PositionConfiguration">
-            <summary>
-            Конфигурация сущности Position.
-            Определяет настройки таблицы, ключи и связи.
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Infrastructure.Configurations.PositionConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SmartSchedule.Core.Entities.Position})">
-            <summary>
-            Метод конфигурации для сущности Position.
-            </summary>
-            <param name="builder">Построитель сущности</param>
-            <exception cref="T:System.ArgumentNullException">Выбрасывается, если параметр builder равен null</exception>
-        </member>
         <member name="T:SmartSchedule.Infrastructure.Configurations.SubjectConfiguration">
             <summary>
             Конфигурация сущности Subject.
@@ -204,11 +191,6 @@
         <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Teachers">
             <summary>
             Таблица преподавателей.
-            </summary>
-        </member>
-        <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.Positions">
-            <summary>
-            Таблица Должностей.
             </summary>
         </member>
         <member name="P:SmartSchedule.Infrastructure.Data.AppDbContext.TimeSlots">
@@ -477,44 +459,6 @@
         <member name="M:SmartSchedule.Infrastructure.Repositories.LessonRepository.UpdateBatchAsync(System.Collections.Generic.IReadOnlyCollection{SmartSchedule.Core.Entities.Lesson},System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="T:SmartSchedule.Infrastructure.Repositories.PositionRepository">
-            <summary>
-            Репозиторий для работы с должностями преподавателей.
-            Данные кэшируются в Redis с автоматической инвалидацией при изменении.
-            </summary>
-        </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext,SmartSchedule.Core.Service.Interfaces.ICachingService)">
-            <summary>
-            Инициализирует новый экземпляр класса <see cref="T:SmartSchedule.Infrastructure.Repositories.PositionRepository"/>.
-            </summary>
-            <param name="context">Контекст базы данных.</param>
-            <param name="cache">Сервис кэширования.</param>
-            <exception cref="T:System.ArgumentNullException">
-            Выбрасывается, если <paramref name="context"/> или <paramref name="cache"/> равны <see langword="null"/>.
-            </exception>
-        </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.ExistsByNameAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
-            <summary>
-            Проверяет, существует ли должность с указанным названием.
-            </summary>
-            <param name="name">Название должности.</param>
-            <param name="excludeId">Идентификатор должности, которую следует исключить из проверки.</param>
-            <param name="ct">Токен отмены операции.</param>
-            <returns><see langword="true"/>, если должность с таким названием уже существует; иначе — <see langword="false"/>.</returns>
-            <exception cref="T:System.ArgumentNullException">Выбрасывается, если <paramref name="name"/> равен <see langword="null"/> или пуст.</exception>
-        </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.GetAllAsync(System.Threading.CancellationToken)">
-            <inheritdoc />
-        </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.CreateAsync(SmartSchedule.Core.Entities.Position,System.Threading.CancellationToken)">
-            <inheritdoc />
-        </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.UpdateAsync(SmartSchedule.Core.Entities.Position,System.Threading.CancellationToken)">
-            <inheritdoc />
-        </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.PositionRepository.DeleteByIdAsync(System.Int32,System.Threading.CancellationToken)">
-            <inheritdoc />
-        </member>
         <member name="T:SmartSchedule.Infrastructure.Repositories.ReportRepository">
             <summary>
             Репозиторий для выполнения аналитических запросов и формирования матриц данных.
@@ -563,41 +507,36 @@
         </member>
         <member name="T:SmartSchedule.Infrastructure.Repositories.TeacherRepository">
             <summary>
-            Репозиторий для работы с Преподавателями
+            Репозиторий для работы с преподавателями.
             </summary>
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.#ctor(SmartSchedule.Infrastructure.Data.AppDbContext)">
             <summary>
-            Конструктор репозитория Teacher
+            Инициализирует новый экземпляр репозитория.
             </summary>
-            <param name="context">Контекст базы данных</param>
+            <param name="context">Контекст базы данных.</param>
         </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.GetAllWithPositonAsync(System.Threading.CancellationToken)">
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.GetAllAsync(System.Threading.CancellationToken)">
             <summary>
-            Ансихрнонно получает всех учителй включая связанные позиции
+            Асинхронно получает список всех преподавателей.
             </summary>
-            <param name="ct">токен отмены</param>
-            <returns></returns>
+            <param name="ct">Токен отмены.</param>
+            <returns>Список всех преподавателей.</returns>
         </member>
-        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.SearchAsync(System.String,System.Nullable{System.Int32})">
+        <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.SearchAsync(System.String)">
             <summary>
-            Выполняет поиск преподавателей по ФИО и фильтрацию по должности.
+            Выполняет поиск преподавателей по ФИО.
             </summary>
-            <param name="search">Часть ФИО для поиска.</param>
-            <param name="positionValue">Идентификатор должности.</param>
-            <returns>Список найденных преподавателей.</returns>
+            <param name="search">Строка поиска.</param>
+            <returns>Список отфильтрованных преподавателей.</returns>
         </member>
         <member name="M:SmartSchedule.Infrastructure.Repositories.TeacherRepository.GetWithLessonsByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Получает преподавателя по идентификатору с присоединенными (Eagerly Loaded) связанными занятиями.
+            Получает данные преподавателя со всеми связанными уроками, группами и таймслотами.
             </summary>
-            <param name="id">Уникальный идентификатор преподавателя.</param>
-            <param name="ct">Токен отмены операции.</param>
-            <returns>
-            Объект сущности <see cref="T:SmartSchedule.Core.Entities.Teacher"/> с заполненной коллекцией <see cref="P:SmartSchedule.Core.Entities.Teacher.Lessons"/> 
-            (включая <see cref="T:SmartSchedule.Core.Entities.Group"/> и <see cref="T:SmartSchedule.Core.Entities.TimeSlot"/>), 
-            или <see langword="null"/>, если преподаватель не найден.
-            </returns>
+            <param name="id">Идентификатор преподавателя.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>Сущность преподавателя с коллекцией уроков.</returns>
         </member>
         <member name="T:SmartSchedule.Infrastructure.Repositories.TimeSlotRepository">
             <summary>
@@ -742,6 +681,18 @@
             <inheritdoc />
         </member>
         <member name="M:SmartSchedule.Infrastructur.Migrations.AddSubgroupToLesson.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:SmartSchedule.Infrastructur.Migrations.DeletePositionEntity">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.DeletePositionEntity.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.DeletePositionEntity.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SmartSchedule.Infrastructur.Migrations.DeletePositionEntity.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:ComputerShop.Infrastructure.Extensions.ModelBuilderExtensions">

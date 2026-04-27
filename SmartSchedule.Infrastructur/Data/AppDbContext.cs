@@ -38,11 +38,6 @@ public class AppDbContext : DbContext
     public virtual DbSet<Teacher> Teachers { get; set; }
 
     /// <summary>
-    /// Таблица Должностей.
-    /// </summary>
-    public virtual DbSet<Position> Positions { get; set; }
-
-    /// <summary>
     /// Таблица временных слотов.
     /// </summary>
     public virtual DbSet<TimeSlot> TimeSlots { get; set; }

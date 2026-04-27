@@ -124,17 +124,14 @@ public class TeacherController : ControllerBase
         return NoContent();
     }
     /// <summary>
-    /// Выполняет поиск преподавателей по ФИО и фильтрацию по должности.
+    /// Выполняет поиск преподавателей по ФИО.
     /// </summary>
-    /// <param name="search">Поисковая строка для поиска по ФИО.</param>
-    /// <param name="positionId">Необязательный идентификатор должности для фильтрации.</param>
-    /// <returns>Список преподавателей, соответствующих критериям поиска.</returns>
+    /// <param name="search">Строка для поиска по фамилии, имени или отчеству.</param>
+    /// <returns>Список найденных преподавателей.</returns>
     [HttpGet("search")]
-    public async Task<IActionResult> SearchTeachersAsync(
-        [FromQuery] string? search,
-        [FromQuery] int? positionId)
+    public async Task<IActionResult> SearchTeachersAsync([FromQuery] string? search)
     {
-        var result = await _teacherService.SearchTeachersAsync(search, positionId);
+        var result = await _teacherService.SearchTeachersAsync(search);
 
         return Ok(result);
     }
