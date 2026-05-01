@@ -1,289 +1,375 @@
 ﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
 
 <style>
-    /* Плавный скролл */
-    .custom-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
+    /* Убираем внешние скроллы */
+    .book-wrapper {
+        height: calc(100vh - 160px);
+        overflow: hidden;
+        display: flex;
+        gap: 1rem;
     }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
+    .sidebar-controls {
+        width: 320px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
 
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 10px;
-        }
+    .teacher-selector-box {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background: #f8fafc;
+        padding: 8px;
+    }
 
-    /* Облако тегов преподавателей */
-    .teacher-tags-container {
+    .results-area {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-width: 0;
+    }
+
+    /* Область прокрутки для результатов */
+    .matrix-table-container {
+        flex-grow: 1;
+        overflow-y: auto;
         border: 1px solid #e2e8f0;
         border-radius: 0.75rem;
-        background: #f8fafc;
-        max-height: 250px;
-        overflow-y: auto;
-        padding: 1rem;
+        background: #fff;
     }
 
-    /* Красивая шапка таблицы */
-    .table-modern thead th {
-        background-color: #f1f5f9;
-        color: #475569;
-        font-weight: 600;
+    .table-sticky-header thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #f1f5f9 !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* Стили статистики */
+    .stats-card {
+        background: #f8fafc;
+        border: 1px solid #e0e7ff;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-badge {
+        display: inline-flex;
+        align-items: center;
+        background: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid #dee2e6;
+        margin: 2px;
+        font-size: 0.85rem;
+    }
+
+    .group-header-row {
+        background-color: #f8fafc !important;
+        font-weight: 800;
         text-transform: uppercase;
         font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        border-bottom: 2px solid #e2e8f0;
-        padding: 1rem;
+        color: #475569;
     }
 
-    .table-modern tbody td {
-        padding: 1rem;
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f5f9;
+    .custom-scroll::-webkit-scrollbar {
+        width: 4px;
     }
 
-    .empty-state {
-        border: 2px dashed #cbd5e1;
-        border-radius: 1rem;
-        background-color: #f8fafc;
-        padding: 4rem 2rem;
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .book-wrapper .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 </style>
 
-<div class="container-fluid px-0 py-2">
+<div class="container-fluid px-0">
+    <div class="book-wrapper">
 
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary me-3 shadow-sm">
-                    <i class="bi bi-intersect fs-4"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold text-dark">Анализ методических окон</h5>
-                    <small class="text-muted">Поиск свободного времени для собраний и кафедр</small>
+        <!-- ЛЕВАЯ ПАНЕЛЬ -->
+        <aside class="sidebar-controls">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-3 d-flex flex-column">
+                    <h6 class="fw-bold mb-2 text-primary"><i class="bi bi-sliders2-vertical me-2"></i>Параметры</h6>
+
+                    <div class="mb-2">
+                        <label class="small fw-bold text-muted text-uppercase" style="font-size: 0.65rem;">Неделя</label>
+                        <select id="mwWeekType" class="form-select form-select-sm shadow-none">
+                            <option value="3">Обе недели</option>
+                            <option value="1">Числитель</option>
+                            <option value="2">Знаменатель</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="small fw-bold text-primary text-uppercase" style="font-size: 0.65rem;">Группировка</label>
+                        <select id="mwGrouping" class="form-select form-select-sm border-primary shadow-none">
+                            <option value="day">По дням недели</option>
+                            <option value="count">По количеству людей</option>
+                            <option value="none">Без группировки</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="small fw-bold text-muted text-uppercase d-flex justify-content-between" style="font-size: 0.65rem;">
+                            Участники <span id="selectedCount" class="badge bg-primary">0</span>
+                        </label>
+                        <div class="input-group input-group-sm mt-1">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" id="mwTeacherSearch" class="form-control border-start-0 ps-0 shadow-none" placeholder="Поиск...">
+                        </div>
+                    </div>
+
+                    <div id="mwTeachersContainer" class="teacher-selector-box custom-scroll mb-2">
+                        <div class="text-center py-4 text-muted small">Загрузка базы...</div>
+                    </div>
+
+                    <button id="mwGenerateBtn" class="btn btn-primary btn-sm w-100 fw-bold shadow-sm py-2">
+                        АНАЛИЗ ОКОН
+                    </button>
                 </div>
             </div>
+        </aside>
 
-            <form id="methodicalFilterForm" class="row g-4" onsubmit="return false;">
-
-                <div class="col-lg-8">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="form-label text-muted small text-uppercase fw-bold mb-0">Участники (выберите от 2-х)</label>
-                        <div class="input-group input-group-sm w-50">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                            <input type="text" id="teacherSearch" class="form-control border-start-0 ps-0" placeholder="Быстрый поиск...">
-                        </div>
-                    </div>
-
-                    <div id="methodicalTeachersContainer" class="teacher-tags-container custom-scrollbar d-flex flex-wrap gap-2">
-                        <div class="w-100 text-center py-4 text-muted" id="teachersLoader">
-                            <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                            <div class="small">Загрузка базы преподавателей...</div>
-                        </div>
-                    </div>
+        <!-- ПРАВАЯ ПАНЕЛЬ -->
+        <main class="results-area">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center flex-shrink-0">
+                    <span class="fw-bold text-dark small text-uppercase" id="mwSummaryText">Результаты анализа</span>
+                    <button id="mwExcelBtn" class="btn btn-sm btn-success d-none rounded-pill px-3 shadow-sm fw-bold">
+                        <i class="bi bi-file-earmark-excel me-1"></i>Скачать Excel
+                    </button>
                 </div>
 
-                <div class="col-lg-4">
-                    <div class="bg-light p-4 rounded-4 border h-100 d-flex flex-column justify-content-between">
-                        <div>
-                            <label class="form-label text-muted small text-uppercase fw-bold mb-2">Диапазон поиска</label>
-                            <select id="methodicalWeekType" class="form-select form-select-lg mb-3 shadow-sm" style="font-size: 0.95rem;">
-                                <option value="3" selected>Обе недели (Строгое окно)</option>
-                                <option value="1">Только Числитель</option>
-                                <option value="2">Только Знаменатель</option>
-                            </select>
-                        </div>
-
-                        <button type="button" id="GenerateMethodicalBtn" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold mt-auto" style="border-radius: 0.75rem;">
-                            <i class="bi bi-magic me-2"></i>Сгенерировать сводку
-                        </button>
+                <div class="matrix-table-container custom-scroll p-3">
+                    <!-- Блок суммирования (Статистика) -->
+                    <div id="mwStatsContainer" class="stats-card d-none">
+                        <div class="small fw-bold text-uppercase text-muted mb-2" style="font-size: 0.7rem;">Всего свободных окон по участникам:</div>
+                        <div id="mwStatsContent" class="d-flex flex-wrap"></div>
                     </div>
+
+                    <table class="table table-hover table-sticky-header mb-0 align-middle" id="mwTable">
+                        <thead>
+                            <tr>
+                                <th class="ps-4" style="width: 100px;">День</th>
+                                <th style="width: 120px;">Время</th>
+                                <th class="text-center" style="width: 60px;">Люди</th>
+                                <th>Список участников</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mwTbody">
+                            <tr><td colspan="4" class="text-center py-5 text-muted">Выберите участников слева</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
+        </main>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-dark" id="methodicalSummary">
-                <i class="bi bi-table me-2 text-primary"></i>Таблица результатов
-            </h5>
-            <button id="ExportMethodicalExcelBtn" class="btn btn-sm btn-success d-none align-items-center gap-2 px-3 fw-bold rounded-pill shadow-sm">
-                <i class="bi bi-file-earmark-excel"></i> Выгрузить в Excel
-            </button>
-        </div>
-
-        <div class="table-responsive custom-scrollbar" style="max-height: 60vh;">
-            <table class="table table-modern table-hover mb-0 w-100" id="methodicalTable">
-                <thead>
-                    <tr>
-                        <th class="ps-4" style="width: 15%;">День</th>
-                        <th style="width: 15%;">Время</th>
-                        <th class="text-center" style="width: 15%;">Свободно</th>
-                        <th style="width: 55%;">Имена преподавателей</th>
-                    </tr>
-                </thead>
-                <tbody id="methodicalTbody">
-                    <tr>
-                        <td colspan="4" class="p-4">
-                            <div class="empty-state text-center">
-                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-4 mb-3 text-primary">
-                                    <i class="bi bi-inboxes fs-1"></i>
-                                </div>
-                                <h5 class="fw-bold text-dark">Нет данных для отображения</h5>
-                                <p class="text-muted mb-0">Выберите нужных преподавателей выше и нажмите кнопку генерации.</p>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const teachersContainer = document.getElementById("methodicalTeachersContainer");
-        const searchInput = document.getElementById("teacherSearch");
-        const generateBtn = document.getElementById("GenerateMethodicalBtn");
-        const exportExcelBtn = document.getElementById("ExportMethodicalExcelBtn");
+    (function () {
+        let rawData = null;
+        let statsData = {}; // Для хранения суммирования
 
-        // 1. Загрузка преподавателей в виде кнопок (тегов)
-        const checkTeachersInterval = setInterval(() => {
+        // ИНИЦИАЛИЗАЦИЯ
+        const loaderInt = setInterval(() => {
             if (window.appData && window.appData.teachers) {
-                clearInterval(checkTeachersInterval);
-                teachersContainer.innerHTML = "";
-
+                clearInterval(loaderInt);
+                const container = document.getElementById("mwTeachersContainer");
+                container.innerHTML = "";
                 window.appData.teachers.forEach(t => {
-                    let displayName = t.fullName || t.name || t.Name;
-                    if (!displayName) {
-                        const last = t.lastName || t.LastName || '';
-                        const first = t.firstName || t.FirstName || '';
-                        const middle = t.middleName || t.MiddleName || '';
-                        displayName = `${last} ${first} ${middle}`.trim();
-                    }
-                    displayName = displayName || 'Без имени';
-
-                    // Используем Bootstrap btn-check для красивых тегов
-                    const div = document.createElement("div");
-                    div.className = "teacher-item-wrapper";
-                    div.innerHTML = `
-                        <input type="checkbox" class="btn-check teacher-cb" id="t_${t.id}" value="${t.id}" autocomplete="off">
-                        <label class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 shadow-sm" for="t_${t.id}">
-                            ${displayName}
-                        </label>
-                    `;
-                    teachersContainer.appendChild(div);
+                    const name = t.fullName || `${t.lastName || ''} ${t.firstName || ''}`.trim();
+                    const item = document.createElement("div");
+                    item.className = "teacher-item-wrapper";
+                    item.innerHTML = `
+                        <input type="checkbox" class="btn-check teacher-cb" id="mw_t_${t.id}" value="${t.id}" onchange="updateSelectedCount()">
+                        <label class="btn btn-outline-secondary btn-sm w-100 text-start mb-1 border-0 text-truncate" for="mw_t_${t.id}">
+                            ${name}
+                        </label>`;
+                    container.appendChild(item);
                 });
             }
         }, 100);
 
-        // 2. Живой поиск по тегам
-        searchInput.addEventListener("input", function() {
+        // ПОИСК
+        document.getElementById("mwTeacherSearch").addEventListener("input", function() {
             const val = this.value.toLowerCase();
             document.querySelectorAll(".teacher-item-wrapper").forEach(item => {
-                const text = item.innerText.toLowerCase();
-                item.style.display = text.includes(val) ? "block" : "none";
+                item.style.display = item.textContent.toLowerCase().includes(val) ? "block" : "none";
             });
         });
 
-        // 3. Запрос к API
-        generateBtn.addEventListener("click", async function () {
-            const selectedIds = Array.from(document.querySelectorAll(".teacher-cb:checked")).map(cb => cb.value);
+        window.updateSelectedCount = function() {
+            document.getElementById("selectedCount").innerText = document.querySelectorAll(".teacher-cb:checked").length;
+        };
 
-            if (selectedIds.length < 2) {
-                alert("Нужно выбрать хотя бы 2-х преподавателей!");
-                return;
-            }
+        // ГРУППИРОВКА
+        document.getElementById("mwGrouping").addEventListener("change", () => { if (rawData) renderData(rawData); });
 
-            const weekTypeId = document.getElementById("methodicalWeekType").value;
-            const params = new URLSearchParams();
-            params.append("weekTypeId", weekTypeId);
-            selectedIds.forEach(id => params.append("teacherIds", id));
+        // ЗАПРОС
+        document.getElementById("mwGenerateBtn").addEventListener("click", async () => {
+            const selected = Array.from(document.querySelectorAll(".teacher-cb:checked")).map(cb => cb.value);
+            if (selected.length < 2) return alert("Выберите минимум 2-х участников");
 
-            const origText = generateBtn.innerHTML;
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Идет анализ...';
+            const btn = document.getElementById("mwGenerateBtn");
+            btn.disabled = true; btn.innerText = "АНАЛИЗ...";
 
             try {
-                // Путь к нашему новому Report контроллеру
-                const response = await fetch(`http://localhost:5062/api/report/methodical-windows?${params.toString()}`);
-                if (!response.ok) throw new Error();
+                const week = document.getElementById("mwWeekType").value;
+                const p = new URLSearchParams({ weekTypeId: week });
+                selected.forEach(id => p.append("teacherIds", id));
 
-                const data = await response.json();
-                renderTable(data);
-                exportExcelBtn.classList.toggle("d-none", !data.rows.length);
-            } catch (e) {
-                alert("Ошибка сервера при расчете расписания.");
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = origText;
+                const res = await fetch(`http://localhost:5062/api/report/methodical-windows?${p.toString()}`);
+                const data = await res.json();
+
+                // Фильтр воскресенья и расчет суммирования
+                rawData = {
+                    ...data,
+                    rows: data.rows.filter(r => r.dayName !== "Воскресенье")
+                };
+
+                calculateStats(rawData);
+                renderData(rawData);
+                document.getElementById("mwExcelBtn").classList.remove("d-none");
+            } catch (e) { alert("Ошибка расчета"); } finally {
+                btn.disabled = false; btn.innerText = "АНАЛИЗ ОКОН";
             }
         });
 
-        // 4. Экспорт
-        exportExcelBtn.addEventListener("click", function() {
-            const table = document.getElementById("methodicalTable");
-            let csvContent = "\uFEFF";
-            const rows = table.querySelectorAll("tr");
-
-            rows.forEach(row => {
-                const cols = row.querySelectorAll("th, td");
-                const rowData = Array.from(cols).map(c => `"${c.innerText.replace(/"/g, '""').trim()}"`).join(";");
-                csvContent += rowData + "\r\n";
+        // ФУНКЦИЯ СУММИРОВАНИЯ
+        function calculateStats(data) {
+            statsData = {};
+            data.rows.forEach(row => {
+                const names = row.freeTeachersNames.split(", ");
+                names.forEach(name => {
+                    const cleanName = name.trim();
+                    if (cleanName) {
+                        statsData[cleanName] = (statsData[cleanName] || 0) + 1;
+                    }
+                });
             });
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", `Методические_окна.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
+            const statsContent = document.getElementById("mwStatsContent");
+            statsContent.innerHTML = "";
 
-        // 5. Отрисовка таблицы
-        function renderTable(data) {
-            const tbody = document.getElementById("methodicalTbody");
-            const summary = document.getElementById("methodicalSummary");
+            // Сортируем статистику по убыванию
+            const sortedStats = Object.entries(statsData).sort((a, b) => b[1] - a[1]);
+
+            sortedStats.forEach(([name, count]) => {
+                statsContent.innerHTML += `
+                    <div class="stat-badge shadow-sm">
+                        <span class="fw-bold text-primary me-2">${count}</span>
+                        <span class="text-dark">${name}</span>
+                    </div>`;
+            });
+            document.getElementById("mwStatsContainer").classList.remove("d-none");
+        }
+
+        // РЕНДЕРИНГ ТАБЛИЦЫ
+        function renderData(data) {
+            const tbody = document.getElementById("mwTbody");
+            const groupMode = document.getElementById("mwGrouping").value;
             tbody.innerHTML = "";
 
-            if (!data.rows || !data.rows.length) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="p-4">
-                            <div class="empty-state text-center border-danger border-opacity-25 bg-danger bg-opacity-10">
-                                <i class="bi bi-emoji-frown fs-1 text-danger opacity-75 mb-3 d-block"></i>
-                                <h5 class="fw-bold text-danger">Общих окон не найдено</h5>
-                                <p class="text-danger opacity-75 mb-0">У выбранной группы преподавателей нет совпадений в расписании.</p>
-                            </div>
-                        </td>
-                    </tr>`;
-                summary.innerHTML = '<i class="bi bi-table me-2 text-primary"></i>Таблица результатов <span class="badge bg-secondary rounded-pill ms-2">0</span>';
+            if (!data.rows.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="py-5 text-center">Окон не найдено</td></tr>';
                 return;
             }
 
-            summary.innerHTML = `<i class="bi bi-table me-2 text-primary"></i>Таблица результатов <span class="badge bg-success rounded-pill ms-2 shadow-sm">Найдено: ${data.totalWindowsFound}</span>`;
+            let sortedRows = [...data.rows];
+            if (groupMode === "count") sortedRows.sort((a, b) => b.freeTeachersCount - a.freeTeachersCount);
 
-            data.rows.forEach(row => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="fw-bold ps-4 text-dark">${row.dayName}</td>
-                        <td class="fw-medium text-secondary">
-                            <div class="d-inline-flex align-items-center bg-light px-2 py-1 rounded-2 border">
-                                <i class="bi bi-clock me-2 text-muted"></i>${row.timeDisplay}
-                            </div>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fs-6 border border-primary border-opacity-25">
-                                ${row.freeTeachersCount}
-                            </span>
-                        </td>
-                        <td class="text-muted" style="line-height: 1.6;">${row.freeTeachersNames}</td>
-                    </tr>`;
+            let lastGroup = null;
+            sortedRows.forEach(row => {
+                let currentGroup = groupMode === "day" ? row.dayName : (groupMode === "count" ? row.freeTeachersCount : null);
+                let label = groupMode === "day" ? `<i class="bi bi-calendar3 me-2"></i>${currentGroup}` : `<i class="bi bi-people me-2"></i>Свободно человек: ${currentGroup}`;
+
+                if (groupMode !== "none" && currentGroup !== lastGroup) {
+                    const gTr = document.createElement("tr");
+                    gTr.className = "group-header-row";
+                    gTr.innerHTML = `<td colspan="4" class="ps-4 py-2">${label}</td>`;
+                    tbody.appendChild(gTr);
+                    lastGroup = currentGroup;
+                }
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="ps-4">${groupMode === "day" ? "" : row.dayName}</td>
+                    <td><span class="badge bg-light text-dark border font-monospace small">${row.timeDisplay}</span></td>
+                    <td class="text-center"><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">${row.freeTeachersCount}</span></td>
+                    <td class="small text-muted">${row.freeTeachersNames}</td>`;
+                tbody.appendChild(tr);
             });
+            document.getElementById("mwSummaryText").innerText = `НАЙДЕНО ОКОН: ${data.rows.length}`;
         }
-    });
+
+        // КРАСИВЫЙ EXCEL С СУММИРОВАНИЕМ
+        document.getElementById("mwExcelBtn").addEventListener("click", async () => {
+            if (!rawData || !rawData.rows.length) return;
+
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('Методические окна');
+
+            // Заголовок
+            sheet.mergeCells('A1:D1');
+            const titleCell = sheet.getCell('A1');
+            titleCell.value = 'АНАЛИЗ МЕТОДИЧЕСКИХ ОКОН (ПН-СБ)';
+            titleCell.font = { size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+            titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D6EFD' } };
+            titleCell.alignment = { horizontal: 'center' };
+
+            // ТАБЛИЦА СУММИРОВАНИЯ В EXCEL
+            sheet.getCell('A3').value = 'СВОДНАЯ СТАТИСТИКА (Кол-во свободных окон)';
+            sheet.getCell('A3').font = { bold: true };
+
+            let currentExcelRow = 4;
+            const sortedStats = Object.entries(statsData).sort((a, b) => b[1] - a[1]);
+
+            sortedStats.forEach(([name, count]) => {
+                sheet.getCell(`A${currentExcelRow}`).value = name;
+                sheet.getCell(`B${currentExcelRow}`).value = count;
+                sheet.getCell(`B${currentExcelRow}`).font = { bold: true };
+                currentExcelRow++;
+            });
+
+            currentExcelRow += 2;
+            const headerRow = sheet.getRow(currentExcelRow);
+            headerRow.values = ['День недели', 'Время', 'Свободно чел.', 'Список преподавателей'];
+            headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF495057' } };
+
+            currentExcelRow++;
+            rawData.rows.forEach(row => {
+                const dataRow = sheet.getRow(currentExcelRow);
+                dataRow.values = [row.dayName, row.timeDisplay, row.freeTeachersCount, row.freeTeachersNames];
+                dataRow.getCell(4).alignment = { wrapText: true };
+                currentExcelRow++;
+            });
+
+            sheet.getColumn(1).width = 15;
+            sheet.getColumn(2).width = 20;
+            sheet.getColumn(3).width = 15;
+            sheet.getColumn(4).width = 60;
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `Methodical_Windows_Report.xlsx`);
+        });
+    })();
 </script>

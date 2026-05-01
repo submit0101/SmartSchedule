@@ -1,0 +1,31 @@
+﻿<!--МОДАЛКА ПРЕДПРОСМОТРА EXCEL -->
+<div id="importPreviewModal" class="modal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-content" style="max-width: 800px; width: 90%;">
+        <button class="btn-close" onclick="closeModal('importPreviewModal')" style="position: absolute; right: 15px; top: 15px;"></button>
+
+        <div class="modal-header mb-3">
+            <h4 class="fw-bold text-success" id="importPreviewTitle">
+                <i class="bi bi-file-earmark-excel me-2"></i>Предпросмотр импорта
+            </h4>
+            <p class="text-muted small mb-0">Показаны первые 10 строк из файла. Проверьте правильность колонок перед загрузкой.</p>
+        </div>
+
+        <div class="modal-body p-0">
+            <div class="table-responsive custom-scroll" style="max-height: 50vh; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+                <table class="table table-hover table-bordered table-sm mb-0 align-middle" style="font-size: 0.85rem;">
+                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;" id="previewThead">
+                    </thead>
+                    <tbody id="previewTbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal-footer mt-3">
+            <button type="button" class="btn btn-light" onclick="closeModal('importPreviewModal')">Отмена</button>
+            <button type="button" class="btn btn-success" id="confirmImportBtn">
+                <i class="bi bi-cloud-arrow-up me-2"></i>Загрузить данные
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,209 +1,207 @@
 ﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
 
 <style>
-    /* Базовые стили */
-    .container-fluid {
-        overflow-x: hidden;
-    }
-
+    /* Стили таблицы и прокрутки */
     .table-scroll-wrapper {
         max-height: 70vh;
         overflow-y: auto;
+        position: relative;
     }
 
         .table-scroll-wrapper thead th {
             position: sticky;
             top: 0;
-            background-color: #F7F7F9;
-            z-index: 2;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            background-color: #f8f9fa;
+            z-index: 20;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-    @@media (min-width: 992px) {
-        .table-scroll-wrapper
-
-    {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+    /* Стили группировки */
+    .group-divider-row {
+        background-color: #f1f3f5 !important;
+        cursor: pointer;
+        transition: background-color 0.2s;
     }
 
-    .table-scroll-wrapper::-webkit-scrollbar {
-        display: none;
+    .group-divider-text {
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        color: #495057;
+        padding: 10px 20px !important;
     }
 
+    .group-divider-row.collapsed i.bi-chevron-down {
+        transform: rotate(-90deg);
     }
 
-    .mobile-scroll-wrapper {
-        height: calc(100vh - 420px);
-        min-height: 300px;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 100px !important;
+    /* Адаптивность диаграмм */
+    .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
     }
 
-    .sticky-stats-card {
-        position: sticky;
-        top: 20px;
-        transition: all 0.3s ease;
-    }
-
-    /* Стили для плавающего виджета */
-    .floating-chart-widget {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 320px;
-        z-index: 990;
-        display: none;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.2);
-        border-radius: 16px;
-        background: white;
-        border: 1px solid rgba(0,0,0,0.05);
-        animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @@keyframes slideInUp {
-        from
-
-    {
-        transform: translateY(50px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
+    /* Мобильная версия */
+    .mobile-stats-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #dee2e6;
+        margin-bottom: 20px;
     }
 
     .mobile-card {
         background: white;
         border-radius: 12px;
-        padding: 12px;
-        margin-bottom: 8px;
-        border: 1px solid #e0e0e0;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #dee2e6;
     }
 
-    /* Стили для группы кнопок на графике */
-    .chart-actions .btn {
-        width: 32px;
-        height: 32px;
+    /* Кнопка сворачивания диаграммы */
+    .btn-toggle-chart {
         padding: 0;
+        width: 30px;
+        height: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 6px;
+        border-radius: 50%;
+        border: 1px solid #eee;
+        background: #f8f9fa;
+        transition: all 0.3s;
     }
+
+        .btn-toggle-chart[aria-expanded="false"] {
+            transform: rotate(180deg);
+        }
 </style>
 
 <div class="container-fluid px-0">
-
-    <div class="material-card mb-4">
-        <h5 class="mb-3" style="color: var(--md-sys-color-primary); font-weight: 600;">Загруженность аудиторий</h5>
+    <!-- Фильтры -->
+    <div class="material-card mb-4 shadow-sm border-0">
+        <h5 class="mb-3 fw-bold text-primary">Загруженность аудиторий</h5>
         <form id="cabFilterForm" class="row g-3 align-items-end" onsubmit="return false;">
-            <div class="col-md-3">
-                <label class="form-label text-muted small text-uppercase fw-bold">Здание</label>
-                <select id="cabBuildingFilter" class="form-select">
-                    <option value="">Все</option>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Здание</label>
+                <select id="cabBuildingFilter" class="form-select shadow-none">
+                    <option value="">Все здания</option>
                     <option value="1">Новый корпус</option>
                     <option value="2">Старый корпус</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label text-muted small text-uppercase fw-bold">Тип недели</label>
-                <select id="cabWeekTypeFilter" class="form-select">
-                    <option value="">Все</option>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Тип недели</label>
+                <select id="cabWeekTypeFilter" class="form-select shadow-none">
+                    <option value="">Все недели</option>
                     <option value="1">Числитель</option>
                     <option value="2">Знаменатель</option>
-                    <option value="3">Обе</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">День</label>
+                <select id="cabDayFilter" class="form-select shadow-none">
+                    <option value="">Любой день</option>
+                    <option value="1">Пн</option>
+                    <option value="2">Вт</option>
+                    <option value="3">Ср</option>
+                    <option value="4">Чт</option>
+                    <option value="5">Пт</option>
+                    <option value="6">Сб</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-bold text-primary text-uppercase">Группировка</label>
+                <select id="cabGroupBy" class="form-select border-primary shadow-none">
+                    <option value="none">Без группировки</option>
+                    <option value="building">По корпусам</option>
+                    <option value="usage">По уровню загрузки</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label text-muted small text-uppercase fw-bold">День недели</label>
-                <select id="cabDayFilter" class="form-select">
-                    <option value="">Все</option>
-                    <option value="1">Понедельник</option>
-                    <option value="2">Вторник</option>
-                    <option value="3">Среда</option>
-                    <option value="4">Четверг</option>
-                    <option value="5">Пятница</option>
-                    <option value="6">Суббота</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <button type="button" id="ShowCabUsageBtn" class="btn btn-primary w-100">
-                    Сформировать отчет
+                <button type="button" id="ShowCabUsageBtn" class="btn btn-primary w-100 fw-bold shadow-sm">
+                    <i class="bi bi-play-fill me-1"></i> Сформировать
                 </button>
             </div>
         </form>
     </div>
 
     <div class="row g-4">
+        <!-- Контент -->
         <div class="col-lg-8">
-            <div class="material-card p-0 overflow-hidden h-100">
-                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white flex-wrap gap-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fw-bold fs-5 text-dark">Результаты</span>
-                        <span id="CabRecordsCount" class="badge bg-light text-dark border">0</span>
+            <div class="material-card p-0 overflow-hidden shadow-sm border-0 bg-white">
+                <!-- Панель управления результатами -->
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="fw-bold">Найдено: <span id="CabRecordsCount" class="text-primary border bg-light px-2 rounded">0</span></span>
+
+                    <div class="flex-grow-1 mx-md-3" style="min-width: 200px;">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input type="text" id="cabTableSearch" class="form-control border-start-0 shadow-none" placeholder="Поиск номера аудитории...">
+                        </div>
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <button id="ExportCabExcelBtn" class="btn btn-sm btn-outline-success d-none align-items-center gap-2 px-3 rounded-pill">
-                            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-                            <span class="d-none d-sm-inline fw-medium">Excel</span>
-                        </button>
+                    <!-- ВОТ ОН, EXCEL! -->
+                    <button id="ExportCabExcelBtn" class="btn btn-sm btn-outline-success d-none rounded-pill px-3 fw-bold">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Excel
+                    </button>
+                </div>
+
+                <!-- Мобильная диаграмма (сворачиваемая) -->
+                <div class="d-md-none p-3 bg-light border-bottom" id="MobileChartBlock" style="display:none;">
+                    <div class="mobile-stats-card shadow-sm overflow-hidden">
+                        <div class="p-3 d-flex justify-content-between align-items-center bg-white border-bottom">
+                            <h6 class="m-0 fw-bold small text-muted text-uppercase">Топ-5 Загрузки</h6>
+                            <button class="btn btn-toggle-chart" type="button" data-bs-toggle="collapse" data-bs-target="#mobileChartCollapse">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="collapse show" id="mobileChartCollapse">
+                            <div class="p-3 bg-white">
+                                <div class="chart-container">
+                                    <canvas id="MobileCabPieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Таблица (Desktop) -->
                 <div class="d-none d-md-block table-scroll-wrapper">
                     <table class="table table-hover mb-0 align-middle">
                         <thead>
                             <tr>
                                 <th class="ps-4">Аудитория</th>
-                                <th class="text-center">Корпус</th>
+                                <th class="text-center cab-col-building">Корпус</th>
                                 <th class="text-center">Занятий</th>
                                 <th class="text-center pe-4">Загрузка</th>
                             </tr>
                         </thead>
                         <tbody id="CabUsageData">
-                            <tr><td colspan="4" class="text-center text-muted py-5">Выберите параметры</td></tr>
+                            <tr><td colspan="4" class="text-center text-muted py-5">Настройте фильтры и нажмите "Сформировать"</td></tr>
                         </tbody>
                     </table>
                 </div>
 
+                <!-- Карточки (Mobile) -->
                 <div class="d-md-none p-3 bg-light mobile-scroll-wrapper" id="CabMobileContainer">
-                    <div class="text-center text-muted py-4">Нет данных</div>
                 </div>
             </div>
         </div>
 
+        <!-- Боковая панель (Desktop) -->
         <div class="col-lg-4 d-none d-lg-block">
-            <div class="material-card sticky-stats-card">
-                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 fw-bold text-primary"><i class="bi bi-pie-chart-fill me-2"></i>Топ-5 Аудиторий</h6>
-
-                    <div class="d-flex gap-2 chart-actions">
-                        <button class="btn btn-light text-primary border shadow-sm" onclick="shareCabChart('desktop')" title="Поделиться в ВК">
-                            <i class="bi bi-share-fill"></i>
-                        </button>
-                        <button class="btn btn-light text-muted border shadow-sm" onclick="downloadCabChartPng('desktop')" title="Скачать PNG">
-                            <i class="bi bi-camera-fill"></i>
-                        </button>
-                    </div>
-
-                </div>
-                <div class="p-4 position-relative" style="height: 300px;">
+            <div class="material-card sticky-stats-card p-3 shadow-sm border-0">
+                <h6 class="fw-bold text-primary mb-3">Эффективность использования</h6>
+                <div class="chart-container" style="height: 280px;">
                     <canvas id="DesktopCabPieChart"></canvas>
                 </div>
-                <div class="p-3 bg-light border-top rounded-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted small text-uppercase fw-bold">Средняя загр.</span>
-                        <span id="DesktopCabAvg" class="fs-5 fw-bold text-dark">0%</span>
+                <div class="mt-4 p-3 bg-light rounded-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small fw-bold text-muted text-uppercase">Средняя загрузка</span>
+                        <span id="DesktopCabAvg" class="fw-bold">0%</span>
                     </div>
-                    <div class="progress mt-2" style="height: 6px;">
-                        <div id="DesktopCabAvgBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    <div class="progress" style="height: 10px;">
+                        <div id="DesktopCabAvgBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -211,31 +209,7 @@
     </div>
 </div>
 
-<div id="floatingCabWidget" class="floating-chart-widget d-lg-none">
-    <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
-        <span class="fw-bold small text-uppercase text-primary">Топ-5</span>
-
-        <div class="d-flex align-items-center gap-2">
-            <div class="d-flex gap-2 chart-actions">
-                <button class="btn btn-white text-primary border shadow-sm" onclick="shareCabChart('mobile')">
-                    <i class="bi bi-share-fill"></i>
-                </button>
-                <button class="btn btn-white text-secondary border shadow-sm" onclick="downloadCabChartPng('mobile')">
-                    <i class="bi bi-camera-fill"></i>
-                </button>
-            </div>
-
-            <div style="width: 1px; height: 24px; background: #eee; margin: 0 4px;"></div>
-            <button type="button" class="btn-close" onclick="closeCabWidget()"></button>
-        </div>
-    </div>
-    <div class="p-3 text-center bg-white">
-        <div style="height: 250px; position: relative;">
-            <canvas id="floatingCabPieChart"></canvas>
-        </div>
-    </div>
-</div>
-
+<!-- БИБЛИОТЕКИ ДЛЯ EXCEL -->
 <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -243,266 +217,171 @@
 <script>
     (function () {
         let cabReportData = [];
-        let desktopCabChart = null;
-        let mobileCabChart = null;
-        let currentAvg = "0%";
+        let charts = { desktop: null, mobile: null };
 
+        // 1. ПОЛУЧЕНИЕ ДАННЫХ
         document.getElementById("ShowCabUsageBtn").addEventListener("click", async () => {
-            const build = document.getElementById("cabBuildingFilter").value;
-            const week = document.getElementById("cabWeekTypeFilter").value;
-            const day = document.getElementById("cabDayFilter").value;
+            const b = document.getElementById("cabBuildingFilter").value;
+            const w = document.getElementById("cabWeekTypeFilter").value;
+            const d = document.getElementById("cabDayFilter").value;
             const btn = document.getElementById("ShowCabUsageBtn");
 
-            btn.style.width = `${btn.offsetWidth}px`;
-            const originalText = btn.innerHTML;
-
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Загрузка...';
 
-            setTimeout(async () => {
-                try {
-                    const url = `http://localhost:5062/api/report/cabinet-usage?buildingId=${build}&weekTypeId=${week}&dayOfWeekId=${day}`;
-                    const res = await fetch(url);
-                    if (!res.ok) throw new Error("Server Error");
+            try {
+                // ПАРАМЕТР dayOfWeekId ВЕРНУЛСЯ![cite: 1]
+                const url = `http://localhost:5062/api/report/cabinet-usage?buildingId=${b}&weekTypeId=${w}&dayOfWeekId=${d}`;
+                const res = await fetch(url);
+                cabReportData = await res.json();
 
-                    const data = await res.json();
-                    cabReportData = data;
+                renderCabResults(cabReportData);
+                updateCharts(cabReportData);
 
-                    renderCabResults(data);
-
-                    if (data && data.length > 0) {
-                        requestAnimationFrame(() => {
-                            updateCabCharts(data);
-                            document.getElementById("ExportCabExcelBtn").classList.remove("d-none");
-                            document.getElementById("ExportCabExcelBtn").classList.add("d-flex");
-
-                            // Показываем кнопку ВК если есть данные
-                            if (window.innerWidth < 992) document.getElementById('floatingCabWidget').style.display = 'block';
-                        });
-                    } else {
-                        closeCabWidget();
-                        document.getElementById("ExportCabExcelBtn").classList.add("d-none");
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert("Ошибка загрузки данных");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                    btn.style.width = '';
-                }
-            }, 0);
+                document.getElementById("ExportCabExcelBtn").classList.toggle("d-none", cabReportData.length === 0);
+                document.getElementById("MobileChartBlock").style.display = cabReportData.length > 0 ? "block" : "none";
+            } catch (e) {
+                alert("Ошибка загрузки данных");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-play-fill me-1"></i> Сформировать';
+            }
         });
 
-        // --- ГЛАВНАЯ МАГИЯ: ПОДЕЛИТЬСЯ ФОТО ---
-        window.shareCabChart = function(type) {
-            const chart = type === 'mobile' ? mobileCabChart : desktopCabChart;
-            if (!chart) return alert("График не найден");
+        // 2. ГРУППИРОВКА И ПОИСК
+        document.getElementById("cabGroupBy").addEventListener("change", () => renderCabResults(cabReportData));
 
-            // 1. Превращаем график в файл (Blob)
-            chart.canvas.toBlob(async (blob) => {
-                if (!blob) return;
+        document.getElementById("cabTableSearch").addEventListener("input", (e) => {
+            const val = e.target.value.toLowerCase();
+            document.querySelectorAll(".cab-data-row, .cab-mobile-card").forEach(el => {
+                el.style.display = el.innerText.toLowerCase().includes(val) ? "" : "none";
+            });
+            if(val) $(".group-divider-row").hide(); else $(".group-divider-row").show();
+        });
 
-                const file = new File([blob], "chart.png", { type: "image/png" });
-
-                // 2. Пробуем "Нативный шеринг" (Работает на Телефонах)
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: 'Статистика аудиторий',
-                            text: `Загрузка аудиторий: ${currentAvg}`,
-                        });
-                    } catch (error) {
-                        console.log('Отменено пользователем'); // Не ругаемся, если просто закрыл окно
-                    }
-                }
-                // 3. Если это Компьютер (Desktop)
-                else {
-                    try {
-                        // Пытаемся скопировать картинку в буфер обмена
-                        // Это работает в Chrome/Edge/Yandex на ПК
-                        await navigator.clipboard.write([
-                            new ClipboardItem({
-                                "image/png": blob
-                            })
-                        ]);
-
-                        // Открываем ВК в новой вкладке
-                        window.open('https://vk.com/share.php?comment=' + encodeURIComponent(`Средняя загрузка аудиторий: ${currentAvg}`), '_blank');
-
-                        // Сообщаем пользователю
-                        alert("📷 Диаграмма скопирована!\n\nПросто нажмите Ctrl+V (Вставить) в открывшемся окне ВК.");
-
-                    } catch (err) {
-                        // Если браузер совсем старый и не умеет копировать картинки
-                        // Скачиваем файл по старинке
-                        saveAs(blob, "chart_stats.png");
-                        alert("Файл скачан. Загрузите его в ВК вручную.");
-                        window.open('https://vk.com/', '_blank');
-                    }
-                }
-            }, 'image/png');
-        };
-        // ----------------------------------------
-
+        // 3. ОТРИСОВКА РЕЗУЛЬТАТОВ (С ГРУППИРОВКОЙ)
         function renderCabResults(data) {
             const tbody = document.getElementById("CabUsageData");
             const mobile = document.getElementById("CabMobileContainer");
-            const count = document.getElementById("CabRecordsCount");
+            const groupBy = document.getElementById("cabGroupBy").value;
 
-            tbody.innerHTML = "";
-            mobile.innerHTML = "";
+            tbody.innerHTML = ""; mobile.innerHTML = "";
+            if (!data.length) return;
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">Нет данных</td></tr>`;
-                mobile.innerHTML = `<div class="text-center text-muted py-4">Нет данных</div>`;
-                count.innerText = "0";
-                updateCabStats(0);
-                return;
-            }
+            let sorted = [...data];
+            if (groupBy === "building") sorted.sort((a,b) => (a.buildingName||"").localeCompare(b.buildingName||""));
+            else if (groupBy === "usage") sorted.sort((a,b) => b.usagePercentage - a.usagePercentage);
 
-            count.innerText = data.length;
-            let sumPct = 0;
-            let tableRows = "";
-            let mobileCards = "";
+            document.querySelectorAll(".cab-col-building").forEach(el => el.style.display = groupBy === "building" ? "none" : "");
 
-            data.forEach(item => {
+            let currentGroup = null, groupIdx = 0, sumPct = 0;
+
+            sorted.forEach(item => {
                 sumPct += item.usagePercentage;
-                const percent = item.usagePercentage.toFixed(1);
+                const pct = item.usagePercentage.toFixed(1);
+                const color = pct > 70 ? "success" : pct > 40 ? "warning" : "danger";
 
-                const colorClass = percent > 70 ? "text-success" : percent > 40 ? "text-warning" : "text-danger";
-                const bgClass = percent > 70 ? "bg-success" : percent > 40 ? "bg-warning" : "bg-danger";
-                const borderClass = percent > 70 ? "border-success" : percent > 40 ? "border-warning" : "border-danger";
+                let groupVal = groupBy === "building" ? (item.buildingName || "Прочее") :
+                               (pct > 70 ? "Высокая загрузка" : pct > 40 ? "Средняя загрузка" : "Низкая загрузка");
 
-                tableRows += `
-                    <tr>
+                if (groupBy !== "none" && groupVal !== currentGroup) {
+                    currentGroup = groupVal; groupIdx++;
+                    tbody.innerHTML += `<tr class="group-divider-row" data-id="${groupIdx}"><td colspan="4" class="group-divider-text fw-bold text-uppercase"><i class="bi bi-chevron-down me-2 text-primary"></i>${groupVal}</td></tr>`;
+                    mobile.innerHTML += `<div class="fw-bold text-muted small text-uppercase mt-3 mb-2 ps-2 border-start border-primary border-3">${groupVal}</div>`;
+                }
+
+                const buildTd = groupBy === "building" ? "" : `<td class="text-center text-muted">${item.buildingName}</td>`;
+                tbody.innerHTML += `
+                    <tr class="cab-data-row" data-parent="${groupIdx}">
                         <td class="ps-4 fw-bold text-dark">${item.cabinetNumber}</td>
-                        <td class="text-center text-muted">${item.buildingName}</td>
+                        ${buildTd}
                         <td class="text-center font-monospace">${item.totalLessons}</td>
-                        <td class="text-center">
-                            <span class="badge ${bgClass} bg-opacity-10 ${colorClass} border ${borderClass} rounded-pill px-3">${percent}%</span>
-                        </td>
+                        <td class="text-center pe-4"><span class="badge bg-${color} bg-opacity-10 text-${color} border border-${color} rounded-pill px-3">${pct}%</span></td>
                     </tr>`;
 
-                mobileCards += `
-                    <div class="mobile-card shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <span class="fw-bold text-dark">Ауд. ${item.cabinetNumber}</span>
-                                <small class="text-muted d-block" style="font-size:0.75rem">${item.buildingName}</small>
-                            </div>
-                            <span class="fw-bold ${colorClass}">${percent}%</span>
-                        </div>
-                        <div class="progress" style="height: 4px;">
-                            <div class="progress-bar ${bgClass}" style="width: ${percent}%"></div>
-                        </div>
-                        <div class="mt-2 text-end small text-muted">
-                            Занятий: ${item.totalLessons}
-                        </div>
+                mobile.innerHTML += `
+                    <div class="mobile-card shadow-sm cab-mobile-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2"><span class="fw-bold">Ауд. ${item.cabinetNumber}</span><span class="badge bg-${color}">${pct}%</span></div>
+                        <div class="progress" style="height: 6px;"><div class="progress-bar bg-${color}" style="width:${pct}%"></div></div>
                     </div>`;
             });
 
-            tbody.innerHTML = tableRows;
-            mobile.innerHTML = mobileCards;
+            $(".group-divider-row").click(function() {
+                const id = $(this).data("id");
+                $(this).toggleClass("collapsed");
+                $(`.cab-data-row[data-parent="${id}"]`).fadeToggle(150);
+            });
 
-            const avg = data.length > 0 ? (sumPct / data.length).toFixed(1) : 0;
-            currentAvg = `${avg}%`;
-            updateCabStats(avg);
-        }
-
-        function updateCabStats(avg) {
-            document.getElementById("DesktopCabAvg").innerText = `${avg}%`;
+            document.getElementById("CabRecordsCount").innerText = data.length;
+            const avg = (sumPct / data.length).toFixed(1);
+            document.getElementById("DesktopCabAvg").innerText = avg + "%";
             const bar = document.getElementById("DesktopCabAvgBar");
-            if (bar) {
-                bar.style.width = `${avg}%`;
-                bar.className = `progress-bar ${avg > 70 ? 'bg-success' : avg > 40 ? 'bg-warning' : 'bg-primary'}`;
-            }
+            bar.style.width = avg + "%";
+            bar.className = `progress-bar progress-bar-striped progress-bar-animated bg-${avg > 70 ? 'success' : avg > 40 ? 'warning' : 'primary'}`;
         }
 
-        function updateCabCharts(data) {
-            const sorted = [...data].sort((a, b) => b.usagePercentage - a.usagePercentage);
-            const top5 = sorted.slice(0, 5);
-            const labels = top5.map(d => `${d.cabinetNumber} (${d.usagePercentage.toFixed(0)}%)`);
-            const values = top5.map(d => d.usagePercentage);
-            const bgColors = ['#EF5350', '#42A5F5', '#66BB6A', '#FFA726', '#AB47BC'];
-
-            const config = {
-                type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: values, backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff' }] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20, font: {size: 11} } },
-                        tooltip: { enabled: false }
-                    },
-                    cutout: '65%',
-                    layout: { padding: 10 }
-                }
+        // 4. ДИАГРАММЫ
+        function updateCharts(data) {
+            const top = [...data].sort((a,b) => b.usagePercentage - a.usagePercentage).slice(0, 5);
+            const chartData = {
+                labels: top.map(d => "Ауд. " + d.cabinetNumber),
+                datasets: [{ data: top.map(d => d.usagePercentage), backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'], borderWidth: 2, borderColor: '#fff' }]
             };
+            const opt = { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, usePointStyle: true } } }, cutout: '75%' };
 
-            const deskCanvas = document.getElementById('DesktopCabPieChart');
-            if (Chart.getChart(deskCanvas)) Chart.getChart(deskCanvas).destroy();
-            desktopCabChart = new Chart(deskCanvas, config);
+            if (charts.desktop) charts.desktop.destroy();
+            charts.desktop = new Chart(document.getElementById('DesktopCabPieChart'), { type: 'doughnut', data: chartData, options: opt });
 
-            const mobCanvas = document.getElementById('floatingCabPieChart');
-            if (Chart.getChart(mobCanvas)) Chart.getChart(mobCanvas).destroy();
-
-            const mobConfig = JSON.parse(JSON.stringify(config));
-            mobConfig.options.plugins.legend.position = 'bottom';
-            mobConfig.options.plugins.legend.labels.boxWidth = 10;
-            mobConfig.options.layout.padding = 5;
-
-            mobileCabChart = new Chart(mobCanvas, mobConfig);
+            if (charts.mobile) charts.mobile.destroy();
+            charts.mobile = new Chart(document.getElementById('MobileCabPieChart'), { type: 'doughnut', data: chartData, options: opt });
         }
 
-        window.downloadCabChartPng = function(type) {
-            const chart = type === 'mobile' ? mobileCabChart : desktopCabChart;
-            if (!chart) return alert("Нет графика");
-            const a = document.createElement('a');
-            a.href = chart.toBase64Image();
-            a.download = `Cabinet_Chart_${type}.png`;
-            a.click();
-        };
-
-        window.closeCabWidget = function() {
-            document.getElementById('floatingCabWidget').style.display = 'none';
-        };
-
+        // 5. EXCEL ЭКСПОРТ (ВОССТАНОВЛЕНО)[cite: 1]
         document.getElementById("ExportCabExcelBtn").addEventListener("click", async () => {
             if (!cabReportData.length) return;
+
             const workbook = new ExcelJS.Workbook();
-            const sheet = workbook.addWorksheet('Аудитории');
-            // ... (Код экспорта Excel остался прежним)
-            // Для краткости не дублирую длинный кусок Excel, он работает как надо
+            const sheet = workbook.addWorksheet('Загрузка аудиторий');
 
-             const borderStyle = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-            const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
-            const headerFont = { bold: true, color: { argb: 'FFFFFFFF' } };
-
+            // Заголовок
             sheet.mergeCells('A1:D1');
-            sheet.getCell('A1').value = 'ОТЧЕТ: АУДИТОРИИ';
-            sheet.getCell('A1').font = { size: 14, bold: true };
-            sheet.getCell('A1').alignment = { horizontal: 'center' };
+            const mainTitle = sheet.getCell('A1');
+            mainTitle.value = 'ОТЧЕТ ПО ЗАГРУЖЕННОСТИ АУДИТОРИЙ';
+            mainTitle.font = { size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+            mainTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4E73DF' } };
+            mainTitle.alignment = { horizontal: 'center' };
 
-            sheet.getRow(3).values = ['Аудитория', 'Корпус', 'Занятий', 'Загрузка %'];
-            sheet.columns = [{ width: 15 }, { width: 25 }, { width: 15 }, { width: 15 }];
+            // Шапка таблицы
+            sheet.getRow(3).values = ['Аудитория', 'Корпус', 'Кол-во занятий', 'Процент загрузки'];
+            sheet.getRow(3).font = { bold: true };
+            sheet.columns = [{ width: 15 }, { width: 30 }, { width: 15 }, { width: 15 }];
 
-            const headerRow = sheet.getRow(3);
-            headerRow.eachCell(c => { c.fill = headerFill; c.font = headerFont; c.alignment = { horizontal: 'center' }; c.border = borderStyle; });
+            // Данные
+            cabReportData.forEach((item, index) => {
+                const row = sheet.addRow([
+                    item.cabinetNumber,
+                    item.buildingName,
+                    item.totalLessons,
+                    item.usagePercentage / 100
+                ]);
+                row.getCell(4).numFmt = '0.0%';
 
-            cabReportData.forEach((d, i) => {
-                const r = sheet.getRow(4 + i);
-                const pct = d.usagePercentage / 100;
-                r.values = [d.cabinetNumber, d.buildingName, d.totalLessons, pct];
-                r.getCell(4).numFmt = '0.0%';
-                r.eachCell(c => { c.border = borderStyle; c.alignment = { horizontal: 'center' }; });
-                if (d.usagePercentage > 70) r.getCell(4).font = { color: { argb: 'FF009900' }, bold: true };
+                // Раскраска процентов
+                if (item.usagePercentage > 70) row.getCell(4).font = { color: { argb: 'FF00B050' }, bold: true };
+                else if (item.usagePercentage < 30) row.getCell(4).font = { color: { argb: 'FFFF0000' } };
+            });
+
+            // Авто-границы
+            sheet.eachRow((row, rowNumber) => {
+                if (rowNumber >= 3) {
+                    row.eachCell(cell => {
+                        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                    });
+                }
             });
 
             const buffer = await workbook.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `Cabinets_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            saveAs(new Blob([buffer]), `Cabinet_Usage_Report_${new Date().toLocaleDateString()}.xlsx`);
         });
     })();
 </script>

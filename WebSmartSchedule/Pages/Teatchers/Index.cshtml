@@ -3,10 +3,12 @@
 @{
     ViewData["Title"] = "Преподаватели";
 }
+<link rel="stylesheet" href="~/css/UnionStyle.css" />
 
 <div class="container-xxl py-4">
     <div class="page-section p-4 bg-white rounded shadow-sm">
 
+        <!-- Сообщения об успехе/ошибке -->
         @if (TempData["TESuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -22,32 +24,32 @@
             </div>
         }
 
+        <!-- Заголовок и кнопки -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h2 class="mb-0 text-primary fw-bold"> Список преподавателей</h2>
+            <h2 class="mb-0 text-primary fw-bold">Список преподавателей</h2>
 
             <div class="d-flex flex-wrap gap-2">
+                <!-- ОБНОВЛЕНО: Добавлен третий параметр 'Преподавателей' -->
                 <input type="file" id="excelFileInput" accept=".xlsx" style="display: none;"
-                       onchange="handleExcelUpload(event, '/Teacher/import')" />
+                       onchange="handleExcelUpload(event, '/Teacher/import', 'Преподавателей')" />
 
                 <button type="button" class="btn btn-outline-success px-3 py-2 d-flex align-items-center gap-2"
                         onclick="document.getElementById('excelFileInput').click()">
                     <i class="bi bi-file-earmark-excel"></i> Импорт из Excel
                 </button>
 
-                <a href="#"
-                   class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
+                <a href="#" class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
                    onclick="openModal('createTeacherModal')">
                     <i class="bi bi-plus-lg"></i> Добавить преподавателя
                 </a>
             </div>
         </div>
 
+        <!-- Поиск -->
         <div class="row mb-3">
             <div class="col-md-6 col-lg-4">
                 <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0">
-                        <i class="bi bi-search text-muted"></i>
-                    </span>
+                    <span class="input-group-text bg-white border-end-0"></span>
                     <input type="text"
                            id="searchInput"
                            class="form-control border-start-0 ps-0"
@@ -56,7 +58,7 @@
                             type="button"
                             id="searchButton"
                             onclick="performSearch()">
-                        Найти
+                        <i class="bi bi-search"></i>
                     </button>
                 </div>
             </div>
@@ -66,11 +68,12 @@
         {
             <div class="text-center py-5 bg-light rounded mt-3">
                 <p class="lead mb-2">Нет данных о преподавателях.</p>
-                <p class="text-muted">Добавьте их через форму выше.</p>
+                <p class="text-muted">Добавьте их через форму или загрузите из Excel.</p>
             </div>
         }
         else
         {
+            <!-- Мобильные карточки -->
             <div class="d-block d-md-none mt-3" style="max-height: 60vh; overflow-y: auto;">
                 <div class="container-fluid p-0">
                     @foreach (var teacher in Model.Teachers)
@@ -97,13 +100,14 @@
                 </div>
             </div>
 
+            <!-- Десктопная таблица -->
             <div class="table-container border rounded overflow-auto d-none d-md-block mt-3" style="max-height: 60vh;">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light sticky-top">
                         <tr>
+                            <th>Фамилия</th>
                             <th>Имя</th>
                             <th>Отчество</th>
-                            <th>Фамилия</th>
                             <th class="text-center">Действия</th>
                         </tr>
                     </thead>
@@ -111,9 +115,9 @@
                         @foreach (var teacher in Model.Teachers)
                         {
                             <tr>
+                                <td data-label="Фамилия" class="search-item">@teacher.LastName</td>
                                 <td data-label="Имя" class="search-item">@teacher.FirstName</td>
                                 <td data-label="Отчество" class="search-item">@teacher.MiddleName</td>
-                                <td data-label="Фамилия" class="search-item">@teacher.LastName</td>
                                 <td data-label="Действия">
                                     <div class="d-flex justify-content-center gap-2">
                                         <button class="btn btn-sm btn-outline-primary"
@@ -122,10 +126,10 @@
                                                 data-firstname="@teacher.FirstName"
                                                 data-middlename="@teacher.MiddleName"
                                                 data-lastname="@teacher.LastName">
-                                            <i class="bi bi-pencil"></i>
+                                            <i class="bi bi-pencil"></i> Изменить
                                         </button>
                                         <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@teacher.Id)">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="bi bi-trash"></i> Удалить
                                         </button>
                                     </div>
                                 </td>
@@ -141,28 +145,41 @@
 <partial name="_TeatcherModals" />
 
 <script>
-    // Заполнение модалки (уже без Position)
     function fillEditModal(button) {
-        const id = button.getAttribute('data-id');
-        const firstName = button.getAttribute('data-firstname');
-        const middleName = button.getAttribute('data-middlename');
-        const lastName = button.getAttribute('data-lastname');
+        try {
+            const id = button.getAttribute('data-id');
+            const firstName = button.getAttribute('data-firstname');
+            const middleName = button.getAttribute('data-middlename');
+            const lastName = button.getAttribute('data-lastname');
 
-        document.getElementById('editTeacherId').value = id;
-        document.getElementById('editTeacherFirstName').value = firstName;
-        document.getElementById('editTeacherMiddleName').value = middleName;
-        document.getElementById('editTeacherLastName').value = lastName;
+            document.getElementById('editTeacherId').value = id;
+            document.getElementById('editTeacherFirstName').value = firstName;
+            document.getElementById('editTeacherMiddleName').value = middleName;
+            document.getElementById('editTeacherLastName').value = lastName;
 
-        openModal('editTeacherModal');
+            if (typeof openModal === 'function') {
+                openModal('editTeacherModal');
+            } else {
+                console.error("Функция openModal не найдена.");
+            }
+        } catch (err) {
+            console.error("Ошибка в fillEditModal:", err);
+        }
     }
 
     function confirmDelete(id) {
-        document.getElementById('deleteTeacherId').value = id;
-        openModal('deleteConfirmModal');
+        const input = document.getElementById('deleteTeacherId');
+        if (input) {
+            input.value = id;
+            openModal('deleteConfirmModal');
+        }
     }
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+
+<!-- Твои родные скрипты -->
 <script src="/js/modal.js"></script>
-<script src="/js/ValidationModal.js"></script>
 <script src="/js/searchHandler.js"></script>
+<script src="/js/ValidationModal.js"></script>
 <script src="/js/handleExcelUpload.js"></script>

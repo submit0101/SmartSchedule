@@ -1,205 +1,397 @@
 ﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
 
 <style>
-    .crosstab-scroll-wrapper {
-        max-height: 70vh;
+    /* Современный скроллбар для матрицы */
+    .matrix-scroll-wrapper {
+        max-height: 70vh; /* Ограничиваем высоту, чтобы скроллилась только таблица, а не вся страница */
         overflow: auto;
-        scrollbar-width: thin;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
     }
 
-        .crosstab-scroll-wrapper thead th {
-            position: sticky;
-            top: 0;
-            background-color: #F7F7F9;
-            z-index: 2;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            vertical-align: middle;
+        .matrix-scroll-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
 
-            .crosstab-scroll-wrapper tbody td.sticky-col,
-            .crosstab-scroll-wrapper thead th.sticky-col {
-                position: sticky;
-                left: 0;
-                background-color: #ffffff;
-                z-index: 3;
-                border-right: 2px solid #dee2e6;
-            }
+        .matrix-scroll-wrapper::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
 
-            .crosstab-scroll-wrapper thead th.sticky-col {
-                z-index: 4;
-                background-color: #F7F7F9;
-            }
+        .matrix-scroll-wrapper::-webkit-scrollbar-corner {
+            background-color: #f8fafc;
+        }
 
-    .cell-filled {
-        background-color: rgba(13, 110, 253, 0.08);
-        color: #0d6efd;
+    /* Липкая шапка (Ось X) */
+    .table-matrix thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8fafc;
+        color: #334155;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        z-index: 20;
+        border-bottom: 2px solid #cbd5e1 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+        /* Липкий первый столбец (Ось Y) */
+        .table-matrix tbody td.sticky-col,
+        .table-matrix thead th.sticky-col {
+            position: sticky;
+            left: 0;
+            background-color: #ffffff;
+            z-index: 10;
+            font-weight: 600;
+            color: #1e293b;
+            border-right: 2px solid #cbd5e1 !important;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.02);
+        }
+
+        /* Верхний левый угол (пересечение липких осей) */
+        .table-matrix thead th.sticky-col {
+            z-index: 30; /* Должен быть выше всех */
+            background-color: #f1f5f9;
+        }
+
+    /* Стили для ячеек тепловой карты */
+    .heatmap-cell {
+        transition: transform 0.1s, box-shadow 0.1s;
+        cursor: crosshair;
         font-weight: 600;
+        font-family: 'Monaco', 'Consolas', monospace;
+    }
+
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            z-index: 5;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-radius: 4px;
+        }
+
+    .empty-cell {
+        color: #94a3b8;
+        opacity: 0.4;
+    }
+
+    /* Итоговые колонки и строки */
+    .total-cell {
+        background-color: #f1f5f9 !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
     }
 </style>
 
 <div class="container-fluid px-0">
-    <div class="material-card mb-4">
-        <h5 class="mb-3" style="color: var(--md-sys-color-primary); font-weight: 600;">Универсальный матричный отчет</h5>
-        <form id="crossTabFilterForm" class="row g-3 align-items-end" onsubmit="return false;">
-            <div class="col-md-4">
-                <label class="form-label text-muted small text-uppercase fw-bold">Строки (Ось Y)</label>
-                <select id="crossTabRowGrouping" class="form-select">
-                    <option value="Teacher" selected>Преподаватели</option>
-                    <option value="Group">Группы</option>
-                    <option value="Cabinet">Кабинеты</option>
-                    <option value="Building">Корпуса</option>
-                    <option value="Subject">Предметы</option>
-                </select>
+    <!-- Блок управления матрицей -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary me-3">
+                    <i class="bi bi-grid-3x3-gap-fill fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">Универсальная матрица (Тепловая карта)</h5>
+                    <small class="text-muted">Анализ пересечений данных по двум осям</small>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label text-muted small text-uppercase fw-bold">Колонки (Ось X)</label>
-                <select id="crossTabColGrouping" class="form-select">
-                    <option value="Subject" selected>Предметы</option>
-                    <option value="Group">Группы</option>
-                    <option value="Teacher">Преподаватели</option>
-                    <option value="Building">Корпуса</option>
-                    <option value="Cabinet">Кабинеты</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <button type="button" id="GenerateCrossTabBtn" class="btn btn-primary w-100">
-                    <i class="bi bi-table me-2"></i>Построить матрицу
-                </button>
-            </div>
-        </form>
+
+            <form id="crossTabFilterForm" class="row g-4 align-items-end" onsubmit="return false;">
+                <div class="col-md-4">
+                    <label class="form-label text-muted small text-uppercase fw-bold">Строки (Ось Y)</label>
+                    <select id="crossTabRowGrouping" class="form-select shadow-sm border-primary">
+                        <option value="Teacher" selected>Преподаватели</option>
+                        <option value="Group">Группы</option>
+                        <option value="Cabinet">Кабинеты</option>
+                        <option value="Building">Корпуса</option>
+                        <option value="Subject">Предметы</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-muted small text-uppercase fw-bold">Колонки (Ось X)</label>
+                    <select id="crossTabColGrouping" class="form-select shadow-sm border-primary">
+                        <option value="Subject" selected>Предметы</option>
+                        <option value="Group">Группы</option>
+                        <option value="Teacher">Преподаватели</option>
+                        <option value="Building">Корпуса</option>
+                        <option value="Cabinet">Кабинеты</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" id="GenerateCrossTabBtn" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold rounded-3">
+                        <i class="bi bi-magic me-2"></i>Построить матрицу
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="material-card p-0 overflow-hidden">
-        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
-            <span class="fw-bold fs-5 text-dark">Результаты матрицы</span>
-            <button id="ExportCrossTabPdfBtn" class="btn btn-sm btn-outline-danger d-none align-items-center gap-2 px-3 rounded-pill">
-                <i class="bi bi-filetype-pdf"></i>
-                <span class="d-none d-sm-inline fw-medium">Скачать PDF</span>
+    <!-- Блок результатов -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark" id="matrixTitle">
+                <i class="bi bi-table me-2 text-primary"></i>Результаты
+            </h5>
+            <button id="ExportCrossTabExcelBtn" class="btn btn-sm btn-outline-success d-none align-items-center gap-2 px-4 fw-bold rounded-pill shadow-sm">
+                <i class="bi bi-file-earmark-excel"></i> Выгрузить Excel
             </button>
         </div>
 
-        <div class="crosstab-scroll-wrapper">
-            <table class="table table-bordered table-hover mb-0 text-center" id="crossTabTable">
-                <thead id="crossTabThead">
-                </thead>
-                <tbody id="crossTabTbody">
-                    <tr>
-                        <td class="text-center text-muted py-5">
-                            <i class="bi bi-layout-three-columns fs-1 d-block mb-2 text-secondary opacity-25"></i>
-                            Выберите оси и нажмите «Построить матрицу»
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="p-3">
+            <div class="matrix-scroll-wrapper bg-white" id="matrixWrapper">
+                <table class="table table-matrix table-bordered mb-0 text-center align-middle" id="crossTabTable">
+                    <thead id="crossTabThead">
+                        <tr>
+                            <th class="sticky-col border-0"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="crossTabTbody">
+                        <tr>
+                            <td class="text-center py-5">
+                                <div class="text-muted opacity-50 my-5">
+                                    <i class="bi bi-grid-1x2 fs-1 d-block mb-3"></i>
+                                    <h5 class="fw-bold text-dark">Матрица не построена</h5>
+                                    <p class="mb-0">Выберите параметры осей и нажмите кнопку.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    (function () {
+        let currentData = null;
+        let currentRowLabel = "";
+        let currentColLabel = "";
+
+        // Названия для осей на русском
+        const namesMap = {
+            "Teacher": "Преподаватели", "Group": "Группы",
+            "Cabinet": "Кабинеты", "Building": "Корпуса", "Subject": "Предметы"
+        };
+
         const generateBtn = document.getElementById("GenerateCrossTabBtn");
-        const exportPdfBtn = document.getElementById("ExportCrossTabPdfBtn");
-        let hasData = false;
+        const exportBtn = document.getElementById("ExportCrossTabExcelBtn");
 
         generateBtn.addEventListener("click", async function () {
-            const rowGrouping = document.getElementById("crossTabRowGrouping").value;
-            const colGrouping = document.getElementById("crossTabColGrouping").value;
+            const rowVal = document.getElementById("crossTabRowGrouping").value;
+            const colVal = document.getElementById("crossTabColGrouping").value;
 
-            const originalText = generateBtn.innerHTML;
+            // Защита от дурака: нельзя выбрать одинаковые оси
+            if (rowVal === colVal) {
+                alert("Ось X и Ось Y не могут быть одинаковыми. Пожалуйста, выберите разные параметры.");
+                return;
+            }
+
+            const origText = generateBtn.innerHTML;
             generateBtn.disabled = true;
-            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Загрузка...';
-            exportPdfBtn.classList.add("d-none"); // Прячем кнопку при загрузке
+            generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Анализ...';
 
             try {
+                // ПУТЬ К API ИЗ ПРЕДЫДУЩИХ ОТВЕТОВ
                 const response = await fetch('http://localhost:5062/api/report/crosstab', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rowGrouping: rowGrouping, colGrouping: colGrouping })
+                    body: JSON.stringify({ rowGrouping: rowVal, colGrouping: colVal })
                 });
 
-                if (!response.ok) throw new Error('Сетевая ошибка при получении данных');
+                if (!response.ok) throw new Error();
 
-                const data = await response.json();
-                renderCrossTabTable(data, rowGrouping, colGrouping);
+                currentData = await response.json();
+                currentRowLabel = namesMap[rowVal];
+                currentColLabel = namesMap[colVal];
 
-                // Показываем кнопку PDF, если есть данные
-                if (data && data.columns && data.columns.length > 0) {
-                    exportPdfBtn.classList.remove("d-none");
-                    exportPdfBtn.classList.add("d-flex");
-                    hasData = true;
-                } else {
-                    hasData = false;
-                }
+                renderHeatmap(currentData, currentRowLabel, currentColLabel);
+                exportBtn.classList.remove("d-none");
 
-            } catch (error) {
-                console.error('Ошибка:', error);
-                if (typeof showAlert === 'function') showAlert("Не удалось сформировать отчет.", "danger");
+                document.getElementById("matrixTitle").innerHTML = `<i class="bi bi-table me-2 text-primary"></i>${currentRowLabel} по отношению к ${currentColLabel}`;
+            } catch (err) {
+                alert("Ошибка генерации матрицы.");
             } finally {
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = originalText;
+                generateBtn.innerHTML = origText;
             }
         });
 
-        // --- ЛОГИКА ЭКСПОРТА В PDF ---
-        exportPdfBtn.addEventListener("click", function() {
-            if (!hasData) return;
-
-            // Берем красивые названия из селектов для имени файла
-            const rowSelect = document.getElementById("crossTabRowGrouping");
-            const colSelect = document.getElementById("crossTabColGrouping");
-            const rowText = rowSelect.options[rowSelect.selectedIndex].text.replace(/\s+/g, '');
-            const colText = colSelect.options[colSelect.selectedIndex].text.replace(/\s+/g, '');
-
-            const tableElement = document.getElementById("crossTabTable");
-
-            // Вызываем твою функцию generatePdf из Index.cshtml
-            if (typeof generatePdf === 'function') {
-                // Передаем саму таблицу, чтобы в PDF не попали ползунки скролла от wrapper'а
-                generatePdf(tableElement, `Матрица_${rowText}_${colText}.pdf`);
-            } else {
-                alert("Ошибка: Функция генерации PDF не найдена.");
-            }
-        });
-
-        function renderCrossTabTable(data, rowLabel, colLabel) {
+        function renderHeatmap(data, rowLabel, colLabel) {
             const thead = document.getElementById("crossTabThead");
             const tbody = document.getElementById("crossTabTbody");
 
             thead.innerHTML = "";
             tbody.innerHTML = "";
 
-            if (!data || !data.columns || data.columns.length === 0) {
-                tbody.innerHTML = `<tr><td class="text-center text-muted py-5">Нет данных для отображения.</td></tr>`;
+            if (!data.columns || data.columns.length === 0) {
+                tbody.innerHTML = `<tr><td class="text-center text-danger py-5 fw-bold">Данные для выбранных осей отсутствуют</td></tr>`;
                 return;
             }
 
-            const namesMap = {
-                "Teacher": "Преподаватель", "Group": "Группа",
-                "Cabinet": "Кабинет", "Building": "Корпус", "Subject": "Предмет"
-            };
-            const cornerLabel = `${namesMap[rowLabel]} \\ ${namesMap[colLabel]}`;
-
-            let theadHtml = `<tr><th class="text-start sticky-col text-uppercase small text-muted" style="min-width: 250px;">${cornerLabel}</th>`;
-            data.columns.forEach(col => {
-                theadHtml += `<th class="text-wrap" style="min-width: 120px;">${col}</th>`;
-            });
-            theadHtml += `<th class="bg-light fw-bold" style="min-width: 100px;">ИТОГО</th></tr>`;
-            thead.innerHTML = theadHtml;
-
-            let tbodyHtml = "";
+            // 1. НАХОДИМ МАКСИМАЛЬНОЕ ЗНАЧЕНИЕ ДЛЯ РАСКРАСКИ (HEATMAP)
+            let maxValue = 0;
             data.rows.forEach(row => {
-                tbodyHtml += `<tr><td class="text-start sticky-col fw-bold text-dark">${row.rowName}</td>`;
                 data.columns.forEach(col => {
                     const val = row.values[col] || 0;
+                    if (val > maxValue) maxValue = val;
+                });
+            });
+
+            // 2. ОТРИСОВКА ШАПКИ (Ось X)
+            const cornerLabel = `${rowLabel} \\ ${colLabel}`;
+            let theadHtml = `<tr><th class="text-start sticky-col" style="min-width: 220px;">${cornerLabel}</th>`;
+
+            data.columns.forEach(col => {
+                theadHtml += `<th style="min-width: 100px;">${col}</th>`;
+            });
+            theadHtml += `<th class="total-cell" style="min-width: 100px;">ВСЕГО</th></tr>`;
+            thead.innerHTML = theadHtml;
+
+            // 3. ОТРИСОВКА СТРОК И ЯЧЕЕК С ЦВЕТОМ
+            let tbodyHtml = "";
+            data.rows.forEach(row => {
+                tbodyHtml += `<tr><td class="text-start sticky-col">${row.rowName}</td>`;
+
+                data.columns.forEach(col => {
+                    const val = row.values[col] || 0;
+
                     if (val > 0) {
-                        tbodyHtml += `<td class="cell-filled">${val}</td>`;
+                        // Вычисляем насыщенность синего цвета (от 15% до 100%)
+                        let alpha = 0.15 + ((val / maxValue) * 0.85);
+                        // Если цвет слишком темный, делаем текст белым
+                        let textColor = alpha > 0.55 ? '#ffffff' : '#0ea5e9';
+
+                        tbodyHtml += `
+                            <td class="heatmap-cell" style="background-color: rgba(14, 165, 233, ${alpha}); color: ${textColor};" title="${row.rowName} - ${col}: ${val}">
+                                ${val}
+                            </td>`;
                     } else {
-                        tbodyHtml += `<td class="text-muted opacity-25">—</td>`;
+                        tbodyHtml += `<td class="empty-cell">—</td>`;
                     }
                 });
-                tbodyHtml += `<td class="bg-light fw-bold text-dark">${row.totalHours}</td></tr>`;
+
+                // Итого по строке
+                tbodyHtml += `<td class="total-cell">${row.totalHours}</td></tr>`;
             });
 
             tbody.innerHTML = tbodyHtml;
         }
+
+          exportBtn.addEventListener("click", async function() {
+        if (!currentData) return;
+
+        // 1. Создаем книгу и лист
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Матричный отчет');
+
+        // Находим максимум для логики тепловой карты
+        let maxValue = 0;
+        currentData.rows.forEach(r => {
+            currentData.columns.forEach(c => {
+                const val = r.values[c] || 0;
+                if (val > maxValue) maxValue = val;
+            });
+        });
+
+        // 2. Стили для оформления
+        const borderStyle = {
+            top: {style:'thin', color: {argb:'FFCBD5E1'}},
+            left: {style:'thin', color: {argb:'FFCBD5E1'}},
+            bottom: {style:'thin', color: {argb:'FFCBD5E1'}},
+            right: {style:'thin', color: {argb:'FFCBD5E1'}}
+        };
+
+        // 3. Заголовок отчета
+        sheet.mergeCells('A1:C1');
+        const titleCell = sheet.getCell('A1');
+        titleCell.value = `МАТРИЧНЫЙ ОТЧЕТ: ${currentRowLabel.toUpperCase()} / ${currentColLabel.toUpperCase()}`;
+        titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF1E293B' } };
+
+        sheet.getCell('A2').value = `Дата формирования: ${new Date().toLocaleString()}`;
+        sheet.getCell('A2').font = { italic: true, color: { argb: 'FF64748B' } };
+
+        // 4. Формируем шапку (Ось X)
+        const headerRow = sheet.getRow(4);
+        headerRow.values = [`${currentRowLabel} \\ ${currentColLabel}`, ...currentData.columns, "ИТОГО"];
+
+        // Стилизуем шапку
+        headerRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF475569' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+            cell.border = borderStyle;
+        });
+        headerRow.height = 30;
+
+        // 5. Заполняем данные (Ось Y и тепловая карта)
+        currentData.rows.forEach((row, rowIndex) => {
+            const excelRow = sheet.getRow(5 + rowIndex);
+            const rowValues = [row.rowName];
+
+            currentData.columns.forEach(col => {
+                rowValues.push(row.values[col] || 0);
+            });
+            rowValues.push(row.totalHours);
+
+            excelRow.values = rowValues;
+
+            // Стилизация ячеек строки
+            excelRow.eachCell((cell, colNumber) => {
+                cell.border = borderStyle;
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+
+                // Первая колонка (названия строк)
+                if (colNumber === 1) {
+                    cell.font = { bold: true };
+                    cell.alignment = { horizontal: 'left', indent: 1 };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+                }
+                // Последняя колонка (Итого)
+                else if (colNumber === currentData.columns.length + 2) {
+                    cell.font = { bold: true };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+                }
+                // Ячейки данных (Тепловая карта)
+                else {
+                    const val = cell.value;
+                    if (val > 0) {
+                        // Вычисляем интенсивность цвета для Excel (ARGB формат)
+                        // Генерируем оттенки синего (от легкого до глубокого)
+                        const intensity = Math.round((val / maxValue) * 150); // от 0 до 150
+                        const hexPart = (255 - intensity).toString(16).padStart(2, '0');
+                        const bgColor = `FF${hexPart}${hexPart}FF`; // Упрощенная логика осветления синего
+
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: bgColor }
+                        };
+                        if (val / maxValue > 0.5) cell.font = { color: { argb: 'FFFFFFFF' } };
+                    } else {
+                        cell.value = "—";
+                        cell.font = { color: { argb: 'FFCBD5E1' } };
+                    }
+                }
+            });
+        });
+
+        // 6. Настройка колонок
+        sheet.getColumn(1).width = 35; // Ширина первой колонки
+        for(let i = 2; i <= currentData.columns.length + 2; i++) {
+            sheet.getColumn(i).width = 15;
+        }
+
+        // 7. Финализация и скачивание
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `Matrix_Report_${currentRowLabel}_${currentColLabel}.xlsx`);
     });
+
+    })();
 </script>
