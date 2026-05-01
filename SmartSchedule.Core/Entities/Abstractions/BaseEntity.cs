@@ -8,5 +8,5 @@ public abstract class BaseEntity<TId> : IEntity<TId> where TId : notnull
     /// <summary>
     ///  индетификатор сущности 
     /// </summary>
-    public required TId Id { get; set; }
+    public TId Id { get; set; } = default!;
 }

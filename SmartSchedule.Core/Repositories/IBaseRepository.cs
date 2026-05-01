@@ -59,4 +59,8 @@ public interface IBaseRepository<TEntity, in TId> where TEntity : class, IEntity
     /// <param name="ct">Токен отмены операции.</param>
     Task DeleteByIdAsync(TId id, CancellationToken ct);
 
+    /// <summary>
+    /// Асинхронно добавляет коллекцию сущностей в базу данных.
+    /// </summary>
+    Task CreateRangeAsync(IEnumerable<TEntity> entities, CancellationToken ct = default);
 }

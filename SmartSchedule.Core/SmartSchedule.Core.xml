@@ -1663,6 +1663,11 @@
             <param name="id">Идентификатор сущности.</param>
             <param name="ct">Токен отмены операции.</param>
         </member>
+        <member name="M:SmartSchedule.Core.Repositories.IBaseRepository`2.CreateRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Threading.CancellationToken)">
+            <summary>
+            Асинхронно добавляет коллекцию сущностей в базу данных.
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Repositories.IBuildingRepository">
             <summary>
             Интерфейс репозитория строения
@@ -2560,6 +2565,12 @@
             <param name="search">Строка поиска.</param>
             <returns>Список найденных преподавателей.</returns>
         </member>
+        <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.ImportFromExcelAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Импортирует преподавателей из потока Excel-файла.
+            </summary>
+            <returns>Количество успешно добавленных записей.</returns>
+        </member>
         <member name="T:SmartSchedule.Application.Services.Interfaces.ITimeSlotService">
             <summary>
             Сервис для работы с временными слотами.
@@ -2808,6 +2819,14 @@
         </member>
         <member name="M:SmartSchedule.Application.Services.TeacherService.SearchTeachersAsync(System.String)">
             <inheritdoc/>
+        </member>
+        <member name="M:SmartSchedule.Application.Services.TeacherService.ImportFromExcelAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Импортирует список преподавателей из потока Excel-файла.
+            </summary>
+            <param name="excelStream">Поток с данными Excel-файла.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Количество успешно добавленных преподавателей.</returns>
         </member>
         <member name="T:SmartSchedule.Application.Services.TimeSlotService">
             <summary>

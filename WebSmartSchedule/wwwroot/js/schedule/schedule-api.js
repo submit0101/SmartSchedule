@@ -1,5 +1,5 @@
 const ScheduleAPI = {
-    baseUrl: 'http://localhost:5062/api',
+    baseUrl: window.AppConfig.apiBaseUrl,
 
     async getGroupSchedule(groupId) {
         const res = await fetch(`${this.baseUrl}/lesson/group/${groupId}/structured`);

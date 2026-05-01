@@ -292,6 +292,11 @@
             <param name="ct">Токен отмены асинхронной операции.</param>
             <exception cref="T:SmartSchedul.Core.Exceptions.ObjectNotFoundException">Выбрасывается, если сущность не найдена.</exception>
         </member>
+        <member name="M:SmartSchedule.Infrastructure.Repositories.BaseRepository`3.CreateRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Threading.CancellationToken)">
+            <summary>
+            Асинхронно добавляет коллекцию сущностей в базу данных.
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Infrastructure.Repositories.BuildingRepository">
             <summary>
             Репозиторий для работы со зданиями (корпусами).

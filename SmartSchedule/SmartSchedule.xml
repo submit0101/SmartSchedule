@@ -433,6 +433,11 @@
             <param name="search">Строка для поиска по фамилии, имени или отчеству.</param>
             <returns>Список найденных преподавателей.</returns>
         </member>
+        <member name="M:SmartSchedule.Application.Controllers.TeacherController.ImportExcel(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>
+            Импорт преподавателей из Excel файла (формат столбцов: Фамилия | Имя | Отчество).
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Application.Controllers.TimeSlotController">
             <summary>
             Контроллер для работы с временными слотами

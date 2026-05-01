@@ -117,6 +117,14 @@ public abstract class BaseRepository<TEntity, TId, TDbContext> : IBaseRepository
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
+    /// <summary>
+    /// Асинхронно добавляет коллекцию сущностей в базу данных.
+    /// </summary>
+    public async Task CreateRangeAsync(IEnumerable<TEntity> entities, CancellationToken ct = default)
+    {
+        await _dbSet.AddRangeAsync(entities, ct).ConfigureAwait(false);
+        await _context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
 
     #endregion
 }

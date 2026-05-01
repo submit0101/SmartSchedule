@@ -4,11 +4,9 @@
     ViewData["Title"] = "Преподаватели";
 }
 
-<link rel="stylesheet" href="~/css/UnionStyle.css" />
-
 <div class="container-xxl py-4">
     <div class="page-section p-4 bg-white rounded shadow-sm">
-        
+
         @if (TempData["TESuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -26,11 +24,22 @@
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
             <h2 class="mb-0 text-primary fw-bold"> Список преподавателей</h2>
-            <a href="#"
-               class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
-               onclick="openModal('createTeacherModal')">
-                <i class="bi bi-plus-lg"></i> Добавить преподавателя
-            </a>
+
+            <div class="d-flex flex-wrap gap-2">
+                <input type="file" id="excelFileInput" accept=".xlsx" style="display: none;"
+                       onchange="handleExcelUpload(event, '/Teacher/import')" />
+
+                <button type="button" class="btn btn-outline-success px-3 py-2 d-flex align-items-center gap-2"
+                        onclick="document.getElementById('excelFileInput').click()">
+                    <i class="bi bi-file-earmark-excel"></i> Импорт из Excel
+                </button>
+
+                <a href="#"
+                   class="btn btn-success px-3 py-2 d-flex align-items-center gap-2"
+                   onclick="openModal('createTeacherModal')">
+                    <i class="bi bi-plus-lg"></i> Добавить преподавателя
+                </a>
+            </div>
         </div>
 
         <div class="row mb-3">
@@ -156,3 +165,4 @@
 <script src="/js/modal.js"></script>
 <script src="/js/ValidationModal.js"></script>
 <script src="/js/searchHandler.js"></script>
+<script src="/js/handleExcelUpload.js"></script>

@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartSchedule.Application.Services.Interfaces;
 using SmartSchedule.Core.Models.DTO.BuildingDTO;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
 using SmartSchedule.Core.Service;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -134,6 +136,23 @@ public class TeacherController : ControllerBase
         var result = await _teacherService.SearchTeachersAsync(search);
 
         return Ok(result);
+    }
+    /// <summary>
+    /// Импорт преподавателей из Excel файла (формат столбцов: Фамилия | Имя | Отчество).
+    /// </summary>
+    [HttpPost("import")]
+    public async Task<IActionResult> ImportExcel(IFormFile file, CancellationToken ct)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("Файл не выбран или пуст.");
+
+        if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            return BadRequest("Поддерживаются только файлы формата .xlsx");
+
+        using var stream = file.OpenReadStream();
+        var addedCount = await _teacherService.ImportFromExcelAsync(stream, ct);
+
+        return Ok(new { Message = $"Успешно импортировано преподавателей: {addedCount}" });
     }
     #endregion
 }

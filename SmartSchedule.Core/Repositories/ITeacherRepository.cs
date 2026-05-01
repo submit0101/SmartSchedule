@@ -23,4 +23,6 @@ public interface ITeacherRepository : IBaseRepository<Teacher, int>
     /// <param name="ct">Токен отмены.</param>
     /// <returns>Объект преподавателя или null.</returns>
     Task<Teacher?> GetWithLessonsByIdAsync(int id, CancellationToken ct = default);
+
+
 }

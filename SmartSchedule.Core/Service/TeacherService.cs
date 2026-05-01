@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
 using SmartSchedule.Application.Services.Interfaces;
 using SmartSchedule.Core.Entities;
 using SmartSchedule.Core.Models.DTO.TeacherDTO;
@@ -107,5 +108,54 @@ public class TeacherService : ITeacherService
     {
         var teachers = await _repository.SearchAsync(search).ConfigureAwait(false);
         return _mapper.Map<List<ResponseTeacherDto>>(teachers);
+    }
+    /// <summary>
+    /// Импортирует список преподавателей из потока Excel-файла.
+    /// </summary>
+    /// <param name="excelStream">Поток с данными Excel-файла.</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Количество успешно добавленных преподавателей.</returns>
+    public async Task<int> ImportFromExcelAsync(Stream excelStream, CancellationToken ct)
+    {
+        var newTeachers = new List<Teacher>();
+
+        using (var workbook = new XLWorkbook(excelStream))
+        {
+            var worksheet = workbook.Worksheet(1);
+
+            var rangeUsed = worksheet.RangeUsed();
+            if (rangeUsed == null)
+            {
+                return 0;
+            }
+
+            var rows = rangeUsed.RowsUsed().Skip(1);
+
+            foreach (var row in rows)
+            {
+                var lastName = row.Cell(1).GetValue<string>()?.Trim();
+                var firstName = row.Cell(2).GetValue<string>()?.Trim();
+                var middleName = row.Cell(3).GetValue<string>()?.Trim();
+
+                if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName))
+                    continue;
+
+                newTeachers.Add(new Teacher
+                {
+                    LastName = lastName,
+                    FirstName = firstName,
+                    MiddleName = string.IsNullOrWhiteSpace(middleName) ? null : middleName
+                });
+            }
+        }
+        if (newTeachers.Count > 0)
+        {
+            await _repository.CreateRangeAsync(newTeachers, ct).ConfigureAwait(false);
+
+            await _cache.RemoveAsync("teachers:all", ct).ConfigureAwait(false);
+            await _cache.RemoveAsync("teachers:short", ct).ConfigureAwait(false);
+        }
+
+        return newTeachers.Count;
     }
 }
