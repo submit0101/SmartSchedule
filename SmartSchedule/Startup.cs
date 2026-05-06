@@ -99,7 +99,7 @@ internal class Startup
                     factory: partition => new FixedWindowRateLimiterOptions
                     {
                         AutoReplenishment = true,
-                        PermitLimit = 30,
+                        PermitLimit = 300,
                         Window = TimeSpan.FromSeconds(10),
                         QueueLimit = 0,
                     });

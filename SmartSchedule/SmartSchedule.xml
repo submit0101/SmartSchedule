@@ -437,6 +437,9 @@
             <summary>
             Импорт преподавателей из Excel файла (формат столбцов: Фамилия | Имя | Отчество).
             </summary>
+            <param name="file">Загружаемый файл Excel.</param>
+            <param name="ct">Токен отмены.</param>
+            <returns>Ответ с количеством добавленных записей и списком ошибок.</returns>
         </member>
         <member name="T:SmartSchedule.Application.Controllers.TimeSlotController">
             <summary>

@@ -140,19 +140,32 @@ public class TeacherController : ControllerBase
     /// <summary>
     /// Импорт преподавателей из Excel файла (формат столбцов: Фамилия | Имя | Отчество).
     /// </summary>
+    /// <param name="file">Загружаемый файл Excel.</param>
+    /// <param name="ct">Токен отмены.</param>
+    /// <returns>Ответ с количеством добавленных записей и списком ошибок.</returns>
     [HttpPost("import")]
     public async Task<IActionResult> ImportExcel(IFormFile file, CancellationToken ct)
     {
         if (file == null || file.Length == 0)
-            return BadRequest("Файл не выбран или пуст.");
+            return BadRequest(new { Message = "Файл не выбран или пуст." });
+
+        if (file.Length > 5 * 1024 * 1024)
+            return BadRequest(new { Message = "Файл слишком большой (максимум 5 МБ)." });
 
         if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
-            return BadRequest("Поддерживаются только файлы формата .xlsx");
+            return BadRequest(new { Message = "Поддерживаются только файлы формата .xlsx" });
 
         using var stream = file.OpenReadStream();
-        var addedCount = await _teacherService.ImportFromExcelAsync(stream, ct);
+        var result = await _teacherService.ImportFromExcelAsync(stream, ct);
 
-        return Ok(new { Message = $"Успешно импортировано преподавателей: {addedCount}" });
+        if (result.Errors.Count > 0 && result.AddedCount == 0)
+            return BadRequest(new { Message = "Импорт не выполнен из-за ошибок.", Errors = result.Errors });
+
+        return Ok(new
+        {
+            Message = $"Успешно импортировано преподавателей: {result.AddedCount}",
+            Errors = result.Errors
+        });
     }
     #endregion
 }

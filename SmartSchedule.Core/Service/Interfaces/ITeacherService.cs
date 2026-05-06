@@ -60,8 +60,10 @@ public interface ITeacherService
     Task<List<ResponseTeacherDto>> SearchTeachersAsync(string? search);
 
     /// <summary>
-    /// Импортирует преподавателей из потока Excel-файла.
+    /// Импортирует список преподавателей из потока Excel-файла.
     /// </summary>
-    /// <returns>Количество успешно добавленных записей.</returns>
-    Task<int> ImportFromExcelAsync(Stream excelStream, CancellationToken ct);
+    /// <param name="excelStream">Поток с данными Excel-файла.</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Результат импорта с количеством добавленных записей и списком ошибок.</returns>
+    Task<ImportResultDto> ImportFromExcelAsync(Stream excelStream, CancellationToken ct);
 }

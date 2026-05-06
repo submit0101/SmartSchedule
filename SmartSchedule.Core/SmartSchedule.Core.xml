@@ -1338,6 +1338,21 @@
             </summary>
             <example>Иванов</example>
         </member>
+        <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.ImportResultDto">
+            <summary>
+            Результат импорта преподавателей.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ImportResultDto.AddedCount">
+            <summary>
+            Количество успешно добавленных преподавателей.
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.TeacherDTO.ImportResultDto.Errors">
+            <summary>
+            Список ошибок при импорте.
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Models.DTO.TeacherDTO.ResponseTeacherDto">
             <summary>
             Ответ с информацией о преподавателе.
@@ -2567,9 +2582,11 @@
         </member>
         <member name="M:SmartSchedule.Application.Services.Interfaces.ITeacherService.ImportFromExcelAsync(System.IO.Stream,System.Threading.CancellationToken)">
             <summary>
-            Импортирует преподавателей из потока Excel-файла.
+            Импортирует список преподавателей из потока Excel-файла.
             </summary>
-            <returns>Количество успешно добавленных записей.</returns>
+            <param name="excelStream">Поток с данными Excel-файла.</param>
+            <param name="ct">Токен отмены операции.</param>
+            <returns>Результат импорта с количеством добавленных записей и списком ошибок.</returns>
         </member>
         <member name="T:SmartSchedule.Application.Services.Interfaces.ITimeSlotService">
             <summary>
@@ -2826,7 +2843,7 @@
             </summary>
             <param name="excelStream">Поток с данными Excel-файла.</param>
             <param name="ct">Токен отмены операции.</param>
-            <returns>Количество успешно добавленных преподавателей.</returns>
+            <returns>Результат импорта с количеством добавленных записей и списком ошибок.</returns>
         </member>
         <member name="T:SmartSchedule.Application.Services.TimeSlotService">
             <summary>

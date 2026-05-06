@@ -1,5 +1,3 @@
-// wwwroot/js/schedule/schedule-core.js
-
 function allowDrop(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -90,8 +88,7 @@ function createLessonSlot(timeSlot, day, daySchedule) {
     slot.dataset.timeSlotId = timeSlot.id;
     slot.dataset.dayOfWeekId = day;
 
-
-    const initialLessons = ScheduleStore.getLessonsInSlot(day, timeSlot.id); //
+    const initialLessons = ScheduleStore.getLessonsInSlot(day, timeSlot.id);
 
     slot.addEventListener('dragover', handleDragOver);
     slot.addEventListener('dragenter', handleDragEnter);
@@ -99,16 +96,15 @@ function createLessonSlot(timeSlot, day, daySchedule) {
     slot.addEventListener('drop', handleDrop);
 
     slot.addEventListener('click', (event) => {
-       
         if (LessonClipboard.data) {
             event.stopPropagation();
-            LessonClipboard.pasteToSlot(slot, day, timeSlot.id); 
+            LessonClipboard.pasteToSlot(slot, day, timeSlot.id);
             return;
         }
 
         if (event.target.closest('.lesson-item')) return;
-        const currentLessons = ScheduleStore.getLessonsInSlot(day, timeSlot.id); 
-        const state = analyzeSlotState(currentLessons); 
+        const currentLessons = ScheduleStore.getLessonsInSlot(day, timeSlot.id);
+        const state = analyzeSlotState(currentLessons);
 
         if (state.isFull) {
             showAlert('Ячейка занята', 'warning');
@@ -119,12 +115,10 @@ function createLessonSlot(timeSlot, day, daySchedule) {
         pendingPasteSlot = slot;
         slot.classList.add('pending-paste');
 
-       
-        openCreateLessonModalForSlot(timeSlot.id, day, currentLessons); 
+        openCreateLessonModalForSlot(timeSlot.id, day, currentLessons);
     });
 
-    
-    renderLessonsInSlot(slot, initialLessons, currentScheduleType); 
+    renderLessonsInSlot(slot, initialLessons, currentScheduleType);
     return slot;
 }
 
@@ -141,64 +135,57 @@ function renderLessonsInSlot(slot, lessons, scheduleType = 'group') {
 
     slot.classList.remove("empty");
 
-    // Сортировка: Числитель (1), Знаменатель (2), Полная (3)
     const sortedLessons = [...filtered].sort((a, b) => {
         const order = { [WeekType.NUMERATOR]: 1, [WeekType.DENOMINATOR]: 2, [WeekType.FULL]: 3 };
         return (order[a.weekTypeId] || 99) - (order[b.weekTypeId] || 99);
     });
 
-    // === НОВАЯ ЛОГИКА ГРУППИРОВКИ ПОДГРУПП ===
     const groupedLessons = {};
 
     sortedLessons.forEach(lesson => {
         let subject = lesson.subjectTitle || 'Без названия';
+        let groupKey = `${subject}_${lesson.weekTypeId}_${lesson.groupId || 'nogroup'}`;
 
-        if (!groupedLessons[subject]) {
-            groupedLessons[subject] = {
-                baseLesson: lesson, // Сохраняем первый урок для цвета бейджа и ID
+        if (!groupedLessons[groupKey]) {
+            groupedLessons[groupKey] = {
+                baseLesson: lesson,
                 ids: [],
                 teachers: [],
                 cabinets: []
             };
         }
 
-        groupedLessons[subject].ids.push(lesson.id);
+        groupedLessons[groupKey].ids.push(lesson.id);
 
-        // Собираем учителей
         let teacher = lesson.teacherFullName;
-        if (teacher && teacher !== 'Не назначен' && !groupedLessons[subject].teachers.includes(teacher)) {
-            groupedLessons[subject].teachers.push(teacher);
+        if (teacher && teacher !== 'Не назначен' && !groupedLessons[groupKey].teachers.includes(teacher)) {
+            groupedLessons[groupKey].teachers.push(teacher);
         }
 
-        // Собираем кабинеты (вместе со зданием)
         let cabText = lesson.cabinetNumber ? `Каб. ${lesson.cabinetNumber}` : '';
         if (lesson.buildingName) cabText += ` (${lesson.buildingName})`;
-        if (cabText && !groupedLessons[subject].cabinets.includes(cabText)) {
-            groupedLessons[subject].cabinets.push(cabText);
+        if (cabText && !groupedLessons[groupKey].cabinets.includes(cabText)) {
+            groupedLessons[groupKey].cabinets.push(cabText);
         }
     });
 
-    // === ОТРИСОВКА СГРУППИРОВАННЫХ КАРТОЧЕК ===
-    for (const subject in groupedLessons) {
-        const group = groupedLessons[subject];
-        // Передаем теперь всю группу в функцию создания элемента
-        const item = createLessonCardElement(group, subject, scheduleType, slot);
+    for (const key in groupedLessons) {
+        const group = groupedLessons[key];
+        const item = createLessonCardElement(group, group.baseLesson.subjectTitle || 'Без названия', scheduleType, slot);
         slot.appendChild(item);
     }
 }
 
 function createLessonCardElement(group, subjectTitle, scheduleType, parentSlot) {
     const item = document.createElement("div");
-    const lesson = group.baseLesson; // Берем свойства от первой подгруппы (например, тип недели)
+    const lesson = group.baseLesson;
 
     item.className = `lesson-item weektype-${lesson.weekTypeId}`;
     item.draggable = true;
 
-    // Сохраняем все id для истории и первый id для совместимости с drag-and-drop
     item.dataset.lessonIds = group.ids.join(',');
     item.dataset.lessonId = group.ids[0];
 
-    // Логика цветов бейджей (осталась ваша)
     let badgeType = '?';
     let badgeColor = 'secondary';
     if (lesson.weekTypeId == WeekType.NUMERATOR) {
@@ -211,7 +198,6 @@ function createLessonCardElement(group, subjectTitle, scheduleType, parentSlot) 
 
     const badgeClass = `lesson-slot-badge bg-${badgeColor}`;
 
-    // Склеиваем массивы через запятую
     const teachersStr = group.teachers.join(', ') || 'Не назначен';
     const cabinetsStr = group.cabinets.join(', ') || 'Каб. ?';
 
@@ -234,11 +220,9 @@ function createLessonCardElement(group, subjectTitle, scheduleType, parentSlot) 
 
     item.innerHTML = itemContent;
 
-    // Подключаем ваши события Drag & Drop
     item.addEventListener('dragstart', handleDragStart);
     item.addEventListener('dragend', handleDragEnd);
 
-    // Подключаем клик для модального окна/всплывающих кнопок
     item.onclick = (e) => {
         e.stopPropagation();
         if (typeof LessonClipboard !== 'undefined' && LessonClipboard.data) return;
@@ -296,7 +280,6 @@ function showLessonActionTooltip(e, itemElement, lessonData, parentSlot) {
     setTimeout(() => { if (document.body.contains(tooltip)) tooltip.remove(); }, 3000);
 }
 
-// Универсальное удаление
 async function deleteLessonUniversal(lessonId, slotElement) {
     if (!confirm('Удалить занятие?')) return;
     try {
@@ -317,7 +300,6 @@ async function deleteLessonUniversal(lessonId, slotElement) {
     }
 }
 
-// Фильтры и поиск
 function applyWeekTypeFilter() {
     if (!window.scheduleData) return;
     document.querySelectorAll('.lesson-slot').forEach(slot => {
