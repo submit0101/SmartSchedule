@@ -17,6 +17,7 @@ public class CabinetConflictException : Exception
     /// </summary>
     public int BuildingId { get; }
 
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="CabinetConflictException"/>.
     /// </summary>
@@ -48,9 +49,10 @@ public class CabinetConflictException : Exception
     /// <param name="number">Номер кабинета.</param>
     /// <param name="buildingId">ID здания.</param>
     public CabinetConflictException(string number, int buildingId)
-        : base($"Кабинет с номером '{number}' уже существует в здании ID {buildingId}.")
+        : base($"Кабинет с номером '{number}' уже существует")
     {
         Number = number;
         BuildingId = buildingId;
+       
     }
 }

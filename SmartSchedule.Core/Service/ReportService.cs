@@ -105,7 +105,7 @@ public class ReportService : IReportService
             {
                 bool isBusy = teacher.Lessons.Any(l => l.DayOfWeekId == day && l.TimeSlotId == slot.Id &&
                     (weekTypeId == ShowAllWeeksId || l.WeekTypeId == weekTypeId || ((weekTypeId == 1 || weekTypeId == 2) && l.WeekTypeId == WholeWeekId)));
-                report.Add(new TeacherScheduleReportDto { DayOfWeekId = day, DayName = dayName, TimeSlotId = slot.Id, TimeSlotDisplay = $"{slot.StartTime:hh\\:mm} - {slot.EndTime:hh\\:mm}", IsBusy = isBusy });
+                report.Add(new TeacherScheduleReportDto { DayOfWeekId = day, DayName = dayName, TimeSlotId = slot.Id, TimeSlotDisplay = $"{slot.StartTime} - {slot.EndTime}", IsBusy = isBusy });
             }
         }
         return report;
@@ -230,7 +230,7 @@ public class ReportService : IReportService
             foreach (var slot in slots)
             {
                 var free = selectedTeachers.Where(t => !busyHash[t.Id].Contains((day.Id, slot.Id))).Select(t => $"{t.LastName} {t.FirstName?[0]}.").ToList();
-                if (free.Count >= 2) report.Rows.Add(new MethodicalWindowRowDto { DayName = day.Name, TimeDisplay = $"{slot.StartTime:HH\\:mm} - {slot.EndTime:HH\\:mm}", FreeTeachersCount = free.Count, FreeTeachersNames = string.Join(", ", free) });
+                if (free.Count >= 2) report.Rows.Add(new MethodicalWindowRowDto { DayName = day.Name, TimeDisplay = $"{slot.StartTime} - {slot.EndTime}", FreeTeachersCount = free.Count, FreeTeachersNames = string.Join(", ", free) });
             }
         }
         report.TotalWindowsFound = report.Rows.Count;

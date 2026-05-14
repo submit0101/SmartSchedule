@@ -3,6 +3,7 @@ using SmartSchedule.Core.Entities;
 using SmartSchedule.Core.Repositories;
 using SmartSchedule.Core.Service.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -22,9 +23,6 @@ public class ExcelExportService : IExcelExportService
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ExcelExportService"/>.
     /// </summary>
-    /// <param name="lessonRepository">Репозиторий для работы с занятиями.</param>
-    /// <param name="groupRepository">Репозиторий для работы с группами.</param>
-    /// <param name="timeSlotRepository">Репозиторий для работы с временными слотами.</param>
     public ExcelExportService(
         ILessonRepository lessonRepository,
         IGroupRepository groupRepository,
@@ -77,55 +75,54 @@ public class ExcelExportService : IExcelExportService
 
             var lessonsGrid = lessons
                 .GroupBy(l => new { l.DayOfWeekId, l.TimeSlotId })
-                .ToDictionary(g => g.Key, g => g.OrderBy(l => l.WeekTypeId).ToList());
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-            var processedLessons = new HashSet<int>();
+            var skipCells = new HashSet<(int Row, int Col)>();
 
-            foreach (var slotEntry in lessonsGrid)
+            for (int col = 0; col < days.Length; col++)
             {
-                var dayId = slotEntry.Key.DayOfWeekId;
-                var slotId = slotEntry.Key.TimeSlotId;
-                var lessonsInSlot = slotEntry.Value;
-
-                int rowIndex = timeSlots.FindIndex(t => t.Id == slotId) + 2;
-                int colIndex = dayId + 1;
-
-                if (rowIndex < 2) continue;
-
-                var currentCell = worksheet.Cell(rowIndex, colIndex);
-                var firstLesson = lessonsInSlot.First();
-
-                if (processedLessons.Contains(firstLesson.Id)) continue;
-
-                var nextSlot = timeSlots.ElementAtOrDefault(timeSlots.FindIndex(t => t.Id == slotId) + 1);
-                if (nextSlot != null && lessonsGrid.TryGetValue(new { DayOfWeekId = dayId, TimeSlotId = (int?)nextSlot.Id }, out var nextLessons))
+                int dayId = col + 1;
+                for (int row = 0; row < timeSlots.Count; row++)
                 {
-                    var nextLesson = nextLessons.FirstOrDefault(nl =>
-                        nl.SubjectId == firstLesson.SubjectId &&
-                        nl.TeacherId == firstLesson.TeacherId &&
-                        nl.WeekTypeId == firstLesson.WeekTypeId);
+                    if (skipCells.Contains((row, col))) continue;
 
-                    if (nextLesson != null)
+                    var slotId = (int?)timeSlots[row].Id;
+                    var key = new { DayOfWeekId = dayId, TimeSlotId = slotId };
+
+                    if (!lessonsGrid.TryGetValue(key, out var currentLessons)) continue;
+
+                    string cellText = GetCellText(currentLessons);
+                    int mergeCount = 0;
+
+                    for (int nextRow = row + 1; nextRow < timeSlots.Count; nextRow++)
                     {
-                        worksheet.Range(rowIndex, colIndex, rowIndex + 1, colIndex).Merge();
-                        processedLessons.Add(nextLesson.Id);
+                        var nextKey = new { DayOfWeekId = dayId, TimeSlotId = (int?)timeSlots[nextRow].Id };
+                        if (!lessonsGrid.TryGetValue(nextKey, out var nextLessons)) break;
+
+                        string nextText = GetCellText(nextLessons);
+
+                        if (nextText == cellText)
+                        {
+                            mergeCount++;
+                            skipCells.Add((nextRow, col));
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    var cell = worksheet.Cell(row + 2, col + 2);
+                    cell.Value = cellText;
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    if (mergeCount > 0)
+                    {
+                        worksheet.Range(row + 2, col + 2, row + 2 + mergeCount, col + 2).Merge();
                     }
                 }
-
-                if (lessonsInSlot.Count > 1)
-                {
-                    string content = string.Join("\n--------------------------\n",
-                        lessonsInSlot.Select(l => FormatLessonText(l)));
-                    currentCell.Value = content;
-                }
-                else
-                {
-                    currentCell.Value = FormatLessonText(firstLesson);
-                }
-
-                currentCell.Style.Alignment.WrapText = true;
-                currentCell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                currentCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             }
 
             var fullRange = worksheet.Range(1, 1, timeSlots.Count + 1, days.Length + 1);
@@ -133,7 +130,7 @@ public class ExcelExportService : IExcelExportService
             fullRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
             worksheet.Columns(1, 1).Width = 18;
-            worksheet.Columns(2, 7).Width = 30;
+            worksheet.Columns(2, 7).Width = 35;
             worksheet.Rows().AdjustToContents();
 
             using (var stream = new MemoryStream())
@@ -144,9 +141,38 @@ public class ExcelExportService : IExcelExportService
         }
     }
 
-    private static string FormatLessonText(Lesson lesson)
+    private static string GetCellText(List<Lesson> list)
     {
-        if (lesson == null) return string.Empty;
-        return $"{lesson.Subject?.Title}\n{lesson.Teacher?.LastName}\nКаб. {lesson.Cabinet?.Number}";
+        if (list == null || list.Count == 0) return string.Empty;
+
+        var everyWeekLessons = list.Where(l => l.WeekTypeId != 1 && l.WeekTypeId != 2).ToList();
+
+        if (everyWeekLessons.Count > 0)
+        {
+            return FormatLessonGroup(everyWeekLessons);
+        }
+
+        var numLessons = list.Where(l => l.WeekTypeId == 1).ToList();
+        var denLessons = list.Where(l => l.WeekTypeId == 2).ToList();
+
+        if (numLessons.Count > 0 || denLessons.Count > 0)
+        {
+            string top = numLessons.Count > 0 ? FormatLessonGroup(numLessons) : " ";
+            string bottom = denLessons.Count > 0 ? FormatLessonGroup(denLessons) : " ";
+            return $"{top}\n--------------------------\n{bottom}";
+        }
+
+        return FormatLessonGroup(list);
+    }
+
+    private static string FormatLessonGroup(List<Lesson> lessons)
+    {
+        if (lessons == null || lessons.Count == 0) return string.Empty;
+
+        var subjects = string.Join(", ", lessons.Select(l => l.Subject?.Title).Distinct());
+        var teachers = string.Join(", ", lessons.Select(l => l.Teacher?.LastName).Where(n => !string.IsNullOrEmpty(n)).Distinct());
+        var cabinets = string.Join(", ", lessons.Select(l => $"Каб. {l.Cabinet?.Number}").Distinct());
+
+        return $"{subjects}\n{teachers}\n{cabinets}";
     }
 }

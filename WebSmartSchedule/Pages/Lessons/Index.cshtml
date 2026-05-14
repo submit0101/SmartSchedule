@@ -86,8 +86,7 @@
 <partial name="_ModalLesson" />
 
 @section Scripts {
-    <script src="/js/html2canvas.min.js"></script>
-    <script src="/js/jspdf.umd.min.js"></script>
+    <!-- Удалены скрипты html2canvas.min.js и jspdf.umd.min.js -->
 
     <script src="~/js/schedule/schedule-utils.js" asp-append-version="true"></script>
     <script src="~/js/schedule/schedule-api.js"></script>
@@ -213,67 +212,26 @@
                 }
             });
 
-            document.getElementById("exportPdfBtn")?.addEventListener("click", handlePdfExport);
+            document.getElementById("exportExcelBtn")?.addEventListener("click", handleExcelExport);
         }
 
-        async function handlePdfExport() {
-             const isMobile = window.innerWidth <= 768;
-             const container = isMobile ? document.getElementById("schedule-mobile") : document.getElementById("schedule-desktop");
-             if (!container || !container.innerHTML.trim()) return showAlert("Нет данных", "warning");
-             generatePdf(container, `Расписание_${window.appData.groupName || 'export'}.pdf`);
-        }
-               async function generatePdf(element, filename) {
-           
-            const tempContainer = document.createElement("div");
-            tempContainer.style.cssText = "position: absolute; left: -9999px; top: 0; width: 1800px; background-color: #ffffff; padding: 20px;";
+        function handleExcelExport() {
+            const select = document.getElementById("groupId");
+            const currentGroupId = select ? parseInt(select.value) : window.appData.groupId;
 
-          
-            
-            const gridOriginal = element.querySelector('.schedule-grid') || element;
-            const gridClone = gridOriginal.cloneNode(true);
-            gridClone.classList.add('pdf-export-view');
-      
-            gridClone.style.maxHeight = 'none';
-            gridClone.style.overflow = 'visible';
-            gridClone.style.width = '100%';
+            if (!currentGroupId) {
+                return showAlert("Сначала выберите группу", "warning");
+            }
 
-            tempContainer.appendChild(gridClone);
-            document.body.appendChild(tempContainer);
+            const baseUrl = window.AppConfig ? window.AppConfig.apiBaseUrl : '';
 
-            try {
-                
-                const canvas = await html2canvas(tempContainer, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
-                    logging: false
-                });
+            const exportUrl = `${baseUrl}/Export/excel/group/${currentGroupId}`;
 
-               
-                const pdf = new jspdf.jsPDF('l', 'mm', 'a4');
+            // Запускаем скачивание файла
+            window.location.href = exportUrl;
 
-                // Получаем ширину листа А4 в миллиметрах (297мм)
-                const pdfPageWidth = pdf.internal.pageSize.getWidth();
-                const pdfPageHeight = pdf.internal.pageSize.getHeight();
-
-                // 6. Магия математики: вписываем нашу огромную картинку в лист А4
-                const imgProps = pdf.getImageProperties(canvas.toDataURL('image/jpeg', 0.9));
-                // Вычисляем высоту картинки, сохраняя пропорции
-                const imgHeight = (imgProps.height * pdfPageWidth) / imgProps.width;
-
-                
-                pdf.addImage(imgProps.data, 'JPEG', 0, 0, pdfPageWidth, imgHeight);
-
-                pdf.save(filename);
-
-                if (typeof showAlert === 'function') showAlert("PDF успешно сохранен!", "success");
-
-            } catch (e) {
-                console.error("Ошибка экспорта:", e);
-                if (typeof showAlert === 'function') showAlert("Не удалось создать PDF", "danger");
-            } finally {
-               
-                document.body.removeChild(tempContainer);
+            if (typeof showAlert === 'function') {
+                showAlert("Формируем Excel файл. Загрузка начнется автоматически...", "info");
             }
         }
     </script>

@@ -1,7 +1,6 @@
 ﻿@model WebSmartSchedule.Pages.Lessons.IndexModel
 
 <style>
-    /* Убираем внешние скроллы */
     .book-wrapper {
         height: calc(100vh - 160px);
         overflow: hidden;
@@ -34,7 +33,6 @@
         min-width: 0;
     }
 
-    /* Область прокрутки для результатов */
     .matrix-table-container {
         flex-grow: 1;
         overflow-y: auto;
@@ -51,7 +49,6 @@
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
 
-    /* Стили статистики */
     .stats-card {
         background: #f8fafc;
         border: 1px solid #e0e7ff;
@@ -98,7 +95,6 @@
 <div class="container-fluid px-0">
     <div class="book-wrapper">
 
-        <!-- ЛЕВАЯ ПАНЕЛЬ -->
         <aside class="sidebar-controls">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-3 d-flex flex-column">
@@ -143,7 +139,6 @@
             </div>
         </aside>
 
-        <!-- ПРАВАЯ ПАНЕЛЬ -->
         <main class="results-area">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center flex-shrink-0">
@@ -154,7 +149,6 @@
                 </div>
 
                 <div class="matrix-table-container custom-scroll p-3">
-                    <!-- Блок суммирования (Статистика) -->
                     <div id="mwStatsContainer" class="stats-card d-none">
                         <div class="small fw-bold text-uppercase text-muted mb-2" style="font-size: 0.7rem;">Всего свободных окон по участникам:</div>
                         <div id="mwStatsContent" class="d-flex flex-wrap"></div>
@@ -186,9 +180,8 @@
 <script>
     (function () {
         let rawData = null;
-        let statsData = {}; // Для хранения суммирования
+        let statsData = {};
 
-        // ИНИЦИАЛИЗАЦИЯ
         const loaderInt = setInterval(() => {
             if (window.appData && window.appData.teachers) {
                 clearInterval(loaderInt);
@@ -208,7 +201,6 @@
             }
         }, 100);
 
-        // ПОИСК
         document.getElementById("mwTeacherSearch").addEventListener("input", function() {
             const val = this.value.toLowerCase();
             document.querySelectorAll(".teacher-item-wrapper").forEach(item => {
@@ -220,10 +212,8 @@
             document.getElementById("selectedCount").innerText = document.querySelectorAll(".teacher-cb:checked").length;
         };
 
-        // ГРУППИРОВКА
         document.getElementById("mwGrouping").addEventListener("change", () => { if (rawData) renderData(rawData); });
 
-        // ЗАПРОС
         document.getElementById("mwGenerateBtn").addEventListener("click", async () => {
             const selected = Array.from(document.querySelectorAll(".teacher-cb:checked")).map(cb => cb.value);
             if (selected.length < 2) return alert("Выберите минимум 2-х участников");
@@ -239,7 +229,6 @@
                 const res = await fetch(`http://localhost:5062/api/report/methodical-windows?${p.toString()}`);
                 const data = await res.json();
 
-                // Фильтр воскресенья и расчет суммирования
                 rawData = {
                     ...data,
                     rows: data.rows.filter(r => r.dayName !== "Воскресенье")
@@ -253,7 +242,6 @@
             }
         });
 
-        // ФУНКЦИЯ СУММИРОВАНИЯ
         function calculateStats(data) {
             statsData = {};
             data.rows.forEach(row => {
@@ -269,7 +257,6 @@
             const statsContent = document.getElementById("mwStatsContent");
             statsContent.innerHTML = "";
 
-            // Сортируем статистику по убыванию
             const sortedStats = Object.entries(statsData).sort((a, b) => b[1] - a[1]);
 
             sortedStats.forEach(([name, count]) => {
@@ -282,7 +269,6 @@
             document.getElementById("mwStatsContainer").classList.remove("d-none");
         }
 
-        // РЕНДЕРИНГ ТАБЛИЦЫ
         function renderData(data) {
             const tbody = document.getElementById("mwTbody");
             const groupMode = document.getElementById("mwGrouping").value;
@@ -320,14 +306,14 @@
             document.getElementById("mwSummaryText").innerText = `НАЙДЕНО ОКОН: ${data.rows.length}`;
         }
 
-        // КРАСИВЫЙ EXCEL С СУММИРОВАНИЕМ
         document.getElementById("mwExcelBtn").addEventListener("click", async () => {
             if (!rawData || !rawData.rows.length) return;
+
+            const groupMode = document.getElementById("mwGrouping").value;
 
             const workbook = new ExcelJS.Workbook();
             const sheet = workbook.addWorksheet('Методические окна');
 
-            // Заголовок
             sheet.mergeCells('A1:D1');
             const titleCell = sheet.getCell('A1');
             titleCell.value = 'АНАЛИЗ МЕТОДИЧЕСКИХ ОКОН (ПН-СБ)';
@@ -335,7 +321,6 @@
             titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D6EFD' } };
             titleCell.alignment = { horizontal: 'center' };
 
-            // ТАБЛИЦА СУММИРОВАНИЯ В EXCEL
             sheet.getCell('A3').value = 'СВОДНАЯ СТАТИСТИКА (Кол-во свободных окон)';
             sheet.getCell('A3').font = { bold: true };
 
@@ -356,10 +341,41 @@
             headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF495057' } };
 
             currentExcelRow++;
-            rawData.rows.forEach(row => {
+
+            // Группировка для Excel
+            let sortedRows = [...rawData.rows];
+            if (groupMode === "count") sortedRows.sort((a, b) => b.freeTeachersCount - a.freeTeachersCount);
+
+            let lastGroup = null;
+
+            sortedRows.forEach(row => {
+                let currentGroup = groupMode === "day" ? row.dayName : (groupMode === "count" ? row.freeTeachersCount : null);
+                let label = groupMode === "day" ? currentGroup : `Свободно человек: ${currentGroup}`;
+
+                if (groupMode !== "none" && currentGroup !== lastGroup) {
+                    const groupRow = sheet.getRow(currentExcelRow);
+                    groupRow.values = [label];
+                    sheet.mergeCells(`A${currentExcelRow}:D${currentExcelRow}`);
+                    groupRow.font = { bold: true, color: { argb: 'FF475569' } };
+                    groupRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+
+                    groupRow.eachCell(cell => {
+                        cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' } };
+                    });
+
+                    currentExcelRow++;
+                    lastGroup = currentGroup;
+                }
+
                 const dataRow = sheet.getRow(currentExcelRow);
-                dataRow.values = [row.dayName, row.timeDisplay, row.freeTeachersCount, row.freeTeachersNames];
+                const displayDay = groupMode === "day" ? "" : row.dayName;
+                dataRow.values = [displayDay, row.timeDisplay, row.freeTeachersCount, row.freeTeachersNames];
                 dataRow.getCell(4).alignment = { wrapText: true };
+
+                dataRow.eachCell(cell => {
+                    cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                });
+
                 currentExcelRow++;
             });
 
