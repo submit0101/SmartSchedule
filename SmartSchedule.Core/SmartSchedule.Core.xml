@@ -1216,6 +1216,16 @@
             Название корпуса.
             </summary>
         </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto.DayOfWeekId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:SmartSchedule.Core.Models.DTO.ReportDTO.LessonReportFlatDto.TimeSlotId">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="T:SmartSchedule.Core.Models.DTO.ReportDTO.MethodicalWindowReportDto">
             <summary>
             Официальный бланк ведомости методических окон для планирования совещаний.

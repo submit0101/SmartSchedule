@@ -171,7 +171,26 @@ public class ExcelExportService : IExcelExportService
 
         var subjects = string.Join(", ", lessons.Select(l => l.Subject?.Title).Distinct());
         var teachers = string.Join(", ", lessons.Select(l => l.Teacher?.LastName).Where(n => !string.IsNullOrEmpty(n)).Distinct());
-        var cabinets = string.Join(", ", lessons.Select(l => $"Каб. {l.Cabinet?.Number}").Distinct());
+
+        var cabinets = string.Join(", ", lessons
+            .Where(l => l.Cabinet != null)
+            .Select(l =>
+            {
+
+                string cabNumber = l.Cabinet.Number ?? string.Empty;
+                string buildingName = l.Cabinet.Building?.Name ?? string.Empty;
+
+                string buildingTag = "";
+                if (!string.IsNullOrEmpty(buildingName))
+                {
+
+                    buildingTag = (buildingName.StartsWith('Н') || buildingName.StartsWith('н')) ? "(Н)" :
+                                  (buildingName.StartsWith('С') || buildingName.StartsWith('с')) ? "(С)" : "";
+                }
+
+                return string.IsNullOrEmpty(buildingTag) ? $"Каб. {cabNumber}" : $"Каб. {cabNumber} {buildingTag}";
+            })
+            .Distinct());
 
         return $"{subjects}\n{teachers}\n{cabinets}";
     }

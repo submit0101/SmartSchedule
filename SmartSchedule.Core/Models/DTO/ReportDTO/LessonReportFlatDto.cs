@@ -29,4 +29,12 @@ public class LessonReportFlatDto
     /// Название корпуса.
     /// </summary>
     public string Building { get; set; } = string.Empty;
+    /// <summary>
+    /// 
+    /// </summary>
+    public int DayOfWeekId { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    public int TimeSlotId { get; set; }
 }

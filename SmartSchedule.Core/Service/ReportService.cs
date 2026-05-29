@@ -195,8 +195,14 @@ public class ReportService : IReportService
             _ => "Неизвестно"
         };
 
-        var groupedData = flatLessons.GroupBy(l => new { Row = getValue(l, filter.RowGrouping), Col = getValue(l, filter.ColGrouping) })
-            .Select(g => new { RowName = g.Key.Row, ColName = g.Key.Col, Hours = g.Count() * 2 }).ToList();
+        var groupedData = flatLessons
+   
+        .GroupBy(l => new { l.Group, l.Subject, l.DayOfWeekId, l.TimeSlotId })
+        .Select(g => g.First())
+
+        .GroupBy(l => new { Row = getValue(l, filter.RowGrouping), Col = getValue(l, filter.ColGrouping) })
+        .Select(g => new { RowName = g.Key.Row, ColName = g.Key.Col, Hours = g.Count() * 2 })
+        .ToList();
 
         var result = new DynamicReportResultDto();
         var uniqueColumns = groupedData.Select(x => x.ColName).Distinct().OrderBy(x => x).ToList();
