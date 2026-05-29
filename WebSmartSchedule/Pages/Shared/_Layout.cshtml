@@ -132,6 +132,8 @@
         .navbar {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+
     </style>
 </head>
 
@@ -215,6 +217,34 @@
             @RenderBody()
         </main>
     </div>
+    <!-- Плавающая кнопка вызова справки -->
+    <button class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle shadow-lg"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#contextHelpOffcanvas"
+            aria-controls="contextHelpOffcanvas"
+            style="z-index: 1050; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center;"
+            title="Справка">
+        <i class="bi bi-question-lg fs-3"></i>
+    </button>
+
+    <!-- Боковая шторка (Offcanvas) -->
+    <div class="offcanvas offcanvas-end shadow-lg" tabindex="-1" id="contextHelpOffcanvas" aria-labelledby="contextHelpLabel" style="width: 450px;">
+        <div class="offcanvas-header bg-light border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="contextHelpLabel">
+                <i class="bi bi-info-circle text-primary me-2"></i><span id="helpSectionTitle">Справка</span>
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+        </div>
+        <div class="offcanvas-body" id="helpSectionBody" style="font-size: 1rem; line-height: 1.6;">
+            <!-- Контент загружается из contextHelp.js -->
+            Загрузка...
+        </div>
+    </div>
+
+    <!-- Подключаем скрипт справки -->
+    <script src="~/js/contextHelp.js"></script>
+
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
